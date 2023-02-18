@@ -59,11 +59,13 @@ utliem -h
 
 ```bash
 utliem image
+utliem image ls
 utliem image list
 utliem image create --name "image_1"
 utliem image import "image_1.image.aviutliem.json"
 utliem image export "image_1" --path "image_1.image.aviutliem.json"
 utliem image delete "image_1"
+utliem image update "image_1" --path "image_1_new.image.aviutliem.json"
 ```
 
 ## container
@@ -71,6 +73,7 @@ utliem image delete "image_1"
 ```bash
 utliem container
 utliem container ls
+utliem container list
 utliem container create --image "image_1" --name "container_1"
 utliem container delete "container_1"
 ```
