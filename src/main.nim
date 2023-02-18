@@ -6,8 +6,9 @@ import
 
 proc image(args: seq[string]) =
   echo "image command"
-  let subcommand = args[0]
-  let options = args[1..^1]
+  let
+    subcommand = args[0]
+    options = args[1..^1]
   case subcommand:
     of "ls", "list":
       images.list options
@@ -16,8 +17,9 @@ proc image(args: seq[string]) =
 
 proc container(args: seq[string]) =
   echo "container command"
-  let subcommand = args[0]
-  let options = args[1..^1]
+  let
+    subcommand = args[0]
+    options = args[1..^1]
   case subcommand:
     of "ls", "list":
       containers.list options
