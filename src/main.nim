@@ -4,6 +4,9 @@ import
   libs/utliem_cli
 
 
+let uc = newUtliemCli("app")
+
+
 proc image(args: seq[string]) =
   echo "image command"
   let
@@ -11,7 +14,8 @@ proc image(args: seq[string]) =
     options = args[1..^1]
   case subcommand:
     of "ls", "list":
-      images.list options
+      # images.list(options)
+      echo uc.image.list
     else:
       echo "unknown command"
 
@@ -29,4 +33,4 @@ proc container(args: seq[string]) =
 
 when isMainModule:
   import cligen
-  dispatchMulti([image], [container])
+  dispatchMulti([main.image], [main.container])
