@@ -77,3 +77,11 @@ utliem container list
 utliem container create --image "image_1" --name "container_1"
 utliem container delete "container_1"
 ```
+
+## UtliemCliオブジェクト
+
+```nim
+let uc = newUtliemCli()
+echo uc.image.list()
+uc.image.create("image_1")
+```
