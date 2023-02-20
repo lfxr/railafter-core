@@ -26,7 +26,8 @@ proc image*(uc: ref UtliemCli): UcImage =
   result.imagesDirPath = uc.appDirectoryPath / "images"
 
 proc list*(i: UcImage): seq[string] =
-  i.imagesDirPath.listDirectories
+  for fd in i.imagesDirPath.listDirectories:
+    result.add(fd.splitPath.tail)
 
 proc delete*(i: UcImage, name: string) =
   discard

@@ -15,7 +15,8 @@ proc image(args: seq[string]) =
   case subcommand:
     of "ls", "list":
       # images.list(options)
-      echo uc.image.list
+      for image in uc.image.list:
+        echo image
     else:
       echo "unknown command"
 
