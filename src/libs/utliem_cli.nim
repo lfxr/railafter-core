@@ -5,7 +5,7 @@ import
 type UtliemCli = object
   appDirectoryPath: string
 
-type UcImage = object
+type UcImages = object
   utliemCli: ref UtliemCli
   imagesDirPath: string
 
@@ -21,13 +21,13 @@ proc listDirectories(dirPath: string): seq[string] =
   for fd in walkDir(dirPath):
     result.add(fd.path)
 
-proc image*(uc: ref UtliemCli): UcImage =
+proc images*(uc: ref UtliemCli): UcImages =
   result.utliemCli = uc
   result.imagesDirPath = uc.appDirectoryPath / "images"
 
-proc list*(i: UcImage): seq[string] =
+proc list*(i: UcImages): seq[string] =
   for fd in i.imagesDirPath.listDirectories:
     result.add(fd.splitPath.tail)
 
-proc delete*(i: UcImage, name: string) =
+proc delete*(i: UcImages, name: string) =
   discard
