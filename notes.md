@@ -61,11 +61,15 @@ utliem -h
 utliem image
 utliem image ls
 utliem image list
-utliem image create --name "image_1"
-utliem image import "image_1.image.aviutliem.json"
-utliem image export "image_1" --path "image_1.image.aviutliem.json"
-utliem image delete "image_1"
-utliem image update "image_1" --path "image_1_new.image.aviutliem.json"
+utliem images create --name "image_1"
+utliem images import "image_1.image.aviutliem.json"
+utliem images export "image_1" --path "image_1.image.aviutliem.json"
+utliem images delete "image_1"
+utliem image "image_1" base
+utliem image "image_1" plugin add "hoge:1.2.0"
+utliem image "image_1" plugin ls
+utliem image "image_1" plugin list
+utliem image "image_1" plugin delete "hoge"
 ```
 
 ### container
