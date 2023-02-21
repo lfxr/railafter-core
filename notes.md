@@ -89,3 +89,25 @@ let uc = newUtliemCli()
 echo uc.image.list()
 uc.image.create("image_1")
 ```
+
+## イメージファイル (image.aviutliem.yml) の中身の例
+
+```yaml
+image_name: image_1
+
+base:
+  aviutl_version: 1.10
+  exedit_version: 0.92
+
+plugins:
+  - id: hoge
+    version: 1.2.0
+  - id: fuga
+    version: 3.4
+
+scripts:
+  - id: piyo
+    version: 0.1.7
+  - id: hogera
+    version: 6.12.9
+```
