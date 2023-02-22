@@ -1,5 +1,12 @@
 import
-  os
+  os,
+  streams
+
+import
+  yaml/serialization
+
+import
+  types
 
 
 type UtliemCli = object
@@ -8,6 +15,13 @@ type UtliemCli = object
 type UcImages = object
   utliemCli: ref UtliemCli
   imagesDirPath: string
+
+type UcImage = object
+  utliemCli: ref UtliemCli
+  imageDirPath: string
+
+type UcPlugins = object
+  ucImage: UcImage
 
 type UcContainer = object
   discard
@@ -31,3 +45,18 @@ proc list*(i: UcImages): seq[string] =
 
 proc delete*(i: UcImages, name: string) =
   discard
+
+proc image*(uc: ref UtliemCli, imageName: string): UcImage =
+  result.utliemCli = uc
+  result.imageDirPath = uc.appDirectoryPath / "images" / imageName
+
+proc plugins*(i: UcImage): UcPlugins =
+  result.ucImage = i
+
+proc list*(p: UcPlugins): seq[Plugin] =
+  var imageYaml: ImageYaml
+  var s = newFileStream(p.ucImage.imageDirPath / "image.aviutliem.yaml")
+  # echo s.readAll
+  s.load(imageYaml)
+  s.close
+  return imageYaml.plugins

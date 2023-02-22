@@ -20,6 +20,21 @@ proc images(args: seq[string]) =
     else:
       echo "unknown command"
 
+proc image(args: seq[string]) =
+  echo "image command"
+  let
+    imageName = args[0]
+    subcommand = args[1]
+    options = args[2..^1]
+  case subcommand:
+    of "plugins":
+      case options[0]:
+        of "ls", "list":
+          echo "plugins list"
+          echo uc.image(imageName).plugins.list
+    else:
+      echo "unknown command"
+
 proc container(args: seq[string]) =
   echo "container command"
   let
@@ -34,4 +49,4 @@ proc container(args: seq[string]) =
 
 when isMainModule:
   import cligen
-  dispatchMulti([main.images], [main.container])
+  dispatchMulti([main.images], [main.image], [main.container])
