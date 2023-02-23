@@ -19,6 +19,8 @@ type UcImages = object
 type UcImage = object
   utliemCli: ref UtliemCli
   imageDirPath: string
+  imageFileName: string
+  imageFilePath: string
 
 type UcPlugins = object
   ucImage: UcImage
@@ -49,13 +51,15 @@ proc delete*(i: UcImages, name: string) =
 proc image*(uc: ref UtliemCli, imageName: string): UcImage =
   result.utliemCli = uc
   result.imageDirPath = uc.appDirectoryPath / "images" / imageName
+  result.imageFileName = "image.aviutliem.yaml"
+  result.imageFilePath = result.imageDirPath / result.imageFileName
 
 proc plugins*(i: UcImage): UcPlugins =
   result.ucImage = i
 
 proc list*(p: UcPlugins): seq[Plugin] =
   var imageYaml: ImageYaml
-  var s = newFileStream(p.ucImage.imageDirPath / "image.aviutliem.yaml")
+  var s = newFileStream(p.ucImage.imageFilePath)
   # echo s.readAll
   s.load(imageYaml)
   s.close
