@@ -50,6 +50,8 @@ proc image(args: seq[string]) =
           echo "plugins delete"
           let pluginId = options[1]
           uc.image(imageName).plugins.delete(pluginId)
+        else:
+          echo "unknown command"
     else:
       echo "unknown command"
 
