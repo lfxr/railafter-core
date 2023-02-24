@@ -49,4 +49,8 @@ proc container(args: seq[string]) =
 
 when isMainModule:
   import cligen
-  dispatchMulti([main.images], [main.image], [main.container])
+  dispatchMulti(
+    [main.images],
+    [main.image],
+    [main.container]
+  )
