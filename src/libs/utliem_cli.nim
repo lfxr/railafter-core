@@ -1,9 +1,5 @@
 import
-  os,
-  streams
-
-import
-  yaml/serialization
+  os
 
 import
   types
@@ -58,9 +54,7 @@ proc plugins*(i: UcImage): UcPlugins =
   result.ucImage = i
 
 proc list*(p: UcPlugins): seq[Plugin] =
-  var imageYaml: ImageYaml
-  var s = newFileStream(p.ucImage.imageFilePath)
-  # echo s.readAll
-  s.load(imageYaml)
-  s.close
+  let
+    imageYamlFile = ImageYamlFile(filePath: p.ucImage.imageFilePath)
+    imageYaml = imageYamlFile.load
   return imageYaml.plugins
