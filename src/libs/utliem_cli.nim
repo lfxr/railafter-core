@@ -64,3 +64,16 @@ proc add*(p: UcPlugins, plugin: Plugin) =
   var imageYaml = imageYamlFile.load()
   imageYaml.plugins.add(plugin)
   discard imageYamlFile.update(imageYaml)
+
+proc delete*(p: UcPlugins, pluginId: string) =
+  let imageYamlFile = ImageYamlFile(filePath: p.ucImage.imageFilePath)
+  var imageYaml = imageYamlFile.load()
+
+  var remainedPlugins: seq[Plugin] = @[]
+  for i, plugin in imageYaml.plugins:
+    if plugin.id != pluginId:
+      remainedPlugins.add(plugin)
+
+  imageYaml.plugins = remainedPlugins
+
+  discard imageYamlFile.update(imageYaml)
