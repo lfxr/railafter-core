@@ -56,7 +56,7 @@ proc plugins*(i: UcImage): UcPlugins =
 proc list*(p: UcPlugins): seq[Plugin] =
   let
     imageYamlFile = ImageYamlFile(filePath: p.ucImage.imageFilePath)
-    imageYaml = imageYamlFile.load
+    imageYaml = imageYamlFile.load()
   return imageYaml.plugins
 
 proc add*(p: UcPlugins, plugin: Plugin) =

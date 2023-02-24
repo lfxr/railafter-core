@@ -30,7 +30,7 @@ type YamlFile = object of RootObj
 proc load[T](yamlFile: YamlFile, obj: var T): T =
   let fileStream = newFileStream(yamlFile.filePath)
   fileStream.load(obj)
-  fileStream.close
+  fileStream.close()
 
 proc updateY[T](yamlFile: YamlFile, obj: T): T =
   let fileStream = newFileStream(yamlFile.filePath, fmWrite)
