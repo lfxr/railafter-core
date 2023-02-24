@@ -61,11 +61,15 @@ utliem -h
 utliem image
 utliem image ls
 utliem image list
-utliem image create --name "image_1"
-utliem image import "image_1.image.aviutliem.json"
-utliem image export "image_1" --path "image_1.image.aviutliem.json"
-utliem image delete "image_1"
-utliem image update "image_1" --path "image_1_new.image.aviutliem.json"
+utliem images create --name "image_1"
+utliem images import "image_1.image.aviutliem.json"
+utliem images export "image_1" --path "image_1.image.aviutliem.json"
+utliem images delete "image_1"
+utliem image "image_1" base
+utliem image "image_1" plugins add "hoge:1.2.0"
+utliem image "image_1" plugins ls
+utliem image "image_1" plugins list
+utliem image "image_1" plugins delete "hoge"
 ```
 
 ### container
@@ -84,4 +88,26 @@ utliem container delete "container_1"
 let uc = newUtliemCli()
 echo uc.image.list()
 uc.image.create("image_1")
+```
+
+## イメージファイル (image.aviutliem.yml) の中身の例
+
+```yaml
+image_name: image_1
+
+base:
+  aviutl_version: 1.10
+  exedit_version: 0.92
+
+plugins:
+  - id: hoge
+    version: 1.2.0
+  - id: fuga
+    version: 3.4
+
+scripts:
+  - id: piyo
+    version: 0.1.7
+  - id: hogera
+    version: 6.12.9
 ```
