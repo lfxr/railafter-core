@@ -1,6 +1,10 @@
 import
+  strutils
+
+import
   libs/commands/containers,
   # libs/commands/images,
+  libs/types,
   libs/utliem_cli
 
 
@@ -32,6 +36,16 @@ proc image(args: seq[string]) =
         of "ls", "list":
           echo "plugins list"
           echo uc.image(imageName).plugins.list
+        of "add":
+          echo "plugins add"
+          let
+            pluginId = options[1].split(":")[0]
+            pluginVersion = options[1].split(":")[1]
+            plugin = Plugin(
+              id: pluginId,
+              version: pluginVersion
+            )
+          uc.image(imageName).plugins.add(plugin)
     else:
       echo "unknown command"
 
