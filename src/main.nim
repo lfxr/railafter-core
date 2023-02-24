@@ -46,7 +46,7 @@ proc image(args: seq[string]) =
               version: pluginVersion
             )
           uc.image(imageName).plugins.add(plugin)
-        of "delete":
+        of "del", "delete":
           echo "plugins delete"
           let pluginId = options[1]
           uc.image(imageName).plugins.delete(pluginId)
