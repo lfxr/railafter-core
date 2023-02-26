@@ -61,7 +61,7 @@ utliem -h
 utliem image
 utliem image ls
 utliem image list
-utliem images create --name "image_1"
+utliem images create "image_1"
 utliem images import "image_1.image.aviutliem.json"
 utliem images export "image_1" --path "image_1.image.aviutliem.json"
 utliem images delete "image_1"
@@ -90,7 +90,7 @@ echo uc.image.list()
 uc.image.create("image_1")
 ```
 
-## イメージファイル (image.aviutliem.yml) の中身の例
+## イメージファイル (image.aviutliem.yaml) の中身の例
 
 ```yaml
 image_name: image_1
