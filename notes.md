@@ -112,6 +112,32 @@ scripts:
     version: 6.12.9
 ```
 
+## コンテナファイル (container.aviutliem.yaml) の中身の例
+
+```yaml
+container_name: container_1
+
+base:
+  aviutl_version: 1.10
+  exedit_version: 0.92
+
+plugins:
+  enabled:
+    - id: hoge
+      version: 1.2.0
+  disabled:
+    - id: fuga
+      version: 3.4
+
+scripts:
+  enabled:
+    - id: piyo
+      version: 0.1.7
+  disabled:
+    - id: hogera
+      version: 6.12.9
+```
+
 ## イメージ/コンテナとは?
 
 ### イメージとは
@@ -161,11 +187,13 @@ scripts:
 
 - インストール
   - 対象プラグインのファイルをダウンロードして`plugins`ディレクトリに移動
-  - 対象プラグイン情報を`container.aviutliem.yaml`に追加
+  - 対象プラグイン情報を`container.aviutliem.yaml`の`enabled`フィールドに追加
 - アンインストール
   - `plugins`ディレクトリ内のファイルを削除
-  - 対象プラグイン情報を`container.aviutliem.yaml`から削除
+  - 対象プラグイン情報を`container.aviutliem.yaml`の`enabled`フィールドまたは`disabled`フィールドから削除
 - 無効にする
   - remove, 対象プラグインを一時的に`trash`ディレクトリに移動
+  - 対象プラグイン情報を`container.aviutliem.yaml`の`enabled`フィールドから`disabled`フィールドに移動
 - 有効にする
   - un-remove, 対象プラグインを`trash`ディレクトリから復活
+  - 対象プラグイン情報を`container.aviutliem.yaml`の`disabled`フィールドから`enabled`フィールドに移動
