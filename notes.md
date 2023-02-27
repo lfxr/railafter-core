@@ -61,7 +61,7 @@ utliem -h
 utliem image
 utliem image ls
 utliem image list
-utliem images create --name "image_1"
+utliem images create "image_1"
 utliem images import "image_1.image.aviutliem.json"
 utliem images export "image_1" --path "image_1.image.aviutliem.json"
 utliem images delete "image_1"
@@ -90,7 +90,7 @@ echo uc.image.list()
 uc.image.create("image_1")
 ```
 
-## イメージファイル (image.aviutliem.yml) の中身の例
+## イメージファイル (image.aviutliem.yaml) の中身の例
 
 ```yaml
 image_name: image_1
@@ -111,3 +111,89 @@ scripts:
   - id: hogera
     version: 6.12.9
 ```
+
+## コンテナファイル (container.aviutliem.yaml) の中身の例
+
+```yaml
+container_name: container_1
+
+base:
+  aviutl_version: 1.10
+  exedit_version: 0.92
+
+plugins:
+  enabled:
+    - id: hoge
+      version: 1.2.0
+  disabled:
+    - id: fuga
+      version: 3.4
+
+scripts:
+  enabled:
+    - id: piyo
+      version: 0.1.7
+  disabled:
+    - id: hogera
+      version: 6.12.9
+```
+
+## イメージ/コンテナとは?
+
+### イメージとは
+
+- 例えるなら: レシピ
+  - 「レシピ」なので「材料」を追加できる&共有できる
+
+### コンテナとは
+
+- 例えるなら: レシピから作られた料理
+  - 料理なので, 後からトッピングしたり材料を取り除いたりする等アレンジできるが共有はできない
+  - 共有したいときはレシピの方を共有する
+  - アレンジした料理を共有したいときは, 新たなレシピとして書き起こしそれを共有する
+
+## キラー
+
+- 環境の使い分けが可能&容易になる
+  - 文字PV用, 茶番用, 実験用という風に分けられる
+  - トリミングなどの軽めの編集だけなら, 動作が軽い, 最低限のプラグインしか入っていないイメージ/コンテナを使用する
+
+- 配布しやすい
+  - イメージファイルを共有してそれを読み込んでもらえば, ほぼ同じ環境が再現できる
+
+## 環境をイメージとコンテナに分離するメリット
+
+- 配布しやすい?
+- 1つのイメージ (テンプレート/ベース, 最低限必要なプラグインを含むイメージ) を作りそのイメージを元に色々なコンテナまたそのコンテナから生成するイメージを作成できる
+- 分離しない場合, 環境を残しておくためには, 環境に手を加える前に環境をコピーしてバックアップをする必要がある
+- イメージファイルとコンテナを分けられる (そのまま)
+
+## イメージの機能
+
+### プラグイン管理
+
+ファイルのダウンロードは行われない。
+
+- 追加
+  - 対象プラグイン情報を`image.aviutliem.yaml`に追加
+- 削除
+  - 対象プラグイン情報を`image.aviutliem.yaml`から削除
+
+## コンテナの機能
+
+### プラグイン管理_
+
+`インストール`ではファイルのダウンロードが行われる。
+
+- インストール
+  - 対象プラグインのファイルをダウンロードして`plugins`ディレクトリに移動
+  - 対象プラグイン情報を`container.aviutliem.yaml`の`enabled`フィールドに追加
+- アンインストール
+  - `plugins`ディレクトリ内のファイルを削除
+  - 対象プラグイン情報を`container.aviutliem.yaml`の`enabled`フィールドまたは`disabled`フィールドから削除
+- 無効にする
+  - remove, 対象プラグインを一時的に`trash`ディレクトリに移動
+  - 対象プラグイン情報を`container.aviutliem.yaml`の`enabled`フィールドから`disabled`フィールドに移動
+- 有効にする
+  - un-remove, 対象プラグインを`trash`ディレクトリから復活
+  - 対象プラグイン情報を`container.aviutliem.yaml`の`disabled`フィールドから`enabled`フィールドに移動
