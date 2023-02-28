@@ -62,7 +62,7 @@ proc container(args: seq[string]) =
     options = args[1..^1]
   case subcommand:
     of "ls", "list":
-      containers.list options
+      containers.list(options)
     else:
       echo "unknown command"
 
