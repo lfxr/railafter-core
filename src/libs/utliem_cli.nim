@@ -38,8 +38,8 @@ proc images*(uc: ref UtliemCli): UcImages =
   result.utliemCli = uc
   result.imagesDirPath = uc.appDirPath / "images"
 
-proc list*(i: UcImages): seq[string] =
-  for fileOrDir in i.imagesDirPath.listDirectories:
+proc list*(ucImages: UcImages): seq[string] =
+  for fileOrDir in ucImages.imagesDirPath.listDirectories:
     result.add(fileOrDir.splitPath.tail)
 
 proc delete*(ucImages: UcImages, name: string) =
