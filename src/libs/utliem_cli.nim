@@ -7,7 +7,7 @@ import
 
 
 type UtliemCli = object
-  appDirectoryPath: string
+  appDirPath: string
 
 type UcImages = object
   utliemCli: ref UtliemCli
@@ -26,48 +26,48 @@ type UcContainer = object
   discard
 
 
-proc newUtliemCli*(appDirectoryPath: string): ref UtliemCli =
+proc newUtliemCli*(appDirPath: string): ref UtliemCli =
   result = new UtliemCli
-  result.appDirectoryPath = appDirectoryPath
+  result.appDirPath = appDirPath
 
 proc listDirectories(dirPath: string): seq[string] =
-  for fd in walkDir(dirPath):
-    result.add(fd.path)
+  for fileOrDir in walkDir(dirPath):
+    result.add(fileOrDir.path)
 
 proc images*(uc: ref UtliemCli): UcImages =
   result.utliemCli = uc
-  result.imagesDirPath = uc.appDirectoryPath / "images"
+  result.imagesDirPath = uc.appDirPath / "images"
 
 proc list*(i: UcImages): seq[string] =
-  for fd in i.imagesDirPath.listDirectories:
-    result.add(fd.splitPath.tail)
+  for fileOrDir in i.imagesDirPath.listDirectories:
+    result.add(fileOrDir.splitPath.tail)
 
-proc delete*(i: UcImages, name: string) =
+proc delete*(ucImages: UcImages, name: string) =
   discard
 
 proc image*(uc: ref UtliemCli, imageName: string): UcImage =
   result.utliemCli = uc
-  result.imageDirPath = uc.appDirectoryPath / "images" / imageName
+  result.imageDirPath = uc.appDirPath / "images" / imageName
   result.imageFileName = "image.aviutliem.yaml"
   result.imageFilePath = result.imageDirPath / result.imageFileName
 
-proc plugins*(i: UcImage): UcPlugins =
-  result.ucImage = i
+proc plugins*(ucImage: UcImage): UcPlugins =
+  result.ucImage = ucImage
 
-proc list*(p: UcPlugins): seq[Plugin] =
+proc list*(ucPlugins: UcPlugins): seq[Plugin] =
   let
-    imageYamlFile = ImageYamlFile(filePath: p.ucImage.imageFilePath)
+    imageYamlFile = ImageYamlFile(filePath: ucPlugins.ucImage.imageFilePath)
     imageYaml = imageYamlFile.load()
   return imageYaml.plugins
 
-proc add*(p: UcPlugins, plugin: Plugin) =
-  let imageYamlFile = ImageYamlFile(filePath: p.ucImage.imageFilePath)
+proc add*(ucPlugins: UcPlugins, plugin: Plugin) =
+  let imageYamlFile = ImageYamlFile(filePath: ucPlugins.ucImage.imageFilePath)
   var imageYaml = imageYamlFile.load()
   imageYaml.plugins.add(plugin)
   discard imageYamlFile.update(imageYaml)
 
-proc delete*(p: UcPlugins, pluginId: string) =
-  let imageYamlFile = ImageYamlFile(filePath: p.ucImage.imageFilePath)
+proc delete*(ucPlugins: UcPlugins, pluginId: string) =
+  let imageYamlFile = ImageYamlFile(filePath: ucPlugins.ucImage.imageFilePath)
   var imageYaml = imageYamlFile.load()
 
   var remainedPlugins: seq[Plugin] = @[]
