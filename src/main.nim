@@ -21,6 +21,10 @@ proc images(args: seq[string]) =
       # images.list(options)
       for image in uc.images.list:
         echo image
+    of "create":
+      echo "images create"
+      let imageName = options[0]
+      uc.images.create(imageName)
     else:
       echo "unknown command"
 

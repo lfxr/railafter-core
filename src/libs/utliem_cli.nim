@@ -1,7 +1,9 @@
 import
-  os
+  os,
+  strformat
 
 import
+  templates,
   types,
   yaml_file
 
@@ -41,6 +43,17 @@ proc images*(uc: ref UtliemCli): UcImages =
 proc list*(ucImages: UcImages): seq[string] =
   for fileOrDir in ucImages.imagesDirPath.listDirectories:
     result.add(fileOrDir.splitPath.tail)
+
+proc create*(ucImages: UcImages, imageName: string) =
+  let newImageDirPath = ucImages.imagesDirPath / imageName
+  if dirExists(newImageDirPath):
+    raise newException(ValueError, fmt"Image named '{imageName}' already exists")
+  createDir newImageDirPath
+  let
+    newImageFilePath = newImageDirPath / "image.aviutliem.yaml"
+    imageYamlFile = ImageYamlFile(filePath: newImageFilePath)
+  discard imageYamlFile.update(yamlTemplates.imageYaml)
+
 
 proc delete*(ucImages: UcImages, name: string) =
   discard
