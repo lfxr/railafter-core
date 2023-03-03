@@ -3,6 +3,7 @@ import
   strformat
 
 import
+  procs,
   templates,
   types,
   yaml_file
@@ -45,9 +46,11 @@ proc list*(ucImages: UcImages): seq[string] =
     result.add(fileOrDir.splitPath.tail)
 
 proc create*(ucImages: UcImages, imageName: string) =
-  let newImageDirPath = ucImages.imagesDirPath / imageName
+  let
+    sanitizedImageName = imageName.sanitizeFileOrDirName
+    newImageDirPath = ucImages.imagesDirPath / sanitizedImageName
   if dirExists(newImageDirPath):
-    raise newException(ValueError, fmt"Image named '{imageName}' already exists")
+    raise newException(ValueError, fmt"Image named '{sanitizedImageName}' already exists")
   createDir newImageDirPath
   let
     newImageFilePath = newImageDirPath / "image.aviutliem.yaml"
