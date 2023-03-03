@@ -1,4 +1,4 @@
-type Base = object
+type Base* = object
   aviutl_version*: string
   exedit_version*: string
 

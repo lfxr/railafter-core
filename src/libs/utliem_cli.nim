@@ -1,7 +1,10 @@
 import
-  os
+  os,
+  strformat
 
 import
+  procs,
+  templates,
   types,
   yaml_file
 
@@ -38,12 +41,31 @@ proc images*(uc: ref UtliemCli): UcImages =
   result.utliemCli = uc
   result.imagesDirPath = uc.appDirPath / "images"
 
-proc list*(i: UcImages): seq[string] =
-  for fileOrDir in i.imagesDirPath.listDirectories:
+proc list*(ucImages: UcImages): seq[string] =
+  for fileOrDir in ucImages.imagesDirPath.listDirectories:
     result.add(fileOrDir.splitPath.tail)
 
-proc delete*(ucImages: UcImages, name: string) =
-  discard
+proc create*(ucImages: UcImages, imageName: string) =
+  let
+    sanitizedImageName = imageName.sanitizeFileOrDirName
+    newImageDirPath = ucImages.imagesDirPath / sanitizedImageName
+  if dirExists(newImageDirPath):
+    raise newException(ValueError, fmt"Image named '{sanitizedImageName}' already exists")
+  createDir newImageDirPath
+  let
+    newImageFilePath = newImageDirPath / "image.aviutliem.yaml"
+    imageYamlFile = ImageYamlFile(filePath: newImageFilePath)
+  discard imageYamlFile.update(yamlTemplates.imageYaml)
+
+proc delete*(ucImages: UcImages, imageName: string) =
+  let
+    sanitizedImageName = imageName.sanitizeFileOrDirName
+    targetImageDirPath = ucImages.imagesDirPath / sanitizedImageName
+  try:
+    removeDir(targetImageDirPath, checkDir = true)
+  except OSError:
+    raise newException(ValueError, fmt"Image named '{sanitizedImageName}' does not exist")
+
 
 proc image*(uc: ref UtliemCli, imageName: string): UcImage =
   result.utliemCli = uc
