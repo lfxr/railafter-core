@@ -57,9 +57,15 @@ proc create*(ucImages: UcImages, imageName: string) =
     imageYamlFile = ImageYamlFile(filePath: newImageFilePath)
   discard imageYamlFile.update(yamlTemplates.imageYaml)
 
+proc delete*(ucImages: UcImages, imageName: string) =
+  let
+    sanitizedImageName = imageName.sanitizeFileOrDirName
+    targetImageDirPath = ucImages.imagesDirPath / sanitizedImageName
+  try:
+    removeDir(targetImageDirPath, checkDir = true)
+  except OSError:
+    raise newException(ValueError, fmt"Image named '{sanitizedImageName}' does not exist")
 
-proc delete*(ucImages: UcImages, name: string) =
-  discard
 
 proc image*(uc: ref UtliemCli, imageName: string): UcImage =
   result.utliemCli = uc
