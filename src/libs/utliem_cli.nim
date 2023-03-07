@@ -113,3 +113,12 @@ proc containers*(uc: ref UtliemCli): UcContainers =
 proc list*(ucContainers: UcContainers): seq[string] =
   for fileOrDir in ucContainers.containersDirPath.listDirectories:
     result.add(fileOrDir.splitPath.tail)
+
+proc delete*(ucContainers: UcContainers, containerName: string) =
+  let
+    sanitizedContainerName = containerName.sanitizeFileOrDirName
+    targetContainerDirPath = ucContainers.containersDirPath / sanitizedContainerName
+  try:
+    removeDir(targetContainerDirPath, checkDir = true)
+  except OSError:
+    raise newException(ValueError, fmt"Container named '{sanitizedContainerName}' does not exist")

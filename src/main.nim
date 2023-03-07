@@ -72,6 +72,10 @@ proc containers(args: seq[string]) =
     of "ls", "list":
       for container in uc.containers.list:
         echo container
+    of "del", "delete":
+      echo "containers delete"
+      let containerName = options[0]
+      uc.containers.delete(containerName)
     else:
       echo "unknown command"
 
