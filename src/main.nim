@@ -63,14 +63,15 @@ proc image(args: seq[string]) =
     else:
       echo "unknown command"
 
-proc container(args: seq[string]) =
-  echo "container command"
+proc containers(args: seq[string]) =
+  echo "containers command"
   let
     subcommand = args[0]
     options = args[1..^1]
   case subcommand:
     of "ls", "list":
-      containers.list(options)
+      for container in uc.containers.list:
+        echo container
     else:
       echo "unknown command"
 
@@ -80,5 +81,5 @@ when isMainModule:
   dispatchMulti(
     [main.images],
     [main.image],
-    [main.container]
+    [main.containers]
   )

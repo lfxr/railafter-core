@@ -22,6 +22,10 @@ type UcImage = object
   imageFileName: string
   imageFilePath: string
 
+type UcContainers = object
+  utliemCli: ref UtliemCli
+  containersDirPath: string
+
 type UcPlugins = object
   ucImage: UcImage
 
@@ -100,3 +104,12 @@ proc delete*(ucPlugins: UcPlugins, pluginId: string) =
   imageYaml.plugins = remainedPlugins
 
   discard imageYamlFile.update(imageYaml)
+
+
+proc containers*(uc: ref UtliemCli): UcContainers =
+  result.utliemCli = uc
+  result.containersDirPath = uc.appDirPath / "containers"
+
+proc list*(ucContainers: UcContainers): seq[string] =
+  for fileOrDir in ucContainers.containersDirPath.listDirectories:
+    result.add(fileOrDir.splitPath.tail)
