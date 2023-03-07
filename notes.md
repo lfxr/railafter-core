@@ -20,6 +20,12 @@
 aviutliem_cli/
 ├── aviutliem_cli.exe         # AviUtliem CLIの実行ファイル
 ├── aviutliem_cli_updater.exe # アップデータ
+├── packages.yaml
+├── temp/                     # プラグイン・スクリプトのインストール時に使用
+├── cache/                    # ダウンロードしたファイルのキャッシュ
+│   ├── base/
+│   ├── plugins/
+│   └── scripts/
 ├── images/                   # イメージ
 │   ├── awesome_image_1/      # とあるイメージ
 │   └── ...
@@ -80,6 +86,7 @@ utliem container ls
 utliem container list
 utliem container create --image "image_1" --name "container_1"
 utliem container delete "container_1"
+utliem containers "container_1" plugins get "hoge:1.2.0"
 ```
 
 ## UtliemCliオブジェクト
@@ -136,6 +143,24 @@ scripts:
   disabled:
     - id: hogera
       version: 6.12.9
+```
+
+## パケージファイル (packages.yaml) の中身の例
+
+```yaml
+plugins:
+  - id: hoge
+    name: ほげ
+    description: ほげするプラグイン
+    author: fuga
+    website: https://fuga.example.com
+    versions:
+      - version: 1.2.0
+        url: https://fuga.example.com/hoge-1.2.0.zip
+        hash: abcdef123456abcdef123456abcdef123456abcdef123456abcdef123456
+      - version: 1.3.1
+        url: https://fuga.example.com/hoge-1.3.1.zip
+        hash: 123456abcdef123456abcdef123456abcdef123456abcdef123456abcdef
 ```
 
 ## イメージ/コンテナとは?
@@ -197,3 +222,21 @@ scripts:
 - 有効にする
   - un-remove, 対象プラグインを`trash`ディレクトリから復活
   - 対象プラグイン情報を`container.aviutliem.yaml`の`disabled`フィールドから`enabled`フィールドに移動
+
+## プラグイン・スクリプトのダウンロード・インストール
+
+### コマンド_
+
+`$ utliem container "container_1" plugins get "hoge:1.2.0"`
+
+### 処理内容
+
+1. `packages.yaml`が改竄されていないか電子署名？で検証する
+1. `cache`ディレクトリにファイルが存在する場合, ファイルを`temp`ディレクトリにコピーした後`7.`から始める
+1. デフォルトブラウザで配布サイトのURLを開く (`start URL`と実行する)
+1. エクスプローラーで`temp`ディレクトリを開く
+1. ユーザーが, ブラウザ上で配布サイトからファイルをダウンロードする
+1. ユーザーが, ダウンロードしたファイルを`temp`ディレクトリに移動もしくはコピーする
+1. `temp`ディレクトリ内のファイルのハッシュ値を計算し, ハッシュ値が一致するか確認する
+1. ファイルを解凍し, コンテナの`plugins`もしくは`scripts`ディレクトリに移動する
+1. キャッシュするオプションが有効かつ`cache`ディレクトリにファイルが存在しない場合, ファイルを`cache`ディレクトリにコピーする
