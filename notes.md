@@ -156,10 +156,10 @@ plugins:
     website: https://fuga.example.com
     versions:
       - version: 1.2.0
-        url: https://hoge.example.com/hoge-1.2.0.zip
+        url: https://fuga.example.com/hoge-1.2.0.zip
         hash: abcdef123456abcdef123456abcdef123456abcdef123456abcdef123456
       - version: 1.3.1
-        url: https://hoge.example.com/hoge-1.3.1.zip
+        url: https://fuga.example.com/hoge-1.3.1.zip
         hash: 123456abcdef123456abcdef123456abcdef123456abcdef123456abcdef
 ```
 
