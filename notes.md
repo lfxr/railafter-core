@@ -20,6 +20,7 @@
 aviutliem_cli/
 ├── aviutliem_cli.exe         # AviUtliem CLIの実行ファイル
 ├── aviutliem_cli_updater.exe # アップデータ
+├── packages.yaml
 ├── temp/                     # プラグイン・スクリプトのインストール時に使用
 ├── cache/                    # ダウンロードしたファイルのキャッシュ
 │   ├── base/
@@ -142,6 +143,24 @@ scripts:
   disabled:
     - id: hogera
       version: 6.12.9
+```
+
+## パケージファイル (packages.yaml) の中身の例
+
+```yaml
+plugins:
+  - id: hoge
+    name: ほげ
+    description: ほげするプラグイン
+    author: fuga
+    website: https://fuga.example.com
+    versions:
+      - version: 1.2.0
+        url: https://hoge.example.com/hoge-1.2.0.zip
+        hash: abcdef123456abcdef123456abcdef123456abcdef123456abcdef123456
+      - version: 1.3.1
+        url: https://hoge.example.com/hoge-1.3.1.zip
+        hash: 123456abcdef123456abcdef123456abcdef123456abcdef123456abcdef
 ```
 
 ## イメージ/コンテナとは?
