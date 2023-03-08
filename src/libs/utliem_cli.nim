@@ -114,6 +114,18 @@ proc list*(ucContainers: UcContainers): seq[string] =
   for fileOrDir in ucContainers.containersDirPath.listDirectories:
     result.add(fileOrDir.splitPath.tail)
 
+proc create*(ucContainers: UcContainers, containerName: string) =
+  let
+    sanitizedContainerName = containerName.sanitizeFileOrDirName
+    newContainerDirPath = ucContainers.containersDirPath / sanitizedContainerName
+  if dirExists(newContainerDirPath):
+    raise newException(ValueError, fmt"Container named '{sanitizedContainerName}' already exists")
+  createDir newContainerDirPath
+  let
+    newContainerFilePath = newContainerDirPath / "container.aviutliem.yaml"
+    containerYamlFile = ContainerYamlFile(filePath: newContainerFilePath)
+  discard containerYamlFile.update(yamlTemplates.containerYaml)
+
 proc delete*(ucContainers: UcContainers, containerName: string) =
   let
     sanitizedContainerName = containerName.sanitizeFileOrDirName
