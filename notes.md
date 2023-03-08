@@ -64,9 +64,9 @@ utliem -h
 ### image
 
 ```bash
-utliem image
-utliem image ls
-utliem image list
+utliem images
+utliem images ls
+utliem images list
 utliem images create "image_1"
 utliem images import "image_1.image.aviutliem.json"
 utliem images export "image_1" --path "image_1.image.aviutliem.json"
@@ -82,11 +82,11 @@ utliem image "image_1" plugins delete "hoge"
 
 ```bash
 utliem container
-utliem container ls
-utliem container list
-utliem container create --image "image_1" --name "container_1"
-utliem container delete "container_1"
-utliem containers "container_1" plugins get "hoge:1.2.0"
+utliem containers ls
+utliem containers list
+utliem containers create "container_1" "image_1"
+utliem containers delete "container_1"
+utliem container "container_1" plugins get "hoge:1.2.0"
 ```
 
 ## UtliemCliオブジェクト

@@ -31,3 +31,15 @@ proc load*(imageYamlFile: ImageYamlFile): ImageYaml =
 
 proc update*(imageYamlFile: ImageYamlFile, imageYaml: ImageYaml): ImageYaml =
   discard imageYamlFile.updateY(imageYaml)
+
+
+type ContainerYamlFile* = object of YamlFile
+  discard
+
+proc load*(containerYamlFile: ContainerYamlFile): ContainerYaml =
+  var containerYaml: ContainerYaml
+  discard containerYamlFile.load(containerYaml)
+  return containerYaml
+
+proc update*(containerYamlFile: ContainerYamlFile, containerYaml: ContainerYaml): ContainerYaml =
+  discard containerYamlFile.updateY(containerYaml)

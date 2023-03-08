@@ -15,3 +15,18 @@ type ImageYaml* = object
   base*: Base
   plugins*: seq[Plugin]
   scripts*: seq[Script]
+
+
+type ContainerPlugins* = object
+  enabled*: seq[Plugin]
+  disabled*: seq[Plugin]
+
+type ContainerScripts* = object
+  enabled*: seq[Script]
+  disabled*: seq[Script]
+
+type ContainerYaml* = object
+  container_name*: string
+  base*: Base
+  plugins*: ContainerPlugins
+  scripts*: ContainerScripts
