@@ -74,8 +74,10 @@ proc containers(args: seq[string]) =
         echo container
     of "create":
       echo "containers create"
-      let containerName = options[0]
-      uc.containers.create(containerName)
+      let
+        containerName = options[0]
+        imageName = options[1]
+      uc.containers.create(containerName, imageName)
     of "del", "delete":
       echo "containers delete"
       let containerName = options[0]

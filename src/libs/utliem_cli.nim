@@ -114,17 +114,30 @@ proc list*(ucContainers: UcContainers): seq[string] =
   for fileOrDir in ucContainers.containersDirPath.listDirectories:
     result.add(fileOrDir.splitPath.tail)
 
-proc create*(ucContainers: UcContainers, containerName: string) =
+proc create*(ucContainers: UcContainers, containerName: string,
+    imageName: string) =
   let
     sanitizedContainerName = containerName.sanitizeFileOrDirName
     newContainerDirPath = ucContainers.containersDirPath / sanitizedContainerName
   if dirExists(newContainerDirPath):
     raise newException(ValueError, fmt"Container named '{sanitizedContainerName}' already exists")
   createDir newContainerDirPath
+  # 対象イメージをイメージファイルから読み込む
+  let
+    image = ucContainers.utliemCli.image(imageName)
+    imageYamlFile = ImageYamlFile(filePath: image.imageFilePath)
+    imageYaml = imageYamlFile.load()
+    containerYaml = ContainerYaml(
+      container_name: containerName,
+      base: imageYaml.base,
+      plugins: ContainerPlugins(enabled: imageYaml.plugins),
+      scripts: ContainerScripts(enabled: imageYaml.scripts),
+    )
+  # コンテナファイルを作成
   let
     newContainerFilePath = newContainerDirPath / "container.aviutliem.yaml"
     containerYamlFile = ContainerYamlFile(filePath: newContainerFilePath)
-  discard containerYamlFile.update(yamlTemplates.containerYaml)
+  discard containerYamlFile.update(containerYaml)
 
 proc delete*(ucContainers: UcContainers, containerName: string) =
   let
