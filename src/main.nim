@@ -2,6 +2,7 @@ import
   strutils
 
 import
+  libs/errors,
   libs/commands/containers,
   # libs/commands/images,
   libs/types,
@@ -19,14 +20,23 @@ proc images(args: seq[string]) =
   case subcommand:
     of "ls", "list":
       # images.list(options)
+      const expectedNumberOfArgs: Natural = 0
+      if options.len != expectedNumberOfArgs: invalidNumberOfArgs(
+          expectedNumberOfArgs, options.len, "images list")
       for image in uc.images.list:
         echo image
     of "create":
       echo "images create"
+      const expectedNumberOfArgs: Natural = 1
+      if options.len != expectedNumberOfArgs: invalidNumberOfArgs(
+          expectedNumberOfArgs, options.len, "images create")
       let imageName = options[0]
       uc.images.create(imageName)
     of "del", "delete":
       echo "images delete"
+      const expectedNumberOfArgs: Natural = 1
+      if options.len != expectedNumberOfArgs: invalidNumberOfArgs(
+          expectedNumberOfArgs, options.len, "images delete")
       let imageName = options[0]
       uc.images.delete(imageName)
     else:
@@ -43,9 +53,15 @@ proc image(args: seq[string]) =
       case options[0]:
         of "ls", "list":
           echo "plugins list"
+          const expectedNumberOfArgs: Natural = 0
+          if options[1..^1].len != expectedNumberOfArgs: invalidNumberOfArgs(
+              expectedNumberOfArgs, options[1..^1].len, "plugins list")
           echo uc.image(imageName).plugins.list
         of "add":
           echo "plugins add"
+          const expectedNumberOfArgs: Natural = 1
+          if options[1..^1].len != expectedNumberOfArgs: invalidNumberOfArgs(
+              expectedNumberOfArgs, options[1..^1].len, "plugins add")
           let
             pluginId = options[1].split(":")[0]
             pluginVersion = options[1].split(":")[1]
@@ -56,6 +72,9 @@ proc image(args: seq[string]) =
           uc.image(imageName).plugins.add(plugin)
         of "del", "delete":
           echo "plugins delete"
+          const expectedNumberOfArgs: Natural = 1
+          if options[1..^1].len != expectedNumberOfArgs: invalidNumberOfArgs(
+              expectedNumberOfArgs, options[1..^1].len, "plugins delete")
           let pluginId = options[1]
           uc.image(imageName).plugins.delete(pluginId)
         else:
@@ -70,16 +89,27 @@ proc containers(args: seq[string]) =
     options = args[1..^1]
   case subcommand:
     of "ls", "list":
+      const expectedNumberOfArgs: Natural = 0
+      if options.len != expectedNumberOfArgs: invalidNumberOfArgs(
+          expectedNumberOfArgs, options.len, "containers list")
       for container in uc.containers.list:
         echo container
     of "create":
-      echo "containers create"
+      const commandName = "containers create"
+      echo commandName
+      const expectedNumberOfArgs: Natural = 2
+      if options.len != expectedNumberOfArgs: invalidNumberOfArgs(
+          expectedNumberOfArgs, options.len, commandName)
       let
         containerName = options[0]
         imageName = options[1]
       uc.containers.create(containerName, imageName)
     of "del", "delete":
-      echo "containers delete"
+      const commandName = "containers delete"
+      echo commandName
+      const expectedNumberOfArgs: Natural = 1
+      if options.len != expectedNumberOfArgs: invalidNumberOfArgs(
+          expectedNumberOfArgs, options.len, commandName)
       let containerName = options[0]
       uc.containers.delete(containerName)
     else:
