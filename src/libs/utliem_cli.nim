@@ -1,5 +1,7 @@
 import
+  browsers,
   os,
+  osproc,
   strformat
 
 import
@@ -11,6 +13,7 @@ import
 
 type UtliemCli = object
   appDirPath: string
+  tempDirPath: string
 
 type UcImages = object
   utliemCli: ref UtliemCli
@@ -30,12 +33,19 @@ type UcPlugins = object
   ucImage: UcImage
 
 type UcContainer = object
-  discard
+  utliemCli: ref UtliemCli
+  containerDirPath: string
+  containerFileName: string
+  containerFilePath: string
+
+type UcContainerPlugins = object
+  ucContainer: UcContainer
 
 
 proc newUtliemCli*(appDirPath: string): ref UtliemCli =
   result = new UtliemCli
   result.appDirPath = appDirPath
+  result.tempDirPath = appDirPath / "temp"
 
 proc listDirectories(dirPath: string): seq[string] =
   for fileOrDir in walkDir(dirPath):
@@ -147,3 +157,25 @@ proc delete*(ucContainers: UcContainers, containerName: string) =
     removeDir(targetContainerDirPath, checkDir = true)
   except OSError:
     raise newException(ValueError, fmt"Container named '{sanitizedContainerName}' does not exist")
+
+
+proc container*(uc: ref UtliemCli, containerName: string): UcContainer =
+  result.utliemCli = uc
+  result.containerDirPath = uc.appDirPath / "containers" / containerName
+  result.containerFileName = "container.aviutliem.yaml"
+  result.containerFilePath = result.containerDirPath / result.containerFileName
+
+proc plugins*(ucContainer: UcContainer): UcContainerPlugins =
+  result.ucContainer = ucContainer
+
+proc download*(ucContainerPlugins: UcContainerPlugins, plugin: Plugin) =
+  # プラグインの配布ページをデフォルトブラウザで開く
+  openDefaultBrowser("https://example.com")
+  # tempディレクトリをエクスプローラーで開く
+  discard execProcess(
+    "explorer",
+    args = [
+      ucContainerPlugins.ucContainer.utliemCli.tempDirPath
+    ],
+    options = {poUsePath}
+  )
