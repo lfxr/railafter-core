@@ -63,13 +63,7 @@ proc image(args: seq[string]) =
           const expectedNumberOfArgs: Natural = 1
           if options[1..^1].len != expectedNumberOfArgs: invalidNumberOfArgs(
               expectedNumberOfArgs, options[1..^1].len, "plugins add")
-          let
-            pluginId = options[1].split(":")[0]
-            pluginVersion = options[1].split(":")[1]
-            plugin = Plugin(
-              id: pluginId,
-              version: pluginVersion
-            )
+          let plugin = deserializePlugin(options[1])
           uc.image(imageName).plugins.add(plugin)
         of "del", "delete":
           echo "plugins delete"
