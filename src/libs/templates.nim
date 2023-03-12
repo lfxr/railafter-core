@@ -8,3 +8,4 @@ type YamlTemplates* = object
 
 
 let yamlTemplates* = YamlTemplates()
+  ## YAMLのテンプレート

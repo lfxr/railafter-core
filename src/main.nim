@@ -5,6 +5,7 @@ import
   libs/errors,
   libs/commands/containers,
   # libs/commands/images,
+  libs/procs,
   libs/types,
   libs/utliem_cli
 
@@ -13,6 +14,7 @@ let uc = newUtliemCli("app")
 
 
 proc images(args: seq[string]) =
+  ## imagesコマンド
   echo "images command"
   let
     subcommand = args[0]
@@ -20,29 +22,33 @@ proc images(args: seq[string]) =
   case subcommand:
     of "ls", "list":
       # images.list(options)
+      const commandName = "images list"
       const expectedNumberOfArgs: Natural = 0
       if options.len != expectedNumberOfArgs: invalidNumberOfArgs(
-          expectedNumberOfArgs, options.len, "images list")
+          expectedNumberOfArgs, options.len, commandName)
       for image in uc.images.list:
         echo image
     of "create":
-      echo "images create"
+      const commandName = "images create"
+      echo commandName
       const expectedNumberOfArgs: Natural = 1
       if options.len != expectedNumberOfArgs: invalidNumberOfArgs(
-          expectedNumberOfArgs, options.len, "images create")
+          expectedNumberOfArgs, options.len, commandName)
       let imageName = options[0]
       uc.images.create(imageName)
     of "del", "delete":
-      echo "images delete"
+      const commandName = "images delete"
+      echo commandName
       const expectedNumberOfArgs: Natural = 1
       if options.len != expectedNumberOfArgs: invalidNumberOfArgs(
-          expectedNumberOfArgs, options.len, "images delete")
+          expectedNumberOfArgs, options.len, commandName)
       let imageName = options[0]
       uc.images.delete(imageName)
     else:
       echo "unknown command"
 
 proc image(args: seq[string]) =
+  ## imageコマンド
   echo "image command"
   let
     imageName = args[0]
@@ -52,29 +58,26 @@ proc image(args: seq[string]) =
     of "plugins":
       case options[0]:
         of "ls", "list":
-          echo "plugins list"
+          const commandName = "plugins list"
+          echo commandName
           const expectedNumberOfArgs: Natural = 0
           if options[1..^1].len != expectedNumberOfArgs: invalidNumberOfArgs(
-              expectedNumberOfArgs, options[1..^1].len, "plugins list")
+              expectedNumberOfArgs, options[1..^1].len, commandName)
           echo uc.image(imageName).plugins.list
         of "add":
-          echo "plugins add"
+          const commandName = "plugins add"
+          echo commandName
           const expectedNumberOfArgs: Natural = 1
           if options[1..^1].len != expectedNumberOfArgs: invalidNumberOfArgs(
-              expectedNumberOfArgs, options[1..^1].len, "plugins add")
-          let
-            pluginId = options[1].split(":")[0]
-            pluginVersion = options[1].split(":")[1]
-            plugin = Plugin(
-              id: pluginId,
-              version: pluginVersion
-            )
+              expectedNumberOfArgs, options[1..^1].len, commandName)
+          let plugin = deserializePlugin(options[1])
           uc.image(imageName).plugins.add(plugin)
         of "del", "delete":
-          echo "plugins delete"
+          const commandName = "plugins delete"
+          echo commandName
           const expectedNumberOfArgs: Natural = 1
           if options[1..^1].len != expectedNumberOfArgs: invalidNumberOfArgs(
-              expectedNumberOfArgs, options[1..^1].len, "plugins delete")
+              expectedNumberOfArgs, options[1..^1].len, commandName)
           let pluginId = options[1]
           uc.image(imageName).plugins.delete(pluginId)
         else:
@@ -83,15 +86,17 @@ proc image(args: seq[string]) =
       echo "unknown command"
 
 proc containers(args: seq[string]) =
+  ## containersコマンド
   echo "containers command"
   let
     subcommand = args[0]
     options = args[1..^1]
   case subcommand:
     of "ls", "list":
+      const commandName = "containers list"
       const expectedNumberOfArgs: Natural = 0
       if options.len != expectedNumberOfArgs: invalidNumberOfArgs(
-          expectedNumberOfArgs, options.len, "containers list")
+          expectedNumberOfArgs, options.len, commandName)
       for container in uc.containers.list:
         echo container
     of "create":
@@ -116,6 +121,7 @@ proc containers(args: seq[string]) =
       echo "unknown command"
 
 proc container(args: seq[string]) =
+  ## containerコマンド
   echo "container command"
   let
     containerName = args[0]
@@ -130,13 +136,7 @@ proc container(args: seq[string]) =
           const expectedNumberOfArgs: Natural = 1
           if options[1..^1].len != expectedNumberOfArgs: invalidNumberOfArgs(
               expectedNumberOfArgs, options[1..^1].len, commandName)
-          let
-            pluginId = options[1].split(":")[0]
-            pluginVersion = options[1].split(":")[1]
-            plugin = Plugin(
-              id: pluginId,
-              version: pluginVersion
-            )
+          let plugin = deserializePlugin(options[1])
           uc.container(containerName).plugins.download(plugin)
         of "install":
           const commandName = "container plugins install"
@@ -144,13 +144,7 @@ proc container(args: seq[string]) =
           const expectedNumberOfArgs: Natural = 1
           if options[1..^1].len != expectedNumberOfArgs: invalidNumberOfArgs(
               expectedNumberOfArgs, options[1..^1].len, commandName)
-          let
-            pluginId = options[1].split(":")[0]
-            pluginVersion = options[1].split(":")[1]
-            plugin = Plugin(
-              id: pluginId,
-              version: pluginVersion
-            )
+          let plugin = deserializePlugin(options[1])
           uc.container(containerName).plugins.install(plugin)
         else:
           echo "unknown command"

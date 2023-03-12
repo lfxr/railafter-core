@@ -51,24 +51,28 @@ type UcContainerPlugins = object
   tempDestDirPath: string
 
 
-proc newUtliemCli*(appDirPath: string): ref UtliemCli =
+func newUtliemCli*(appDirPath: string): ref UtliemCli =
   result = new UtliemCli
   result.appDirPath = appDirPath
   result.tempDirPath = appDirPath / "temp"
 
-proc listDirectories(dirPath: string): seq[string] =
+proc listDirs(dirPath: string): seq[string] =
+  ## 指定されたディレクトリ下のサブディレクトリのパスを返す
   for fileOrDir in walkDir(dirPath):
     result.add(fileOrDir.path)
 
-proc images*(uc: ref UtliemCli): UcImages =
+func images*(uc: ref UtliemCli): UcImages =
+  ## imagesコマンド
   result.utliemCli = uc
   result.imagesDirPath = uc.appDirPath / "images"
 
 proc list*(ucImages: UcImages): seq[string] =
-  for fileOrDir in ucImages.imagesDirPath.listDirectories:
+  ## イメージ一覧を返す
+  for fileOrDir in ucImages.imagesDirPath.listDirs:
     result.add(fileOrDir.splitPath.tail)
 
 proc create*(ucImages: UcImages, imageName: string) =
+  ## イメージを作成する
   let
     sanitizedImageName = imageName.sanitizeFileOrDirName
     newImageDirPath = ucImages.imagesDirPath / sanitizedImageName
@@ -81,6 +85,7 @@ proc create*(ucImages: UcImages, imageName: string) =
   discard imageYamlFile.update(yamlTemplates.imageYaml)
 
 proc delete*(ucImages: UcImages, imageName: string) =
+  ## イメージを削除する
   let
     sanitizedImageName = imageName.sanitizeFileOrDirName
     targetImageDirPath = ucImages.imagesDirPath / sanitizedImageName
@@ -90,28 +95,33 @@ proc delete*(ucImages: UcImages, imageName: string) =
     raise newException(ValueError, fmt"Image named '{sanitizedImageName}' does not exist")
 
 
-proc image*(uc: ref UtliemCli, imageName: string): UcImage =
+func image*(uc: ref UtliemCli, imageName: string): UcImage =
+  ## imageコマンド
   result.utliemCli = uc
   result.imageDirPath = uc.appDirPath / "images" / imageName
   result.imageFileName = "image.aviutliem.yaml"
   result.imageFilePath = result.imageDirPath / result.imageFileName
 
-proc plugins*(ucImage: UcImage): UcPlugins =
+func plugins*(ucImage: UcImage): UcPlugins =
+  ## image.pluginsコマンド
   result.ucImage = ucImage
 
 proc list*(ucPlugins: UcPlugins): seq[Plugin] =
+  ## イメージ内のプラグイン一覧を返す
   let
     imageYamlFile = ImageYamlFile(filePath: ucPlugins.ucImage.imageFilePath)
     imageYaml = imageYamlFile.load()
   return imageYaml.plugins
 
 proc add*(ucPlugins: UcPlugins, plugin: Plugin) =
+  ## プラグインを追加する
   let imageYamlFile = ImageYamlFile(filePath: ucPlugins.ucImage.imageFilePath)
   var imageYaml = imageYamlFile.load()
   imageYaml.plugins.add(plugin)
   discard imageYamlFile.update(imageYaml)
 
 proc delete*(ucPlugins: UcPlugins, pluginId: string) =
+  ## プラグインを削除する
   let imageYamlFile = ImageYamlFile(filePath: ucPlugins.ucImage.imageFilePath)
   var imageYaml = imageYamlFile.load()
 
@@ -125,16 +135,19 @@ proc delete*(ucPlugins: UcPlugins, pluginId: string) =
   discard imageYamlFile.update(imageYaml)
 
 
-proc containers*(uc: ref UtliemCli): UcContainers =
+func containers*(uc: ref UtliemCli): UcContainers =
+  ## containersコマンド
   result.utliemCli = uc
   result.containersDirPath = uc.appDirPath / "containers"
 
 proc list*(ucContainers: UcContainers): seq[string] =
-  for fileOrDir in ucContainers.containersDirPath.listDirectories:
+  ## コンテナ一覧を返す
+  for fileOrDir in ucContainers.containersDirPath.listDirs:
     result.add(fileOrDir.splitPath.tail)
 
 proc create*(ucContainers: UcContainers, containerName: string,
     imageName: string) =
+  ## コンテナを作成する
   let
     sanitizedContainerName = containerName.sanitizeFileOrDirName
     newContainerDirPath = ucContainers.containersDirPath / sanitizedContainerName
@@ -159,6 +172,7 @@ proc create*(ucContainers: UcContainers, containerName: string,
   discard containerYamlFile.update(containerYaml)
 
 proc delete*(ucContainers: UcContainers, containerName: string) =
+  ## コンテナを削除する
   let
     sanitizedContainerName = containerName.sanitizeFileOrDirName
     targetContainerDirPath = ucContainers.containersDirPath / sanitizedContainerName
@@ -168,7 +182,8 @@ proc delete*(ucContainers: UcContainers, containerName: string) =
     raise newException(ValueError, fmt"Container named '{sanitizedContainerName}' does not exist")
 
 
-proc container*(uc: ref UtliemCli, containerName: string): UcContainer =
+func container*(uc: ref UtliemCli, containerName: string): UcContainer =
+  ## containerコマンド
   result.utliemCli = uc
   result.tempDirPath = uc.tempDirPath / "container"
   result.containerDirPath = uc.appDirPath / "containers" / containerName
@@ -176,7 +191,8 @@ proc container*(uc: ref UtliemCli, containerName: string): UcContainer =
   result.containerFilePath = result.containerDirPath / result.containerFileName
   result.aviutlDirPath = result.containerDirPath / "aviutl"
 
-proc plugins*(ucContainer: UcContainer): UcContainerPlugins =
+func plugins*(ucContainer: UcContainer): UcContainerPlugins =
+  ## container.pluginsコマンド
   result.ucContainer = ucContainer
   result.dirPath = ucContainer.aviutlDirPath / "plugins"
   result.tempDirPath = ucContainer.tempDirPath / "plugins"
@@ -184,6 +200,7 @@ proc plugins*(ucContainer: UcContainer): UcContainerPlugins =
   result.tempDestDirPath = result.tempDirPath / "dest"
 
 proc download*(ucContainerPlugins: UcContainerPlugins, plugin: Plugin) =
+  ## プラグインをダウンロードする
   # プラグインの配布ページをデフォルトブラウザで開く
   openDefaultBrowser("https://example.com")
   # tempSrcディレクトリをエクスプローラーで開く
@@ -194,10 +211,11 @@ proc download*(ucContainerPlugins: UcContainerPlugins, plugin: Plugin) =
   )
 
 proc install*(ucContainerPlugins: UcContainerPlugins, plugin: Plugin) =
+  ## プラグインをインストールする
   let
     tempSrcDirPath = ucContainerPlugins.tempSrcDirPath
     tempDestDirPath = ucContainerPlugins.tempDestDirPath
-    pluginZipFilePath = listDirectories(tempSrcDirPath)[0]
+    pluginZipFilePath = listDirs(tempSrcDirPath)[0]
     containerPluginsDirPath = ucContainerPlugins.dirPath
   # プラグインのzipファイルを解凍
   extractAll(pluginZipFilePath, tempDestDirPath)
