@@ -56,7 +56,7 @@ func newUtliemCli*(appDirPath: string): ref UtliemCli =
   result.appDirPath = appDirPath
   result.tempDirPath = appDirPath / "temp"
 
-proc listDirectories(dirPath: string): seq[string] =
+proc listDirs(dirPath: string): seq[string] =
   for fileOrDir in walkDir(dirPath):
     result.add(fileOrDir.path)
 
@@ -65,7 +65,7 @@ func images*(uc: ref UtliemCli): UcImages =
   result.imagesDirPath = uc.appDirPath / "images"
 
 proc list*(ucImages: UcImages): seq[string] =
-  for fileOrDir in ucImages.imagesDirPath.listDirectories:
+  for fileOrDir in ucImages.imagesDirPath.listDirs:
     result.add(fileOrDir.splitPath.tail)
 
 proc create*(ucImages: UcImages, imageName: string) =
@@ -130,7 +130,7 @@ func containers*(uc: ref UtliemCli): UcContainers =
   result.containersDirPath = uc.appDirPath / "containers"
 
 proc list*(ucContainers: UcContainers): seq[string] =
-  for fileOrDir in ucContainers.containersDirPath.listDirectories:
+  for fileOrDir in ucContainers.containersDirPath.listDirs:
     result.add(fileOrDir.splitPath.tail)
 
 proc create*(ucContainers: UcContainers, containerName: string,
@@ -197,7 +197,7 @@ proc install*(ucContainerPlugins: UcContainerPlugins, plugin: Plugin) =
   let
     tempSrcDirPath = ucContainerPlugins.tempSrcDirPath
     tempDestDirPath = ucContainerPlugins.tempDestDirPath
-    pluginZipFilePath = listDirectories(tempSrcDirPath)[0]
+    pluginZipFilePath = listDirs(tempSrcDirPath)[0]
     containerPluginsDirPath = ucContainerPlugins.dirPath
   # プラグインのzipファイルを解凍
   extractAll(pluginZipFilePath, tempDestDirPath)
