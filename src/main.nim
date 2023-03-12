@@ -115,11 +115,54 @@ proc containers(args: seq[string]) =
     else:
       echo "unknown command"
 
+proc container(args: seq[string]) =
+  echo "container command"
+  let
+    containerName = args[0]
+    subcommand = args[1]
+    options = args[2..^1]
+  case subcommand:
+    of "plugins":
+      case options[0]:
+        of "dl", "download":
+          const commandName = "container plugins download"
+          echo commandName
+          const expectedNumberOfArgs: Natural = 1
+          if options[1..^1].len != expectedNumberOfArgs: invalidNumberOfArgs(
+              expectedNumberOfArgs, options[1..^1].len, commandName)
+          let
+            pluginId = options[1].split(":")[0]
+            pluginVersion = options[1].split(":")[1]
+            plugin = Plugin(
+              id: pluginId,
+              version: pluginVersion
+            )
+          uc.container(containerName).plugins.download(plugin)
+        of "install":
+          const commandName = "container plugins install"
+          echo commandName
+          const expectedNumberOfArgs: Natural = 1
+          if options[1..^1].len != expectedNumberOfArgs: invalidNumberOfArgs(
+              expectedNumberOfArgs, options[1..^1].len, commandName)
+          let
+            pluginId = options[1].split(":")[0]
+            pluginVersion = options[1].split(":")[1]
+            plugin = Plugin(
+              id: pluginId,
+              version: pluginVersion
+            )
+          uc.container(containerName).plugins.install(plugin)
+        else:
+          echo "unknown command"
+    else:
+      echo "unknown command"
+
 
 when isMainModule:
   import cligen
   dispatchMulti(
     [main.images],
     [main.image],
-    [main.containers]
+    [main.containers],
+    [main.container],
   )

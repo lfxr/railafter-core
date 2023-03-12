@@ -1,5 +1,7 @@
 import
+  browsers,
   os,
+  osproc,
   strformat
 
 import
@@ -8,9 +10,13 @@ import
   types,
   yaml_file
 
+import
+  zippy/ziparchives
+
 
 type UtliemCli = object
   appDirPath: string
+  tempDirPath: string
 
 type UcImages = object
   utliemCli: ref UtliemCli
@@ -30,12 +36,25 @@ type UcPlugins = object
   ucImage: UcImage
 
 type UcContainer = object
-  discard
+  utliemCli: ref UtliemCli
+  tempDirPath: string
+  containerDirPath: string
+  containerFileName: string
+  containerFilePath: string
+  aviutlDirPath: string
+
+type UcContainerPlugins = object
+  ucContainer: UcContainer
+  dirPath: string
+  tempDirPath: string
+  tempSrcDirPath: string
+  tempDestDirPath: string
 
 
 proc newUtliemCli*(appDirPath: string): ref UtliemCli =
   result = new UtliemCli
   result.appDirPath = appDirPath
+  result.tempDirPath = appDirPath / "temp"
 
 proc listDirectories(dirPath: string): seq[string] =
   for fileOrDir in walkDir(dirPath):
@@ -147,3 +166,44 @@ proc delete*(ucContainers: UcContainers, containerName: string) =
     removeDir(targetContainerDirPath, checkDir = true)
   except OSError:
     raise newException(ValueError, fmt"Container named '{sanitizedContainerName}' does not exist")
+
+
+proc container*(uc: ref UtliemCli, containerName: string): UcContainer =
+  result.utliemCli = uc
+  result.tempDirPath = uc.tempDirPath / "container"
+  result.containerDirPath = uc.appDirPath / "containers" / containerName
+  result.containerFileName = "container.aviutliem.yaml"
+  result.containerFilePath = result.containerDirPath / result.containerFileName
+  result.aviutlDirPath = result.containerDirPath / "aviutl"
+
+proc plugins*(ucContainer: UcContainer): UcContainerPlugins =
+  result.ucContainer = ucContainer
+  result.dirPath = ucContainer.aviutlDirPath / "plugins"
+  result.tempDirPath = ucContainer.tempDirPath / "plugins"
+  result.tempSrcDirPath = result.tempDirPath / "src"
+  result.tempDestDirPath = result.tempDirPath / "dest"
+
+proc download*(ucContainerPlugins: UcContainerPlugins, plugin: Plugin) =
+  # プラグインの配布ページをデフォルトブラウザで開く
+  openDefaultBrowser("https://example.com")
+  # tempSrcディレクトリをエクスプローラーで開く
+  discard execProcess(
+    "explorer",
+    args = [ucContainerPlugins.tempSrcDirPath],
+    options = {poUsePath}
+  )
+
+proc install*(ucContainerPlugins: UcContainerPlugins, plugin: Plugin) =
+  let
+    tempSrcDirPath = ucContainerPlugins.tempSrcDirPath
+    tempDestDirPath = ucContainerPlugins.tempDestDirPath
+    pluginZipFilePath = listDirectories(tempSrcDirPath)[0]
+    containerPluginsDirPath = ucContainerPlugins.dirPath
+  # プラグインのzipファイルを解凍
+  extractAll(pluginZipFilePath, tempDestDirPath)
+  # コンテナのaviutl/pluginsディレクトリに解凍されたファイルを移動
+  for file in walkDirRec(tempDestDirPath):
+    moveFile(file, containerPluginsDirPath / file.splitPath.tail)
+  # 解凍されたファイルが存在していたディレクトリを削除
+  removeDir(tempDestDirPath, checkDir = true)
+  removeFile pluginZipFilePath
