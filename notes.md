@@ -86,7 +86,9 @@ utliem containers ls
 utliem containers list
 utliem containers create "container_1" "image_1"
 utliem containers delete "container_1"
-utliem container "container_1" plugins get "hoge:1.2.0"
+utliem container "container_1" plugins download "hoge:1.2.0"
+utliem container "container_1" plugins dl "hoge:1.2.0"
+utliem container "container_1" plugins install "hoge:1.2.0"
 ```
 
 ## UtliemCliオブジェクト
