@@ -14,6 +14,7 @@ let uc = newUtliemCli("app")
 
 
 proc images(args: seq[string]) =
+  ## imagesコマンド
   echo "images command"
   let
     subcommand = args[0]
@@ -44,6 +45,7 @@ proc images(args: seq[string]) =
       echo "unknown command"
 
 proc image(args: seq[string]) =
+  ## imageコマンド
   echo "image command"
   let
     imageName = args[0]
@@ -78,6 +80,7 @@ proc image(args: seq[string]) =
       echo "unknown command"
 
 proc containers(args: seq[string]) =
+  ## containersコマンド
   echo "containers command"
   let
     subcommand = args[0]
@@ -111,6 +114,7 @@ proc containers(args: seq[string]) =
       echo "unknown command"
 
 proc container(args: seq[string]) =
+  ## containerコマンド
   echo "container command"
   let
     containerName = args[0]

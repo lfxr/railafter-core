@@ -57,18 +57,22 @@ func newUtliemCli*(appDirPath: string): ref UtliemCli =
   result.tempDirPath = appDirPath / "temp"
 
 proc listDirs(dirPath: string): seq[string] =
+  ## 指定されたディレクトリ下のサブディレクトリのパスを返す
   for fileOrDir in walkDir(dirPath):
     result.add(fileOrDir.path)
 
 func images*(uc: ref UtliemCli): UcImages =
+  ## imagesコマンド
   result.utliemCli = uc
   result.imagesDirPath = uc.appDirPath / "images"
 
 proc list*(ucImages: UcImages): seq[string] =
+  ## イメージ一覧を返す
   for fileOrDir in ucImages.imagesDirPath.listDirs:
     result.add(fileOrDir.splitPath.tail)
 
 proc create*(ucImages: UcImages, imageName: string) =
+  ## イメージを作成する
   let
     sanitizedImageName = imageName.sanitizeFileOrDirName
     newImageDirPath = ucImages.imagesDirPath / sanitizedImageName
@@ -81,6 +85,7 @@ proc create*(ucImages: UcImages, imageName: string) =
   discard imageYamlFile.update(yamlTemplates.imageYaml)
 
 proc delete*(ucImages: UcImages, imageName: string) =
+  ## イメージを削除する
   let
     sanitizedImageName = imageName.sanitizeFileOrDirName
     targetImageDirPath = ucImages.imagesDirPath / sanitizedImageName
@@ -91,27 +96,32 @@ proc delete*(ucImages: UcImages, imageName: string) =
 
 
 func image*(uc: ref UtliemCli, imageName: string): UcImage =
+  ## imageコマンド
   result.utliemCli = uc
   result.imageDirPath = uc.appDirPath / "images" / imageName
   result.imageFileName = "image.aviutliem.yaml"
   result.imageFilePath = result.imageDirPath / result.imageFileName
 
 func plugins*(ucImage: UcImage): UcPlugins =
+  ## image.pluginsコマンド
   result.ucImage = ucImage
 
 proc list*(ucPlugins: UcPlugins): seq[Plugin] =
+  ## イメージ内のプラグイン一覧を返す
   let
     imageYamlFile = ImageYamlFile(filePath: ucPlugins.ucImage.imageFilePath)
     imageYaml = imageYamlFile.load()
   return imageYaml.plugins
 
 proc add*(ucPlugins: UcPlugins, plugin: Plugin) =
+  ## プラグインを追加する
   let imageYamlFile = ImageYamlFile(filePath: ucPlugins.ucImage.imageFilePath)
   var imageYaml = imageYamlFile.load()
   imageYaml.plugins.add(plugin)
   discard imageYamlFile.update(imageYaml)
 
 proc delete*(ucPlugins: UcPlugins, pluginId: string) =
+  ## プラグインを削除する
   let imageYamlFile = ImageYamlFile(filePath: ucPlugins.ucImage.imageFilePath)
   var imageYaml = imageYamlFile.load()
 
@@ -126,15 +136,18 @@ proc delete*(ucPlugins: UcPlugins, pluginId: string) =
 
 
 func containers*(uc: ref UtliemCli): UcContainers =
+  ## containersコマンド
   result.utliemCli = uc
   result.containersDirPath = uc.appDirPath / "containers"
 
 proc list*(ucContainers: UcContainers): seq[string] =
+  ## コンテナ一覧を返す
   for fileOrDir in ucContainers.containersDirPath.listDirs:
     result.add(fileOrDir.splitPath.tail)
 
 proc create*(ucContainers: UcContainers, containerName: string,
     imageName: string) =
+  ## コンテナを作成する
   let
     sanitizedContainerName = containerName.sanitizeFileOrDirName
     newContainerDirPath = ucContainers.containersDirPath / sanitizedContainerName
@@ -159,6 +172,7 @@ proc create*(ucContainers: UcContainers, containerName: string,
   discard containerYamlFile.update(containerYaml)
 
 proc delete*(ucContainers: UcContainers, containerName: string) =
+  ## コンテナを削除する
   let
     sanitizedContainerName = containerName.sanitizeFileOrDirName
     targetContainerDirPath = ucContainers.containersDirPath / sanitizedContainerName
@@ -169,6 +183,7 @@ proc delete*(ucContainers: UcContainers, containerName: string) =
 
 
 func container*(uc: ref UtliemCli, containerName: string): UcContainer =
+  ## containerコマンド
   result.utliemCli = uc
   result.tempDirPath = uc.tempDirPath / "container"
   result.containerDirPath = uc.appDirPath / "containers" / containerName
@@ -177,6 +192,7 @@ func container*(uc: ref UtliemCli, containerName: string): UcContainer =
   result.aviutlDirPath = result.containerDirPath / "aviutl"
 
 func plugins*(ucContainer: UcContainer): UcContainerPlugins =
+  ## container.pluginsコマンド
   result.ucContainer = ucContainer
   result.dirPath = ucContainer.aviutlDirPath / "plugins"
   result.tempDirPath = ucContainer.tempDirPath / "plugins"
@@ -184,6 +200,7 @@ func plugins*(ucContainer: UcContainer): UcContainerPlugins =
   result.tempDestDirPath = result.tempDirPath / "dest"
 
 proc download*(ucContainerPlugins: UcContainerPlugins, plugin: Plugin) =
+  ## プラグインをダウンロードする
   # プラグインの配布ページをデフォルトブラウザで開く
   openDefaultBrowser("https://example.com")
   # tempSrcディレクトリをエクスプローラーで開く
@@ -194,6 +211,7 @@ proc download*(ucContainerPlugins: UcContainerPlugins, plugin: Plugin) =
   )
 
 proc install*(ucContainerPlugins: UcContainerPlugins, plugin: Plugin) =
+  ## プラグインをインストールする
   let
     tempSrcDirPath = ucContainerPlugins.tempSrcDirPath
     tempDestDirPath = ucContainerPlugins.tempDestDirPath
