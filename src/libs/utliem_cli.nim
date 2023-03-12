@@ -34,12 +34,15 @@ type UcPlugins = object
 
 type UcContainer = object
   utliemCli: ref UtliemCli
+  tempDirPath: string
   containerDirPath: string
   containerFileName: string
   containerFilePath: string
 
 type UcContainerPlugins = object
   ucContainer: UcContainer
+  tempDirPath: string
+  tempSrcDirPath: string
 
 
 proc newUtliemCli*(appDirPath: string): ref UtliemCli =
@@ -161,21 +164,22 @@ proc delete*(ucContainers: UcContainers, containerName: string) =
 
 proc container*(uc: ref UtliemCli, containerName: string): UcContainer =
   result.utliemCli = uc
+  result.tempDirPath = uc.tempDirPath / "container"
   result.containerDirPath = uc.appDirPath / "containers" / containerName
   result.containerFileName = "container.aviutliem.yaml"
   result.containerFilePath = result.containerDirPath / result.containerFileName
 
 proc plugins*(ucContainer: UcContainer): UcContainerPlugins =
   result.ucContainer = ucContainer
+  result.tempDirPath = ucContainer.tempDirPath / "plugins"
+  result.tempSrcDirPath = result.tempDirPath / "src"
 
 proc download*(ucContainerPlugins: UcContainerPlugins, plugin: Plugin) =
   # プラグインの配布ページをデフォルトブラウザで開く
   openDefaultBrowser("https://example.com")
-  # tempディレクトリをエクスプローラーで開く
+  # tempSrcディレクトリをエクスプローラーで開く
   discard execProcess(
     "explorer",
-    args = [
-      ucContainerPlugins.ucContainer.utliemCli.tempDirPath
-    ],
+    args = [ucContainerPlugins.tempSrcDirPath],
     options = {poUsePath}
   )
