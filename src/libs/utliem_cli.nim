@@ -10,6 +10,9 @@ import
   types,
   yaml_file
 
+import
+  zippy/ziparchives
+
 
 type UtliemCli = object
   appDirPath: string
@@ -38,11 +41,14 @@ type UcContainer = object
   containerDirPath: string
   containerFileName: string
   containerFilePath: string
+  aviutlDirPath: string
 
 type UcContainerPlugins = object
   ucContainer: UcContainer
+  dirPath: string
   tempDirPath: string
   tempSrcDirPath: string
+  tempDestDirPath: string
 
 
 proc newUtliemCli*(appDirPath: string): ref UtliemCli =
@@ -168,11 +174,14 @@ proc container*(uc: ref UtliemCli, containerName: string): UcContainer =
   result.containerDirPath = uc.appDirPath / "containers" / containerName
   result.containerFileName = "container.aviutliem.yaml"
   result.containerFilePath = result.containerDirPath / result.containerFileName
+  result.aviutlDirPath = result.containerDirPath / "aviutl"
 
 proc plugins*(ucContainer: UcContainer): UcContainerPlugins =
   result.ucContainer = ucContainer
+  result.dirPath = ucContainer.aviutlDirPath / "plugins"
   result.tempDirPath = ucContainer.tempDirPath / "plugins"
   result.tempSrcDirPath = result.tempDirPath / "src"
+  result.tempDestDirPath = result.tempDirPath / "dest"
 
 proc download*(ucContainerPlugins: UcContainerPlugins, plugin: Plugin) =
   # プラグインの配布ページをデフォルトブラウザで開く
@@ -183,3 +192,18 @@ proc download*(ucContainerPlugins: UcContainerPlugins, plugin: Plugin) =
     args = [ucContainerPlugins.tempSrcDirPath],
     options = {poUsePath}
   )
+
+proc install*(ucContainerPlugins: UcContainerPlugins, plugin: Plugin) =
+  let
+    tempSrcDirPath = ucContainerPlugins.tempSrcDirPath
+    tempDestDirPath = ucContainerPlugins.tempDestDirPath
+    pluginZipFilePath = listDirectories(tempSrcDirPath)[0]
+    containerPluginsDirPath = ucContainerPlugins.dirPath
+  # プラグインのzipファイルを解凍
+  extractAll(pluginZipFilePath, tempDestDirPath)
+  # コンテナのaviutl/pluginsディレクトリに解凍されたファイルを移動
+  for file in walkDirRec(tempDestDirPath):
+    moveFile(file, containerPluginsDirPath / file.splitPath.tail)
+  # 解凍されたファイルが存在していたディレクトリを削除
+  removeDir(tempDestDirPath, checkDir = true)
+  removeFile pluginZipFilePath
