@@ -5,7 +5,7 @@ import
   types
 
 
-proc sanitizeFileOrDirName*(s: string): string =
+func sanitizeFileOrDirName*(s: string): string =
   result = s
   const replacingTargets = [
     "..", "/", "\\", ":", "*", "?", "\"", "<", ">", "|"

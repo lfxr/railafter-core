@@ -51,7 +51,7 @@ type UcContainerPlugins = object
   tempDestDirPath: string
 
 
-proc newUtliemCli*(appDirPath: string): ref UtliemCli =
+func newUtliemCli*(appDirPath: string): ref UtliemCli =
   result = new UtliemCli
   result.appDirPath = appDirPath
   result.tempDirPath = appDirPath / "temp"
@@ -60,7 +60,7 @@ proc listDirectories(dirPath: string): seq[string] =
   for fileOrDir in walkDir(dirPath):
     result.add(fileOrDir.path)
 
-proc images*(uc: ref UtliemCli): UcImages =
+func images*(uc: ref UtliemCli): UcImages =
   result.utliemCli = uc
   result.imagesDirPath = uc.appDirPath / "images"
 
@@ -90,13 +90,13 @@ proc delete*(ucImages: UcImages, imageName: string) =
     raise newException(ValueError, fmt"Image named '{sanitizedImageName}' does not exist")
 
 
-proc image*(uc: ref UtliemCli, imageName: string): UcImage =
+func image*(uc: ref UtliemCli, imageName: string): UcImage =
   result.utliemCli = uc
   result.imageDirPath = uc.appDirPath / "images" / imageName
   result.imageFileName = "image.aviutliem.yaml"
   result.imageFilePath = result.imageDirPath / result.imageFileName
 
-proc plugins*(ucImage: UcImage): UcPlugins =
+func plugins*(ucImage: UcImage): UcPlugins =
   result.ucImage = ucImage
 
 proc list*(ucPlugins: UcPlugins): seq[Plugin] =
@@ -125,7 +125,7 @@ proc delete*(ucPlugins: UcPlugins, pluginId: string) =
   discard imageYamlFile.update(imageYaml)
 
 
-proc containers*(uc: ref UtliemCli): UcContainers =
+func containers*(uc: ref UtliemCli): UcContainers =
   result.utliemCli = uc
   result.containersDirPath = uc.appDirPath / "containers"
 
@@ -168,7 +168,7 @@ proc delete*(ucContainers: UcContainers, containerName: string) =
     raise newException(ValueError, fmt"Container named '{sanitizedContainerName}' does not exist")
 
 
-proc container*(uc: ref UtliemCli, containerName: string): UcContainer =
+func container*(uc: ref UtliemCli, containerName: string): UcContainer =
   result.utliemCli = uc
   result.tempDirPath = uc.tempDirPath / "container"
   result.containerDirPath = uc.appDirPath / "containers" / containerName
@@ -176,7 +176,7 @@ proc container*(uc: ref UtliemCli, containerName: string): UcContainer =
   result.containerFilePath = result.containerDirPath / result.containerFileName
   result.aviutlDirPath = result.containerDirPath / "aviutl"
 
-proc plugins*(ucContainer: UcContainer): UcContainerPlugins =
+func plugins*(ucContainer: UcContainer): UcContainerPlugins =
   result.ucContainer = ucContainer
   result.dirPath = ucContainer.aviutlDirPath / "plugins"
   result.tempDirPath = ucContainer.tempDirPath / "plugins"
