@@ -91,6 +91,16 @@ utliem container "container_1" plugins dl "hoge:1.2.0"
 utliem container "container_1" plugins install "hoge:1.2.0"
 ```
 
+### packages
+
+```bash
+utliem packages info
+utliem packages ls
+utliem packages list
+utliem packages find "hoge"
+utliem packages update
+```
+
 ## UtliemCliオブジェクト
 
 ```nim
@@ -154,6 +164,7 @@ plugins:
   - id: hoge
     name: ほげ
     description: ほげするプラグイン
+    tags: [foo, bar]
     author: fuga
     website: https://fuga.example.com
     versions:
