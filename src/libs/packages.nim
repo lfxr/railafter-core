@@ -21,3 +21,13 @@ proc newPackages*(filePath: string): ref Packages =
 
 func list*(p: ref Packages): PackagesYaml =
   p.yaml
+
+func find*(p: ref Packages, query: string): seq[PackagesPlugin] =
+  for plugin in p.yaml.plugins:
+    if query in plugin.id or
+      query in plugin.name or
+      query in plugin.description or
+      query in plugin.tags or
+      query in plugin.author or
+      query in plugin.website:
+        result.add(plugin)

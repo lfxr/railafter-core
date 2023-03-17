@@ -164,6 +164,14 @@ proc packages(args: seq[string]) =
       if options.len != expectedNumberOfArgs: invalidNumberOfArgs(
           expectedNumberOfArgs, options.len, commandName)
       echo uc.packages.list
+    of "find":
+      const commandName = "packages find"
+      echo commandName
+      const expectedNumberOfArgs: Natural = 1
+      if options.len != expectedNumberOfArgs: invalidNumberOfArgs(
+          expectedNumberOfArgs, options.len, commandName)
+      let query = options[0]
+      echo uc.packages.find(query)
     else:
       echo "unknown command"
 

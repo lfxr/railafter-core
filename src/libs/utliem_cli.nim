@@ -240,3 +240,7 @@ func packages*(uc: ref UtliemCli): UcPackages =
 func list*(ucPackages: UcPackages): PackagesYaml =
   ## 入手可能なパッケージ一覧を返す
   ucPackages.utliemCli.packages.list
+
+func find*(ucPackages: UcPackages, query: string): seq[PackagesPlugin] =
+  ## 入手可能なパッケージを検索する
+  ucPackages.utliemCli.packages.find(query)
