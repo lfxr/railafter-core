@@ -151,6 +151,30 @@ proc container(args: seq[string]) =
     else:
       echo "unknown command"
 
+proc packages(args: seq[string]) =
+  ## packagesコマンド
+  echo "packages command"
+  let
+    subcommand = args[0]
+    options = args[1..^1]
+  case subcommand:
+    of "ls", "list":
+      const commandName = "packages list"
+      const expectedNumberOfArgs: Natural = 0
+      if options.len != expectedNumberOfArgs: invalidNumberOfArgs(
+          expectedNumberOfArgs, options.len, commandName)
+      echo uc.packages.list
+    of "find":
+      const commandName = "packages find"
+      echo commandName
+      const expectedNumberOfArgs: Natural = 1
+      if options.len != expectedNumberOfArgs: invalidNumberOfArgs(
+          expectedNumberOfArgs, options.len, commandName)
+      let query = options[0]
+      echo uc.packages.find(query)
+    else:
+      echo "unknown command"
+
 
 when isMainModule:
   import cligen
@@ -159,4 +183,5 @@ when isMainModule:
     [main.image],
     [main.containers],
     [main.container],
+    [main.packages]
   )

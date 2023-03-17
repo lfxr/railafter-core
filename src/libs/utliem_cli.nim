@@ -5,6 +5,7 @@ import
   strformat
 
 import
+  packages,
   procs,
   templates,
   types,
@@ -17,6 +18,7 @@ import
 type UtliemCli = object
   appDirPath: string
   tempDirPath: string
+  packages: ref Packages
 
 type UcImages = object
   utliemCli: ref UtliemCli
@@ -50,11 +52,15 @@ type UcContainerPlugins = object
   tempSrcDirPath: string
   tempDestDirPath: string
 
+type UcPackages = object
+  utliemCli: ref UtliemCli
 
-func newUtliemCli*(appDirPath: string): ref UtliemCli =
+
+proc newUtliemCli*(appDirPath: string): ref UtliemCli =
   result = new UtliemCli
   result.appDirPath = appDirPath
   result.tempDirPath = appDirPath / "temp"
+  result.packages = newPackages(appDirPath / "packages.yaml")
 
 proc listDirs(dirPath: string): seq[string] =
   ## 指定されたディレクトリ下のサブディレクトリのパスを返す
@@ -225,3 +231,16 @@ proc install*(ucContainerPlugins: UcContainerPlugins, plugin: Plugin) =
   # 解凍されたファイルが存在していたディレクトリを削除
   removeDir(tempDestDirPath, checkDir = true)
   removeFile pluginZipFilePath
+
+
+func packages*(uc: ref UtliemCli): UcPackages =
+  ## packagesコマンド
+  result.utliemCli = uc
+
+func list*(ucPackages: UcPackages): PackagesYaml =
+  ## 入手可能なパッケージ一覧を返す
+  ucPackages.utliemCli.packages.list
+
+func find*(ucPackages: UcPackages, query: string): seq[PackagesPlugin] =
+  ## 入手可能なパッケージを検索する
+  ucPackages.utliemCli.packages.find(query)

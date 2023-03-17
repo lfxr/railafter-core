@@ -49,3 +49,13 @@ proc load*(containerYamlFile: ContainerYamlFile): ContainerYaml =
 proc update*(containerYamlFile: ContainerYamlFile, containerYaml: ContainerYaml): ContainerYaml =
   ## コンテナファイルを更新する
   discard containerYamlFile.updateY(containerYaml)
+
+
+type PackagesYamlFile* = object of YamlFile
+  discard
+
+proc load*(packagesYamlFile: PackagesYamlFile): PackagesYaml =
+  ## パッケージファイルを読み込んで返す
+  var packagesYaml: PackagesYaml
+  discard packagesYamlFile.load(packagesYaml)
+  return packagesYaml

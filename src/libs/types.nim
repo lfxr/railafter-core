@@ -30,3 +30,21 @@ type ContainerYaml* = object
   base*: Base
   plugins*: ContainerPlugins
   scripts*: ContainerScripts
+
+
+type PackagesPluginVersion* = object
+  version*: string
+  url*: string
+  hash*: string
+
+type PackagesPlugin* = object
+  id*: string
+  name*: string
+  description*: string
+  tags*: seq[string]
+  author*: string
+  website*: string
+  versions*: seq[PackagesPluginVersion]
+
+type PackagesYaml* = object
+  plugins*: seq[PackagesPlugin]
