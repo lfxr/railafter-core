@@ -46,7 +46,8 @@ proc load*(containerYamlFile: ContainerYamlFile): ContainerYaml =
   discard containerYamlFile.load(containerYaml)
   return containerYaml
 
-proc update*(containerYamlFile: ContainerYamlFile, containerYaml: ContainerYaml): ContainerYaml =
+proc update*(containerYamlFile: ContainerYamlFile,
+    containerYaml: ContainerYaml): ContainerYaml =
   ## コンテナファイルを更新する
   discard containerYamlFile.updateY(containerYaml)
 

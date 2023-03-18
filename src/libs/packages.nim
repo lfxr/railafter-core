@@ -30,4 +30,4 @@ func find*(p: ref Packages, query: string): seq[PackagesPlugin] =
       query in plugin.tags or
       query in plugin.author or
       query in plugin.website:
-        result.add(plugin)
+      result.add(plugin)
