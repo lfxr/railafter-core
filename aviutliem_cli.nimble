@@ -24,3 +24,6 @@ task lint, "Lint Nim files":
 
 task htmldocs, "Generate HTML documentation":
   exec "nim doc --project --index:on --outdir:docs/htmldocs src/main.nim"
+
+task typos, "Check for typos":
+  exec "typos"
