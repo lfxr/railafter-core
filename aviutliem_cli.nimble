@@ -16,6 +16,11 @@ requires "nim >= 1.6.10"
 
 # Tasks
 
+task precommit, "Pre-commit runs this":
+  exec "nimble format"
+  exec "nimble lint"
+  exec "nimble typos"
+
 task format, "Format Nim files":
   exec "nim c --hints:off -r tasks/format.nim"
 
