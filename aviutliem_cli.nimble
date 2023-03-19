@@ -21,3 +21,6 @@ task format, "Format Nim files":
 
 task lint, "Lint Nim files":
   exec "nim c --hints:off -r tasks/lint.nim"
+
+task htmldocs, "Generate HTML documentation":
+  exec "nim doc --project --index:on --outdir:docs/htmldocs src/main.nim"
