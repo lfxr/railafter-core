@@ -5,6 +5,7 @@ import
   strformat
 
 import
+  errors,
   packages,
   procs,
   templates,
@@ -222,10 +223,17 @@ proc download*(ucContainerPlugins: UcContainerPlugins, plugin: Plugin) =
 proc install*(ucContainerPlugins: UcContainerPlugins, plugin: Plugin) =
   ## プラグインをインストールする
   let
+    packages = ucContainerPlugins.ucContainer.utliemCli.packages
     tempSrcDirPath = ucContainerPlugins.tempSrcDirPath
     tempDestDirPath = ucContainerPlugins.tempDestDirPath
     pluginZipFilePath = listDirs(tempSrcDirPath)[0]
+    pluginZipSha3_512Hash = sha3_512File(pluginZipFilePath)
+    correctPluginZipSha3_512Hash =
+      packages.plugin(plugin.id).version(plugin.version).sha3_512_hash
     containerPluginsDirPath = ucContainerPlugins.dirPath
+  # ダウンロードしたzipファイルのハッシュ値を検証
+  if pluginZipSha3_512Hash != correctPluginZipSha3_512Hash:
+    invalidZipFileHashValue(pluginZipFilePath.absolutePath)
   # プラグインのzipファイルを解凍
   extractAll(pluginZipFilePath, tempDestDirPath)
   # コンテナのaviutl/pluginsディレクトリに解凍されたファイルを移動
