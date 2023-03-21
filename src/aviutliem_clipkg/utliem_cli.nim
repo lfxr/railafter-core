@@ -55,6 +55,9 @@ type UcContainerPlugins = object
 type UcPackages = object
   utliemCli: ref UtliemCli
 
+type UcPackagesPlugins = object
+  ucPackages: UcPackages
+
 
 proc newUtliemCli*(appDirPath: string): ref UtliemCli =
   result = new UtliemCli
@@ -237,10 +240,15 @@ func packages*(uc: ref UtliemCli): UcPackages =
   ## packagesコマンド
   result.utliemCli = uc
 
-func list*(ucPackages: UcPackages): PackagesYaml =
-  ## 入手可能なパッケージ一覧を返す
-  ucPackages.utliemCli.packages.list
+func plugins*(ucPackages: UcPackages): UcPackagesPlugins =
+  ## packages.pluginsコマンド
+  result.ucPackages = ucPackages
 
-func find*(ucPackages: UcPackages, query: string): seq[PackagesPlugin] =
+func list*(ucPackagesPlugins: UcPackagesPlugins): seq[PackagesPlugin] =
+  ## 入手可能なパッケージ一覧を返す
+  ucPackagesPlugins.ucPackages.utliemCli.packages.plugins.list
+
+func find*(ucPackagesPlugins: UcPackagesPlugins, query: string): seq[
+    PackagesPlugin] =
   ## 入手可能なパッケージを検索する
-  ucPackages.utliemCli.packages.find(query)
+  ucPackagesPlugins.ucPackages.utliemCli.packages.plugins.find(query)
