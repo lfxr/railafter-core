@@ -1,4 +1,5 @@
 import
+  sequtils,
   strutils
 
 import
@@ -12,6 +13,10 @@ type Packages* = object
 
 type Plugins* = object
   packages: ref Packages
+
+type PackagesPlugin* = object
+  packages: ref Packages
+  packagesYamlPlugin: PackagesYamlPlugin
 
 
 proc load(p: ref Packages) =
@@ -39,3 +44,12 @@ func find*(p: Plugins, query: string): seq[PackagesYamlPlugin] =
       query in plugin.author or
       query in plugin.website:
       result.add(plugin)
+
+
+func plugin*(p: ref Packages, id: string): PackagesPlugin =
+  ## packages.pluginコマンド
+  result.packagesYamlPlugin = p.plugins.list.filterIt(it.id == id)[0]
+
+func version*(p: PackagesPlugin, version: string): PackagesYamlPluginVersion =
+  ## 指定したバージョンのプラグインを返す
+  p.packagesYamlPlugin.versions.filterIt(it.version == version)[0]
