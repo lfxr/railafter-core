@@ -5,15 +5,15 @@ import
   strformat
 
 import
+  zippy/ziparchives
+
+import
   errors,
   packages,
   procs,
   templates,
   types,
   yaml_file
-
-import
-  zippy/ziparchives
 
 
 type UtliemCli = object
