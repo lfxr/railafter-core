@@ -20,6 +20,6 @@ func deserializePlugin*(raw: string): Plugin =
     pluginId = raw.split(":")[0]
     pluginVersion = raw.split(":")[1]
   Plugin(
-      id: pluginId,
-      version: pluginVersion
+    id: pluginId,
+    version: pluginVersion
   )
