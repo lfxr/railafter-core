@@ -2,6 +2,9 @@ import
   strutils
 
 import
+  nimcrypto
+
+import
   types
 
 
@@ -20,6 +23,14 @@ func deserializePlugin*(raw: string): Plugin =
     pluginId = raw.split(":")[0]
     pluginVersion = raw.split(":")[1]
   Plugin(
-      id: pluginId,
-      version: pluginVersion
+    id: pluginId,
+    version: pluginVersion
   )
+
+proc sha3_512File*(filePath: string): string =
+  ## ファイルのSHA3-512ハッシュ値を計算して返す
+  let
+    file = open(filePath, fmRead)
+    fileContent = file.readAll()
+  defer: file.close()
+  $sha3_512.digest(fileContent)

@@ -32,19 +32,19 @@ type ContainerYaml* = object
   scripts*: ContainerScripts
 
 
-type PackagesPluginVersion* = object
+type PackagesYamlPluginVersion* = object
   version*: string
   url*: string
-  hash*: string
+  sha3_512_hash*: string
 
-type PackagesPlugin* = object
+type PackagesYamlPlugin* = object
   id*: string
   name*: string
   description*: string
   tags*: seq[string]
   author*: string
   website*: string
-  versions*: seq[PackagesPluginVersion]
+  versions*: seq[PackagesYamlPluginVersion]
 
 type PackagesYaml* = object
-  plugins*: seq[PackagesPlugin]
+  plugins*: seq[PackagesYamlPlugin]

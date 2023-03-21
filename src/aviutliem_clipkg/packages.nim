@@ -1,4 +1,5 @@
 import
+  sequtils,
   strutils
 
 import
@@ -10,6 +11,13 @@ type Packages* = object
   yamlFile: PackagesYamlFile
   yaml: PackagesYaml
 
+type Plugins* = object
+  packages: ref Packages
+
+type PackagesPlugin* = object
+  packages: ref Packages
+  packagesYamlPlugin: PackagesYamlPlugin
+
 
 proc load(p: ref Packages) =
   p.yaml = p.yamlFile.load()
@@ -19,11 +27,16 @@ proc newPackages*(filePath: string): ref Packages =
   result.yamlFile = PackagesYamlFile(filePath: filePath)
   result.load()
 
-func list*(p: ref Packages): PackagesYaml =
-  p.yaml
+func plugins*(p: ref Packages): Plugins =
+  ## packagesコマンド
+  result.packages = p
 
-func find*(p: ref Packages, query: string): seq[PackagesPlugin] =
-  for plugin in p.yaml.plugins:
+func list*(p: Plugins): seq[PackagesYamlPlugin] =
+  ## 入手可能なプラグイン一覧を返す
+  p.packages.yaml.plugins
+
+func find*(p: Plugins, query: string): seq[PackagesYamlPlugin] =
+  for plugin in p.list:
     if query in plugin.id or
       query in plugin.name or
       query in plugin.description or
@@ -31,3 +44,12 @@ func find*(p: ref Packages, query: string): seq[PackagesPlugin] =
       query in plugin.author or
       query in plugin.website:
       result.add(plugin)
+
+
+func plugin*(p: ref Packages, id: string): PackagesPlugin =
+  ## packages.pluginコマンド
+  result.packagesYamlPlugin = p.plugins.list.filterIt(it.id == id)[0]
+
+func version*(p: PackagesPlugin, version: string): PackagesYamlPluginVersion =
+  ## 指定したバージョンのプラグインを返す
+  p.packagesYamlPlugin.versions.filterIt(it.version == version)[0]

@@ -5,14 +5,15 @@ import
   strformat
 
 import
+  zippy/ziparchives
+
+import
+  errors,
   packages,
   procs,
   templates,
   types,
   yaml_file
-
-import
-  zippy/ziparchives
 
 
 type UtliemCli = object
@@ -54,6 +55,9 @@ type UcContainerPlugins = object
 
 type UcPackages = object
   utliemCli: ref UtliemCli
+
+type UcPackagesPlugins = object
+  ucPackages: UcPackages
 
 
 proc newUtliemCli*(appDirPath: string): ref UtliemCli =
@@ -219,10 +223,17 @@ proc download*(ucContainerPlugins: UcContainerPlugins, plugin: Plugin) =
 proc install*(ucContainerPlugins: UcContainerPlugins, plugin: Plugin) =
   ## プラグインをインストールする
   let
+    packages = ucContainerPlugins.ucContainer.utliemCli.packages
     tempSrcDirPath = ucContainerPlugins.tempSrcDirPath
     tempDestDirPath = ucContainerPlugins.tempDestDirPath
     pluginZipFilePath = listDirs(tempSrcDirPath)[0]
+    pluginZipSha3_512Hash = sha3_512File(pluginZipFilePath)
+    correctPluginZipSha3_512Hash =
+      packages.plugin(plugin.id).version(plugin.version).sha3_512_hash
     containerPluginsDirPath = ucContainerPlugins.dirPath
+  # ダウンロードしたzipファイルのハッシュ値を検証
+  if pluginZipSha3_512Hash != correctPluginZipSha3_512Hash:
+    invalidZipFileHashValue(pluginZipFilePath.absolutePath)
   # プラグインのzipファイルを解凍
   extractAll(pluginZipFilePath, tempDestDirPath)
   # コンテナのaviutl/pluginsディレクトリに解凍されたファイルを移動
@@ -237,10 +248,15 @@ func packages*(uc: ref UtliemCli): UcPackages =
   ## packagesコマンド
   result.utliemCli = uc
 
-func list*(ucPackages: UcPackages): PackagesYaml =
-  ## 入手可能なパッケージ一覧を返す
-  ucPackages.utliemCli.packages.list
+func plugins*(ucPackages: UcPackages): UcPackagesPlugins =
+  ## packages.pluginsコマンド
+  result.ucPackages = ucPackages
 
-func find*(ucPackages: UcPackages, query: string): seq[PackagesPlugin] =
+func list*(ucPackagesPlugins: UcPackagesPlugins): seq[PackagesYamlPlugin] =
+  ## 入手可能なパッケージ一覧を返す
+  ucPackagesPlugins.ucPackages.utliemCli.packages.plugins.list
+
+func find*(ucPackagesPlugins: UcPackagesPlugins, query: string): seq[
+    PackagesYamlPlugin] =
   ## 入手可能なパッケージを検索する
-  ucPackages.utliemCli.packages.find(query)
+  ucPackagesPlugins.ucPackages.utliemCli.packages.plugins.find(query)

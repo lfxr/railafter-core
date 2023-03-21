@@ -14,3 +14,11 @@ func invalidNumberOfArgs*(expectedNumberOfArgs, actualNumberOfArgs: Natural,
     (if actualNumberOfArgs > 1: "s" else: "") &
     "."
   )
+
+func invalidZipFileHashValue*(zipFilePath: string) =
+  ## zipファイルのハッシュ値が一致しないエラーを吐く
+  raiseNewException(
+    ValueError,
+    "Invalid zip file hash value: The hash value of zip file '" &
+    zipFilePath & "' does not match the correct one."
+  )
