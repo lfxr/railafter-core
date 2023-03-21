@@ -244,11 +244,11 @@ func plugins*(ucPackages: UcPackages): UcPackagesPlugins =
   ## packages.pluginsコマンド
   result.ucPackages = ucPackages
 
-func list*(ucPackagesPlugins: UcPackagesPlugins): seq[PackagesPlugin] =
+func list*(ucPackagesPlugins: UcPackagesPlugins): seq[PackagesYamlPlugin] =
   ## 入手可能なパッケージ一覧を返す
   ucPackagesPlugins.ucPackages.utliemCli.packages.plugins.list
 
 func find*(ucPackagesPlugins: UcPackagesPlugins, query: string): seq[
-    PackagesPlugin] =
+    PackagesYamlPlugin] =
   ## 入手可能なパッケージを検索する
   ucPackagesPlugins.ucPackages.utliemCli.packages.plugins.find(query)

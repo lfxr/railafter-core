@@ -26,11 +26,11 @@ func plugins*(p: ref Packages): Plugins =
   ## packagesコマンド
   result.packages = p
 
-func list*(p: Plugins): seq[PackagesPlugin] =
+func list*(p: Plugins): seq[PackagesYamlPlugin] =
   ## 入手可能なプラグイン一覧を返す
   p.packages.yaml.plugins
 
-func find*(p: Plugins, query: string): seq[PackagesPlugin] =
+func find*(p: Plugins, query: string): seq[PackagesYamlPlugin] =
   for plugin in p.list:
     if query in plugin.id or
       query in plugin.name or
