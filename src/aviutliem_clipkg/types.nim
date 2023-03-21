@@ -35,7 +35,7 @@ type ContainerYaml* = object
 type PackagesYamlPluginVersion* = object
   version*: string
   url*: string
-  hash*: string
+  sha3_512_hash*: string
 
 type PackagesYamlPlugin* = object
   id*: string
