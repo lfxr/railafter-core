@@ -1,8 +1,38 @@
 # AviUtliem CLI - AviUtl統合環境管理CLIツール
 
+[![GitHub Repo stars](https://img.shields.io/github/stars/lafixier/aviutliem-cli?style=for-the-badge)](https://github.com/lafixier/aviutliem-cli/stargazers)
+[![GitHub](https://img.shields.io/github/license/lafixier/aviutliem-cli?style=for-the-badge)](https://github.com/lafixier/aviutliem-cli/blob/develop/LICENSE)
+![GitHub last commit](https://img.shields.io/github/last-commit/lafixier/aviutliem-cli?style=for-the-badge)
+[![GitHub issues](https://img.shields.io/github/issues/lafixier/aviutliem-cli?style=for-the-badge)](https://github.com/lafixier/aviutliem-cli/issues)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/lafixier/aviutliem-cli?style=for-the-badge)](https://github.com/lafixier/aviutliem-cli/pulls)
+
 ## 概要
 
 AviUtliem CLIは, AviUtlの環境を統合的に管理するCLIツールです。
+
+## 機能
+
+- AviUtl, 拡張編集Pluginのインストール
+- プラグイン, スクリプトのインストール
+- AviUtl自体の環境を複数作成・管理・共有
+
+## インストール
+
+### Nimble
+
+```sh
+nimble install aviutliem-cli
+```
+
+## 使い方
+
+## CLIツール
+
+[docs/cli/README.md](docs/cli/README.md)を参照してください。
+
+## ライブラリ
+
+[docs/api](docs/api/theindex.html)を参照してください。
 
 ## 開発
 
