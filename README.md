@@ -24,6 +24,16 @@ AviUtliem CLIは, AviUtlの環境を統合的に管理するCLIツールです�
 nimble install aviutliem-cli
 ```
 
+## 使い方
+
+## CLIツール
+
+[docs/cli_usage.md](docs/cli/README.md)を参照してください。
+
+## ライブラリ
+
+[docs/api](docs/api/theindex.html)を参照してください。
+
 ## 開発
 
 ### 要件
