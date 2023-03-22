@@ -28,7 +28,7 @@ nimble install aviutliem-cli
 
 ## CLIツール
 
-[docs/cli_usage.md](docs/cli/README.md)を参照してください。
+[docs/cli/README.md](docs/cli/README.md)を参照してください。
 
 ## ライブラリ
 
