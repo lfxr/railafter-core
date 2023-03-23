@@ -2,12 +2,10 @@ import
   strutils
 
 import
-  azanautl_clipkg/errors,
-  azanautl_clipkg/commands/containers,
-  # azanautl_clipkg/commands/images,
-  azanautl_clipkg/procs,
-  azanautl_clipkg/types,
-  azanautl_clipkg/azanautl
+  azanautl_cli/errors,
+  azanautl_cli/procs,
+  azanautl_cli/types,
+  azanautl_cli/azanautl
 
 
 let uc = newUtliemCli("app")
