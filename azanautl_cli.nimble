@@ -6,7 +6,7 @@ description   = "A new awesome nimble package"
 license       = "Proprietary"
 srcDir        = "src"
 installExt    = @["nim"]
-bin           = @["aviutliem_cli"]
+bin           = @["azanautl-cli"]
 
 
 # Dependencies
@@ -32,7 +32,7 @@ task lint, "Lint Nim files":
   exec "nim c --hints:off -r tasks/lint.nim"
 
 task apidocs, "Generate API documentation":
-  exec "nim doc --project --index:on --outdir:docs/api src/aviutliem_clipkg/utliem_cli.nim"
+  exec "nim doc --project --index:on --outdir:docs/api src/azanautl_clipkg/utliem_cli.nim"
 
 task typos, "Check for typos":
   exec "typos"

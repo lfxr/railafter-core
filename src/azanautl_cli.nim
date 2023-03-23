@@ -2,12 +2,12 @@ import
   strutils
 
 import
-  aviutliem_clipkg/errors,
-  aviutliem_clipkg/commands/containers,
-  # aviutliem_clipkg/commands/images,
-  aviutliem_clipkg/procs,
-  aviutliem_clipkg/types,
-  aviutliem_clipkg/utliem_cli
+  azanautl_clipkg/errors,
+  azanautl_clipkg/commands/containers,
+  # azanautl_clipkg/commands/images,
+  azanautl_clipkg/procs,
+  azanautl_clipkg/types,
+  azanautl_clipkg/azanautl
 
 
 let uc = newUtliemCli("app")
@@ -183,9 +183,9 @@ proc packages(args: seq[string]) =
 when isMainModule:
   import cligen
   dispatchMulti(
-    [aviutliem_cli.images],
-    [aviutliem_cli.image],
-    [aviutliem_cli.containers],
-    [aviutliem_cli.container],
-    [aviutliem_cli.packages]
+    [azanautl_cli.images],
+    [azanautl_cli.image],
+    [azanautl_cli.containers],
+    [azanautl_cli.container],
+    [azanautl_cli.packages]
   )
