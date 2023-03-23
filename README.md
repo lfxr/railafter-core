@@ -55,3 +55,16 @@ cd aviutliem-cli
 chmod +x scripts/git_hooks/pre-commit
 git config --local core.hooksPath scripts/git_hooks
 ```
+
+### 依存外部ライブラリ
+
+| ライブラリ名 | 用途                               | リポジトリ                               |
+| :----------- | :--------------------------------- | :--------------------------------------- |
+| cligen       | コマンドライン引数のパース         | <https://github.com/c-blake/cligen>      |
+| nimcrypto    | SHA3-512ハッシュ値の計算           | <https://github.com/cheatfate/nimcrypto> |
+| NimYAML      | YAMLのシリアライズ・デシリアライズ | <https://github.com/flyx/NimYAML>        |
+| Zippy        | zipファイルの解凍                  | <https://github.com/guzba/zippy>         |
+
+## 依存ライブラリのライセンス
+
+[ThirdPartyNotices.md](ThirdPartyNotices.md)を参照してください。
