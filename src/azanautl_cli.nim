@@ -8,7 +8,7 @@ import
   azanautl_cli/azanautl
 
 
-let uc = newUtliemCli("app")
+let auc = newAzanaUtlCli("app")
 
 
 proc images(args: seq[string]) =
@@ -24,7 +24,7 @@ proc images(args: seq[string]) =
       const expectedNumberOfArgs: Natural = 0
       if options.len != expectedNumberOfArgs: invalidNumberOfArgs(
           expectedNumberOfArgs, options.len, commandName)
-      for image in uc.images.list:
+      for image in auc.images.list:
         echo image
     of "create":
       const commandName = "images create"
@@ -33,7 +33,7 @@ proc images(args: seq[string]) =
       if options.len != expectedNumberOfArgs: invalidNumberOfArgs(
           expectedNumberOfArgs, options.len, commandName)
       let imageName = options[0]
-      uc.images.create(imageName)
+      auc.images.create(imageName)
     of "del", "delete":
       const commandName = "images delete"
       echo commandName
@@ -41,7 +41,7 @@ proc images(args: seq[string]) =
       if options.len != expectedNumberOfArgs: invalidNumberOfArgs(
           expectedNumberOfArgs, options.len, commandName)
       let imageName = options[0]
-      uc.images.delete(imageName)
+      auc.images.delete(imageName)
     else:
       echo "unknown command"
 
@@ -61,7 +61,7 @@ proc image(args: seq[string]) =
           const expectedNumberOfArgs: Natural = 0
           if options[1..^1].len != expectedNumberOfArgs: invalidNumberOfArgs(
               expectedNumberOfArgs, options[1..^1].len, commandName)
-          echo uc.image(imageName).plugins.list
+          echo auc.image(imageName).plugins.list
         of "add":
           const commandName = "plugins add"
           echo commandName
@@ -69,7 +69,7 @@ proc image(args: seq[string]) =
           if options[1..^1].len != expectedNumberOfArgs: invalidNumberOfArgs(
               expectedNumberOfArgs, options[1..^1].len, commandName)
           let plugin = deserializePlugin(options[1])
-          uc.image(imageName).plugins.add(plugin)
+          auc.image(imageName).plugins.add(plugin)
         of "del", "delete":
           const commandName = "plugins delete"
           echo commandName
@@ -77,7 +77,7 @@ proc image(args: seq[string]) =
           if options[1..^1].len != expectedNumberOfArgs: invalidNumberOfArgs(
               expectedNumberOfArgs, options[1..^1].len, commandName)
           let pluginId = options[1]
-          uc.image(imageName).plugins.delete(pluginId)
+          auc.image(imageName).plugins.delete(pluginId)
         else:
           echo "unknown command"
     else:
@@ -95,7 +95,7 @@ proc containers(args: seq[string]) =
       const expectedNumberOfArgs: Natural = 0
       if options.len != expectedNumberOfArgs: invalidNumberOfArgs(
           expectedNumberOfArgs, options.len, commandName)
-      for container in uc.containers.list:
+      for container in auc.containers.list:
         echo container
     of "create":
       const commandName = "containers create"
@@ -106,7 +106,7 @@ proc containers(args: seq[string]) =
       let
         containerName = options[0]
         imageName = options[1]
-      uc.containers.create(containerName, imageName)
+      auc.containers.create(containerName, imageName)
     of "del", "delete":
       const commandName = "containers delete"
       echo commandName
@@ -114,7 +114,7 @@ proc containers(args: seq[string]) =
       if options.len != expectedNumberOfArgs: invalidNumberOfArgs(
           expectedNumberOfArgs, options.len, commandName)
       let containerName = options[0]
-      uc.containers.delete(containerName)
+      auc.containers.delete(containerName)
     else:
       echo "unknown command"
 
@@ -135,7 +135,7 @@ proc container(args: seq[string]) =
           if options[1..^1].len != expectedNumberOfArgs: invalidNumberOfArgs(
               expectedNumberOfArgs, options[1..^1].len, commandName)
           let plugin = deserializePlugin(options[1])
-          uc.container(containerName).plugins.download(plugin)
+          auc.container(containerName).plugins.download(plugin)
         of "install":
           const commandName = "container plugins install"
           echo commandName
@@ -143,7 +143,7 @@ proc container(args: seq[string]) =
           if options[1..^1].len != expectedNumberOfArgs: invalidNumberOfArgs(
               expectedNumberOfArgs, options[1..^1].len, commandName)
           let plugin = deserializePlugin(options[1])
-          uc.container(containerName).plugins.install(plugin)
+          auc.container(containerName).plugins.install(plugin)
         else:
           echo "unknown command"
     else:
@@ -163,7 +163,7 @@ proc packages(args: seq[string]) =
           const expectedNumberOfArgs: Natural = 0
           if options.len != expectedNumberOfArgs: invalidNumberOfArgs(
               expectedNumberOfArgs, options.len, commandName)
-          echo uc.packages.plugins.list
+          echo auc.packages.plugins.list
         of "find":
           const commandName = "packages find"
           echo commandName
@@ -171,7 +171,7 @@ proc packages(args: seq[string]) =
           if options.len != expectedNumberOfArgs: invalidNumberOfArgs(
               expectedNumberOfArgs, options.len, commandName)
           let query = options[0]
-          echo uc.packages.plugins.find(query)
+          echo auc.packages.plugins.find(query)
         else:
           echo "unknown command"
     else:

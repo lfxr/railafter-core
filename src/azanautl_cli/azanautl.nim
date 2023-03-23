@@ -16,52 +16,52 @@ import
   yaml_file
 
 
-type UtliemCli = object
+type AzanaUtlCli = object
   appDirPath: string
   tempDirPath: string
   packages: ref Packages
 
-type UcImages = object
-  utliemCli: ref UtliemCli
+type AucImages = object
+  azanaUtlCli: ref AzanaUtlCli
   imagesDirPath: string
 
-type UcImage = object
-  utliemCli: ref UtliemCli
+type AucImage = object
+  azanaUtlCli: ref AzanaUtlCli
   imageDirPath: string
   imageFileName: string
   imageFilePath: string
 
-type UcContainers = object
-  utliemCli: ref UtliemCli
+type AucContainers = object
+  azanaUtlCli: ref AzanaUtlCli
   containersDirPath: string
 
-type UcPlugins = object
-  ucImage: UcImage
+type AucPlugins = object
+  aucImage: AucImage
 
-type UcContainer = object
-  utliemCli: ref UtliemCli
+type AucContainer = object
+  azanaUtlCli: ref AzanaUtlCli
   tempDirPath: string
   containerDirPath: string
   containerFileName: string
   containerFilePath: string
   aviutlDirPath: string
 
-type UcContainerPlugins = object
-  ucContainer: UcContainer
+type AucContainerPlugins = object
+  aucContainer: AucContainer
   dirPath: string
   tempDirPath: string
   tempSrcDirPath: string
   tempDestDirPath: string
 
-type UcPackages = object
-  utliemCli: ref UtliemCli
+type AucPackages = object
+  azanaUtlCli: ref AzanaUtlCli
 
-type UcPackagesPlugins = object
-  ucPackages: UcPackages
+type AucPackagesPlugins = object
+  aucPackages: AucPackages
 
 
-proc newUtliemCli*(appDirPath: string): ref UtliemCli =
-  result = new UtliemCli
+proc newAzanaUtlCli*(appDirPath: string): ref AzanaUtlCli =
+  result = new AzanaUtlCli
   result.appDirPath = appDirPath
   result.tempDirPath = appDirPath / "temp"
   result.packages = newPackages(appDirPath / "packages.yaml")
@@ -71,21 +71,21 @@ proc listDirs(dirPath: string): seq[string] =
   for fileOrDir in walkDir(dirPath):
     result.add(fileOrDir.path)
 
-func images*(uc: ref UtliemCli): UcImages =
+func images*(auc: ref AzanaUtlCli): AucImages =
   ## imagesコマンド
-  result.utliemCli = uc
-  result.imagesDirPath = uc.appDirPath / "images"
+  result.azanaUtlCli = auc
+  result.imagesDirPath = auc.appDirPath / "images"
 
-proc list*(ucImages: UcImages): seq[string] =
+proc list*(aucImages: AucImages): seq[string] =
   ## イメージ一覧を返す
-  for fileOrDir in ucImages.imagesDirPath.listDirs:
+  for fileOrDir in aucImages.imagesDirPath.listDirs:
     result.add(fileOrDir.splitPath.tail)
 
-proc create*(ucImages: UcImages, imageName: string) =
+proc create*(aucImages: AucImages, imageName: string) =
   ## イメージを作成する
   let
     sanitizedImageName = imageName.sanitizeFileOrDirName
-    newImageDirPath = ucImages.imagesDirPath / sanitizedImageName
+    newImageDirPath = aucImages.imagesDirPath / sanitizedImageName
   if dirExists(newImageDirPath):
     raise newException(ValueError, fmt"Image named '{sanitizedImageName}' already exists")
   createDir newImageDirPath
@@ -94,45 +94,45 @@ proc create*(ucImages: UcImages, imageName: string) =
     imageYamlFile = ImageYamlFile(filePath: newImageFilePath)
   discard imageYamlFile.update(yamlTemplates.imageYaml)
 
-proc delete*(ucImages: UcImages, imageName: string) =
+proc delete*(aucImages: AucImages, imageName: string) =
   ## イメージを削除する
   let
     sanitizedImageName = imageName.sanitizeFileOrDirName
-    targetImageDirPath = ucImages.imagesDirPath / sanitizedImageName
+    targetImageDirPath = aucImages.imagesDirPath / sanitizedImageName
   try:
     removeDir(targetImageDirPath, checkDir = true)
   except OSError:
     raise newException(ValueError, fmt"Image named '{sanitizedImageName}' does not exist")
 
 
-func image*(uc: ref UtliemCli, imageName: string): UcImage =
+func image*(auc: ref AzanaUtlCli, imageName: string): AucImage =
   ## imageコマンド
-  result.utliemCli = uc
-  result.imageDirPath = uc.appDirPath / "images" / imageName
+  result.azanaUtlCli = auc
+  result.imageDirPath = auc.appDirPath / "images" / imageName
   result.imageFileName = "image.aviutliem.yaml"
   result.imageFilePath = result.imageDirPath / result.imageFileName
 
-func plugins*(ucImage: UcImage): UcPlugins =
+func plugins*(aucImage: AucImage): AucPlugins =
   ## image.pluginsコマンド
-  result.ucImage = ucImage
+  result.aucImage = aucImage
 
-proc list*(ucPlugins: UcPlugins): seq[Plugin] =
+proc list*(aucPlugins: AucPlugins): seq[Plugin] =
   ## イメージ内のプラグイン一覧を返す
   let
-    imageYamlFile = ImageYamlFile(filePath: ucPlugins.ucImage.imageFilePath)
+    imageYamlFile = ImageYamlFile(filePath: aucPlugins.aucImage.imageFilePath)
     imageYaml = imageYamlFile.load()
   return imageYaml.plugins
 
-proc add*(ucPlugins: UcPlugins, plugin: Plugin) =
+proc add*(aucPlugins: AucPlugins, plugin: Plugin) =
   ## プラグインを追加する
-  let imageYamlFile = ImageYamlFile(filePath: ucPlugins.ucImage.imageFilePath)
+  let imageYamlFile = ImageYamlFile(filePath: aucPlugins.aucImage.imageFilePath)
   var imageYaml = imageYamlFile.load()
   imageYaml.plugins.add(plugin)
   discard imageYamlFile.update(imageYaml)
 
-proc delete*(ucPlugins: UcPlugins, pluginId: string) =
+proc delete*(aucPlugins: AucPlugins, pluginId: string) =
   ## プラグインを削除する
-  let imageYamlFile = ImageYamlFile(filePath: ucPlugins.ucImage.imageFilePath)
+  let imageYamlFile = ImageYamlFile(filePath: aucPlugins.aucImage.imageFilePath)
   var imageYaml = imageYamlFile.load()
 
   var remainedPlugins: seq[Plugin] = @[]
@@ -145,28 +145,28 @@ proc delete*(ucPlugins: UcPlugins, pluginId: string) =
   discard imageYamlFile.update(imageYaml)
 
 
-func containers*(uc: ref UtliemCli): UcContainers =
+func containers*(auc: ref AzanaUtlCli): AucContainers =
   ## containersコマンド
-  result.utliemCli = uc
-  result.containersDirPath = uc.appDirPath / "containers"
+  result.azanaUtlCli = auc
+  result.containersDirPath = auc.appDirPath / "containers"
 
-proc list*(ucContainers: UcContainers): seq[string] =
+proc list*(aucContainers: AucContainers): seq[string] =
   ## コンテナ一覧を返す
-  for fileOrDir in ucContainers.containersDirPath.listDirs:
+  for fileOrDir in aucContainers.containersDirPath.listDirs:
     result.add(fileOrDir.splitPath.tail)
 
-proc create*(ucContainers: UcContainers, containerName: string,
+proc create*(aucContainers: AucContainers, containerName: string,
     imageName: string) =
   ## コンテナを作成する
   let
     sanitizedContainerName = containerName.sanitizeFileOrDirName
-    newContainerDirPath = ucContainers.containersDirPath / sanitizedContainerName
+    newContainerDirPath = aucContainers.containersDirPath / sanitizedContainerName
   if dirExists(newContainerDirPath):
     raise newException(ValueError, fmt"Container named '{sanitizedContainerName}' already exists")
   createDir newContainerDirPath
   # 対象イメージをイメージファイルから読み込む
   let
-    image = ucContainers.utliemCli.image(imageName)
+    image = aucContainers.azanaUtlCli.image(imageName)
     imageYamlFile = ImageYamlFile(filePath: image.imageFilePath)
     imageYaml = imageYamlFile.load()
     containerYaml = ContainerYaml(
@@ -181,56 +181,56 @@ proc create*(ucContainers: UcContainers, containerName: string,
     containerYamlFile = ContainerYamlFile(filePath: newContainerFilePath)
   discard containerYamlFile.update(containerYaml)
 
-proc delete*(ucContainers: UcContainers, containerName: string) =
+proc delete*(aucContainers: AucContainers, containerName: string) =
   ## コンテナを削除する
   let
     sanitizedContainerName = containerName.sanitizeFileOrDirName
-    targetContainerDirPath = ucContainers.containersDirPath / sanitizedContainerName
+    targetContainerDirPath = aucContainers.containersDirPath / sanitizedContainerName
   try:
     removeDir(targetContainerDirPath, checkDir = true)
   except OSError:
     raise newException(ValueError, fmt"Container named '{sanitizedContainerName}' does not exist")
 
 
-func container*(uc: ref UtliemCli, containerName: string): UcContainer =
+func container*(auc: ref AzanaUtlCli, containerName: string): AucContainer =
   ## containerコマンド
-  result.utliemCli = uc
-  result.tempDirPath = uc.tempDirPath / "container"
-  result.containerDirPath = uc.appDirPath / "containers" / containerName
+  result.azanaUtlCli = auc
+  result.tempDirPath = auc.tempDirPath / "container"
+  result.containerDirPath = auc.appDirPath / "containers" / containerName
   result.containerFileName = "container.aviutliem.yaml"
   result.containerFilePath = result.containerDirPath / result.containerFileName
   result.aviutlDirPath = result.containerDirPath / "aviutl"
 
-func plugins*(ucContainer: UcContainer): UcContainerPlugins =
+func plugins*(aucContainer: AucContainer): AucContainerPlugins =
   ## container.pluginsコマンド
-  result.ucContainer = ucContainer
-  result.dirPath = ucContainer.aviutlDirPath / "plugins"
-  result.tempDirPath = ucContainer.tempDirPath / "plugins"
+  result.aucContainer = aucContainer
+  result.dirPath = aucContainer.aviutlDirPath / "plugins"
+  result.tempDirPath = aucContainer.tempDirPath / "plugins"
   result.tempSrcDirPath = result.tempDirPath / "src"
   result.tempDestDirPath = result.tempDirPath / "dest"
 
-proc download*(ucContainerPlugins: UcContainerPlugins, plugin: Plugin) =
+proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin) =
   ## プラグインをダウンロードする
   # プラグインの配布ページをデフォルトブラウザで開く
   openDefaultBrowser("https://example.com")
   # tempSrcディレクトリをエクスプローラーで開く
   discard execProcess(
     "explorer",
-    args = [ucContainerPlugins.tempSrcDirPath],
+    args = [aucContainerPlugins.tempSrcDirPath],
     options = {poUsePath}
   )
 
-proc install*(ucContainerPlugins: UcContainerPlugins, plugin: Plugin) =
+proc install*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin) =
   ## プラグインをインストールする
   let
-    packages = ucContainerPlugins.ucContainer.utliemCli.packages
-    tempSrcDirPath = ucContainerPlugins.tempSrcDirPath
-    tempDestDirPath = ucContainerPlugins.tempDestDirPath
+    packages = aucContainerPlugins.aucContainer.azanaUtlCli.packages
+    tempSrcDirPath = aucContainerPlugins.tempSrcDirPath
+    tempDestDirPath = aucContainerPlugins.tempDestDirPath
     pluginZipFilePath = listDirs(tempSrcDirPath)[0]
     pluginZipSha3_512Hash = sha3_512File(pluginZipFilePath)
     correctPluginZipSha3_512Hash =
       packages.plugin(plugin.id).version(plugin.version).sha3_512_hash
-    containerPluginsDirPath = ucContainerPlugins.dirPath
+    containerPluginsDirPath = aucContainerPlugins.dirPath
   # ダウンロードしたzipファイルのハッシュ値を検証
   if pluginZipSha3_512Hash != correctPluginZipSha3_512Hash:
     invalidZipFileHashValue(pluginZipFilePath.absolutePath)
@@ -244,19 +244,19 @@ proc install*(ucContainerPlugins: UcContainerPlugins, plugin: Plugin) =
   removeFile pluginZipFilePath
 
 
-func packages*(uc: ref UtliemCli): UcPackages =
+func packages*(auc: ref AzanaUtlCli): AucPackages =
   ## packagesコマンド
-  result.utliemCli = uc
+  result.azanaUtlCli = auc
 
-func plugins*(ucPackages: UcPackages): UcPackagesPlugins =
+func plugins*(aucPackages: AucPackages): AucPackagesPlugins =
   ## packages.pluginsコマンド
-  result.ucPackages = ucPackages
+  result.aucPackages = aucPackages
 
-func list*(ucPackagesPlugins: UcPackagesPlugins): seq[PackagesYamlPlugin] =
+func list*(aucPackagesPlugins: AucPackagesPlugins): seq[PackagesYamlPlugin] =
   ## 入手可能なパッケージ一覧を返す
-  ucPackagesPlugins.ucPackages.utliemCli.packages.plugins.list
+  aucPackagesPlugins.aucPackages.azanaUtlCli.packages.plugins.list
 
-func find*(ucPackagesPlugins: UcPackagesPlugins, query: string): seq[
+func find*(aucPackagesPlugins: AucPackagesPlugins, query: string): seq[
     PackagesYamlPlugin] =
   ## 入手可能なパッケージを検索する
-  ucPackagesPlugins.ucPackages.utliemCli.packages.plugins.find(query)
+  aucPackagesPlugins.aucPackages.azanaUtlCli.packages.plugins.find(query)
