@@ -12,6 +12,10 @@ bin           = @["aviutliem_cli"]
 # Dependencies
 
 requires "nim >= 1.6.10"
+requires "cligen >= 1.5.39"
+requires "nimcrypto >= 0.5.4"
+requires "yaml >= 1.0.0"
+requires "zippy >= 0.10.7"
 
 
 # Tasks
