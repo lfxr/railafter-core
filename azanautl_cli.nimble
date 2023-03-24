@@ -6,7 +6,8 @@ description   = "A new awesome nimble package"
 license       = "MIT"
 srcDir        = "src"
 installExt    = @["nim"]
-bin           = @["azanautl-cli"]
+bin           = @["azanautl_cli"]
+namedBin      = {"azanautl_cli": "azanac"}.toTable
 
 
 # Dependencies
