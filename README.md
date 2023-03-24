@@ -68,3 +68,9 @@ git config --local core.hooksPath scripts/git_hooks
 ## 依存ライブラリのライセンス
 
 [ThirdPartyNotices.md](ThirdPartyNotices.md)を参照してください。
+
+## ライセンス
+
+Copyright (c) 2023 Lafixier Furude
+
+[MITライセンス](LICENSE.txt)でライセンスされています。
