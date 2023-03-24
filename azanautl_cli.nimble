@@ -32,7 +32,7 @@ task lint, "Lint Nim files":
   exec "nim c --hints:off -r tasks/lint.nim"
 
 task apidocs, "Generate API documentation":
-  exec "nim doc --project --index:on --outdir:docs/api src/azanautl_cli/azanautl_cli.nim"
+  exec "nim doc --project --index:on --outdir:docs/api src/azanautl_cli/azanautl.nim"
 
 task typos, "Check for typos":
   exec "typos"
