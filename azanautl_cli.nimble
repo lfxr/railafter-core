@@ -3,7 +3,7 @@
 version       = "0.1.0"
 author        = "lafixier"
 description   = "A new awesome nimble package"
-license       = "Proprietary"
+license       = "MIT"
 srcDir        = "src"
 installExt    = @["nim"]
 bin           = @["azanautl-cli"]
