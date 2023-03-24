@@ -13,8 +13,8 @@
 - [インストール](#インストール)
   - [Nimble](#nimble)
 - [使い方](#使い方)
-- [CLIツール](#cliツール)
-- [ライブラリ](#ライブラリ)
+  - [CLIツール](#cliツール)
+  - [ライブラリ](#ライブラリ)
 - [開発](#開発)
   - [要件](#要件)
   - [環境構築](#環境構築)
@@ -42,11 +42,11 @@ nimble install azanautl-cli
 
 ## 使い方
 
-## CLIツール
+### CLIツール
 
 [docs/cli/README.md](docs/cli/README.md)を参照してください。
 
-## ライブラリ
+### ライブラリ
 
 [docs/api](docs/api/theindex.html)を参照してください。
 
