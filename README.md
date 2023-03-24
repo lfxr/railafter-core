@@ -1,14 +1,14 @@
-# AviUtliem CLI - AviUtl統合環境管理CLIツール
+# AzanaUtl CLI - AviUtl統合環境管理CLIツール
 
-[![GitHub Repo stars](https://img.shields.io/github/stars/lafixier/aviutliem-cli?style=for-the-badge)](https://github.com/lafixier/aviutliem-cli/stargazers)
-[![GitHub](https://img.shields.io/github/license/lafixier/aviutliem-cli?style=for-the-badge)](https://github.com/lafixier/aviutliem-cli/blob/develop/LICENSE)
-![GitHub last commit](https://img.shields.io/github/last-commit/lafixier/aviutliem-cli?style=for-the-badge)
-[![GitHub issues](https://img.shields.io/github/issues/lafixier/aviutliem-cli?style=for-the-badge)](https://github.com/lafixier/aviutliem-cli/issues)
-[![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/lafixier/aviutliem-cli?style=for-the-badge)](https://github.com/lafixier/aviutliem-cli/pulls)
+[![GitHub Repo stars](https://img.shields.io/github/stars/lafixier/azanautl-cli?style=for-the-badge)](https://github.com/lafixier/azanautl-cli/stargazers)
+[![GitHub](https://img.shields.io/github/license/lafixier/azanautl-cli?style=for-the-badge)](https://github.com/lafixier/azanautl-cli/blob/develop/LICENSE)
+![GitHub last commit](https://img.shields.io/github/last-commit/lafixier/azanautl-cli?style=for-the-badge)
+[![GitHub issues](https://img.shields.io/github/issues/lafixier/azanautl-cli?style=for-the-badge)](https://github.com/lafixier/azanautl-cli/issues)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/lafixier/azanautl-cli?style=for-the-badge)](https://github.com/lafixier/azanautl-cli/pulls)
 
 ## 概要
 
-AviUtliem CLIは, AviUtlの環境を統合的に管理するCLIツールです。
+AzanaUtl CLIは, AviUtlの環境を統合的に管理するCLIツールです。
 
 ## 機能
 
@@ -21,7 +21,7 @@ AviUtliem CLIは, AviUtlの環境を統合的に管理するCLIツールです�
 ### Nimble
 
 ```sh
-nimble install aviutliem-cli
+nimble install azanautl-cli
 ```
 
 ## 使い方
@@ -46,10 +46,10 @@ nimble install aviutliem-cli
 
 ```sh
 # リポジトリをクローン
-git clone git@github.com:lafixier/aviutliem-cli.git
+git clone git@github.com:lafixier/azanautl-cli.git
 
 # リポジトリに移動
-cd aviutliem-cli
+cd azanautl-cli
 
 # Git Hooksをインストール
 chmod +x scripts/git_hooks/pre-commit
