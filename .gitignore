@@ -1,0 +1,8 @@
+*
+!*/
+!*.*
+!pre-commit
+
+*.exe
+app/
+bin/
