@@ -1,7 +1,7 @@
 # AzanaUtl CLI - AviUtl統合環境管理CLIツール <!-- omit in toc -->
 
 [![GitHub Repo stars](https://img.shields.io/github/stars/lafixier/azanautl-cli?style=for-the-badge)](https://github.com/lafixier/azanautl-cli/stargazers)
-[![GitHub](https://img.shields.io/github/license/lafixier/azanautl-cli?style=for-the-badge)](https://github.com/lafixier/azanautl-cli/blob/develop/LICENSE)
+[![GitHub](https://img.shields.io/github/license/lafixier/azanautl-cli?style=for-the-badge)](LICENSE.txt)
 ![GitHub last commit](https://img.shields.io/github/last-commit/lafixier/azanautl-cli?style=for-the-badge)
 [![GitHub issues](https://img.shields.io/github/issues/lafixier/azanautl-cli?style=for-the-badge)](https://github.com/lafixier/azanautl-cli/issues)
 [![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/lafixier/azanautl-cli?style=for-the-badge)](https://github.com/lafixier/azanautl-cli/pulls)
