@@ -1,12 +1,14 @@
 # Package
 
 version       = "0.1.0"
-author        = "lafixier"
+author        = "Lafixier Furude"
 description   = "A new awesome nimble package"
-license       = "Proprietary"
+license       = "MIT"
 srcDir        = "src"
 installExt    = @["nim"]
-bin           = @["azanautl-cli"]
+bin           = @["azanautl_cli"]
+binDir        = "bin"
+namedBin      = {"azanautl_cli": "azanac"}.toTable
 
 
 # Dependencies
