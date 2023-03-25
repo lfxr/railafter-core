@@ -1,0 +1,22 @@
+newAzanaUtlCli	azanautl.html#newAzanaUtlCli,string	azanautl: newAzanaUtlCli(appDirPath: string): ref AzanaUtlCli	
+images	azanautl.html#images,ref.AzanaUtlCli	azanautl: images(auc: ref AzanaUtlCli): AucImages	
+list	azanautl.html#list,AucImages	azanautl: list(aucImages: AucImages): seq[string]	
+create	azanautl.html#create,AucImages,string	azanautl: create(aucImages: AucImages; imageName: string)	
+delete	azanautl.html#delete,AucImages,string	azanautl: delete(aucImages: AucImages; imageName: string)	
+image	azanautl.html#image,ref.AzanaUtlCli,string	azanautl: image(auc: ref AzanaUtlCli; imageName: string): AucImage	
+plugins	azanautl.html#plugins,AucImage	azanautl: plugins(aucImage: AucImage): AucPlugins	
+list	azanautl.html#list,AucPlugins	azanautl: list(aucPlugins: AucPlugins): seq[Plugin]	
+add	azanautl.html#add,AucPlugins,Plugin	azanautl: add(aucPlugins: AucPlugins; plugin: Plugin)	
+delete	azanautl.html#delete,AucPlugins,string	azanautl: delete(aucPlugins: AucPlugins; pluginId: string)	
+containers	azanautl.html#containers,ref.AzanaUtlCli	azanautl: containers(auc: ref AzanaUtlCli): AucContainers	
+list	azanautl.html#list,AucContainers	azanautl: list(aucContainers: AucContainers): seq[string]	
+create	azanautl.html#create,AucContainers,string,string	azanautl: create(aucContainers: AucContainers; containerName: string; imageName: string)	
+delete	azanautl.html#delete,AucContainers,string	azanautl: delete(aucContainers: AucContainers; containerName: string)	
+container	azanautl.html#container,ref.AzanaUtlCli,string	azanautl: container(auc: ref AzanaUtlCli; containerName: string): AucContainer	
+plugins	azanautl.html#plugins,AucContainer	azanautl: plugins(aucContainer: AucContainer): AucContainerPlugins	
+download	azanautl.html#download,AucContainerPlugins,Plugin	azanautl: download(aucContainerPlugins: AucContainerPlugins; plugin: Plugin)	
+install	azanautl.html#install,AucContainerPlugins,Plugin	azanautl: install(aucContainerPlugins: AucContainerPlugins; plugin: Plugin)	
+packages	azanautl.html#packages,ref.AzanaUtlCli	azanautl: packages(auc: ref AzanaUtlCli): AucPackages	
+plugins	azanautl.html#plugins,AucPackages	azanautl: plugins(aucPackages: AucPackages): AucPackagesPlugins	
+list	azanautl.html#list,AucPackagesPlugins	azanautl: list(aucPackagesPlugins: AucPackagesPlugins): seq[PackagesYamlPlugin]	
+find	azanautl.html#find,AucPackagesPlugins,string	azanautl: find(aucPackagesPlugins: AucPackagesPlugins; query: string): seq[\n    PackagesYamlPlugin]	

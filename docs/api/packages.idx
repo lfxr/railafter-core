@@ -1,0 +1,9 @@
+Packages	packages.html#Packages	packages: Packages	
+Plugins	packages.html#Plugins	packages: Plugins	
+PackagesPlugin	packages.html#PackagesPlugin	packages: PackagesPlugin	
+newPackages	packages.html#newPackages,string	packages: newPackages(filePath: string): ref Packages	
+plugins	packages.html#plugins,ref.Packages	packages: plugins(p: ref Packages): Plugins	
+list	packages.html#list,Plugins	packages: list(p: Plugins): seq[PackagesYamlPlugin]	
+find	packages.html#find,Plugins,string	packages: find(p: Plugins; query: string): seq[PackagesYamlPlugin]	
+plugin	packages.html#plugin,ref.Packages,string	packages: plugin(p: ref Packages; id: string): PackagesPlugin	
+version	packages.html#version,PackagesPlugin,string	packages: version(p: PackagesPlugin; version: string): PackagesYamlPluginVersion	

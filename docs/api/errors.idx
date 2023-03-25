@@ -1,0 +1,2 @@
+invalidNumberOfArgs	errors.html#invalidNumberOfArgs,Natural,Natural,string	errors: invalidNumberOfArgs(expectedNumberOfArgs, actualNumberOfArgs: Natural;\n                    commandName: string)	
+invalidZipFileHashValue	errors.html#invalidZipFileHashValue,string	errors: invalidZipFileHashValue(zipFilePath: string)	
