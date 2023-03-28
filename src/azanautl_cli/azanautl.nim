@@ -56,6 +56,9 @@ type AucContainerPlugins = object
 type AucPackages = object
   azanaUtlCli: ref AzanaUtlCli
 
+type AucPackagesBases = object
+  aucPackages: AucPackages
+
 type AucPackagesPlugins = object
   aucPackages: AucPackages
 
@@ -247,6 +250,14 @@ proc install*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin) =
 func packages*(auc: ref AzanaUtlCli): AucPackages =
   ## packagesコマンド
   result.azanaUtlCli = auc
+
+func bases*(aucPackages: AucPackages): AucPackagesBases =
+  ## packages.baseコマンド
+  result.aucPackages = aucPackages
+
+func list*(aucPackagesBases: AucPackagesBases): seq[PackagesYamlBasis] =
+  ## 入手可能な基盤一覧を返す
+  aucPackagesBases.aucPackages.azanaUtlCli.packages.bases.list
 
 func plugins*(aucPackages: AucPackages): AucPackagesPlugins =
   ## packages.pluginsコマンド

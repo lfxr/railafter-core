@@ -46,5 +46,18 @@ type PackagesYamlPlugin* = object
   website*: string
   versions*: seq[PackagesYamlPluginVersion]
 
+type PackagesYamlBasisVersion* = object
+  version*: string
+  url*: string
+  sha3_512_hash*: string
+
+type PackagesYamlBasis* = object
+  id*: string
+  name*: string
+  description*: string
+  website*: string
+  versions*: seq[PackagesYamlBasisVersion]
+
 type PackagesYaml* = object
+  bases*: seq[PackagesYamlBasis]
   plugins*: seq[PackagesYamlPlugin]
