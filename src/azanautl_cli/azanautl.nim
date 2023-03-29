@@ -53,6 +53,13 @@ type AucContainerPlugins = object
   tempSrcDirPath: string
   tempDestDirPath: string
 
+type AucContainerBases = object
+  aucContainer: AucContainer
+  dirPath: string
+  tempDirPath: string
+  tempSrcDirPath: string
+  tempDestDirPath: string
+
 type AucPackages = object
   azanaUtlCli: ref AzanaUtlCli
 
@@ -245,6 +252,14 @@ proc install*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin) =
   # 解凍されたファイルが存在していたディレクトリを削除
   removeDir(tempDestDirPath, checkDir = true)
   removeFile pluginZipFilePath
+
+func bases*(aucContainer: AucContainer): AucContainerBases =
+  ## container.baseコマンド
+  result.aucContainer = aucContainer
+  result.dirPath = aucContainer.aviutlDirPath
+  result.tempDirPath = aucContainer.tempDirPath / "base"
+  result.tempSrcDirPath = result.tempDirPath / "src"
+  result.tempDestDirPath = result.tempDirPath / "dest"
 
 
 func packages*(auc: ref AzanaUtlCli): AucPackages =
