@@ -21,6 +21,10 @@ type PackagesPlugin* = object
 type PackagesBases* = object
   packages: ref Packages
 
+type PackagesBasis* = object
+  packages: ref Packages
+  packagesYamlBasis: PackagesYamlBasis
+
 
 proc load(p: ref Packages) =
   p.yaml = p.yamlFile.load()
@@ -65,3 +69,13 @@ func bases*(p: ref Packages): PackagesBases =
 func list*(p: PackagesBases): seq[PackagesYamlBasis] =
   ## ベースパッケージ一覧を返す
   p.packages.yaml.bases
+
+
+func basis*(p: ref Packages, id: string): PackagesBasis =
+  ## packages.basisコマンド
+  result.packages = p
+  result.packagesYamlBasis = p.bases.list.filterIt(it.id == id)[0]
+
+func version*(p: PackagesBasis, version: string): PackagesYamlBasisVersion =
+  ## 指定したバージョンのベースパッケージを返す
+  p.packagesYamlBasis.versions.filterIt(it.version == version)[0]
