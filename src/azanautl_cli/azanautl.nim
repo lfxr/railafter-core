@@ -181,7 +181,7 @@ proc create*(aucContainers: AucContainers, containerName: string,
     imageYaml = imageYamlFile.load()
     containerYaml = ContainerYaml(
       container_name: containerName,
-      base: imageYaml.base,
+      bases: imageYaml.bases,
       plugins: ContainerPlugins(enabled: imageYaml.plugins),
       scripts: ContainerScripts(enabled: imageYaml.scripts),
     )

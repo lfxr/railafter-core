@@ -1,4 +1,4 @@
-type Base* = object
+type Bases* = object
   aviutl_version*: string
   exedit_version*: string
 
@@ -12,7 +12,7 @@ type Script = object
 
 type ImageYaml* = object
   image_name*: string
-  base*: Base
+  bases*: Bases
   plugins*: seq[Plugin]
   scripts*: seq[Script]
 
@@ -27,7 +27,7 @@ type ContainerScripts* = object
 
 type ContainerYaml* = object
   container_name*: string
-  base*: Base
+  bases*: Bases
   plugins*: ContainerPlugins
   scripts*: ContainerScripts
 
