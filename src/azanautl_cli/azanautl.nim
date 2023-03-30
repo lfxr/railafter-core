@@ -53,8 +53,18 @@ type AucContainerPlugins = object
   tempSrcDirPath: string
   tempDestDirPath: string
 
+type AucContainerBases = object
+  aucContainer: AucContainer
+  dirPath: string
+  tempDirPath: string
+  tempSrcDirPath: string
+  tempDestDirPath: string
+
 type AucPackages = object
   azanaUtlCli: ref AzanaUtlCli
+
+type AucPackagesBases = object
+  aucPackages: AucPackages
 
 type AucPackagesPlugins = object
   aucPackages: AucPackages
@@ -171,7 +181,7 @@ proc create*(aucContainers: AucContainers, containerName: string,
     imageYaml = imageYamlFile.load()
     containerYaml = ContainerYaml(
       container_name: containerName,
-      base: imageYaml.base,
+      bases: imageYaml.bases,
       plugins: ContainerPlugins(enabled: imageYaml.plugins),
       scripts: ContainerScripts(enabled: imageYaml.scripts),
     )
@@ -243,10 +253,26 @@ proc install*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin) =
   removeDir(tempDestDirPath, checkDir = true)
   removeFile pluginZipFilePath
 
+func bases*(aucContainer: AucContainer): AucContainerBases =
+  ## container.baseコマンド
+  result.aucContainer = aucContainer
+  result.dirPath = aucContainer.aviutlDirPath
+  result.tempDirPath = aucContainer.tempDirPath / "base"
+  result.tempSrcDirPath = result.tempDirPath / "src"
+  result.tempDestDirPath = result.tempDirPath / "dest"
+
 
 func packages*(auc: ref AzanaUtlCli): AucPackages =
   ## packagesコマンド
   result.azanaUtlCli = auc
+
+func bases*(aucPackages: AucPackages): AucPackagesBases =
+  ## packages.baseコマンド
+  result.aucPackages = aucPackages
+
+func list*(aucPackagesBases: AucPackagesBases): seq[PackagesYamlBasis] =
+  ## 入手可能な基盤一覧を返す
+  aucPackagesBases.aucPackages.azanaUtlCli.packages.bases.list
 
 func plugins*(aucPackages: AucPackages): AucPackagesPlugins =
   ## packages.pluginsコマンド

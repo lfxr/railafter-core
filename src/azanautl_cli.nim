@@ -156,6 +156,18 @@ proc packages(args: seq[string]) =
     subcommand = args[0]
     options = args[1..^1]
   case subcommand:
+    of "bases":
+      case options[0]:
+        of "ls", "list":
+          const commandName = "packages bases list"
+          echo commandName
+          const expectedNumberOfArgs: Natural = 0
+          if options[1..^1].len != expectedNumberOfArgs: invalidNumberOfArgs(
+              expectedNumberOfArgs, options[1..^1].len, commandName)
+          for basis in auc.packages.bases.list:
+            echo basis
+        else:
+          echo "unknown command"
     of "plugins":
       case options[0]
         of "ls", "list":

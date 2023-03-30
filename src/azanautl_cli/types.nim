@@ -1,4 +1,4 @@
-type Base* = object
+type Bases* = object
   aviutl_version*: string
   exedit_version*: string
 
@@ -12,7 +12,7 @@ type Script = object
 
 type ImageYaml* = object
   image_name*: string
-  base*: Base
+  bases*: Bases
   plugins*: seq[Plugin]
   scripts*: seq[Script]
 
@@ -27,7 +27,7 @@ type ContainerScripts* = object
 
 type ContainerYaml* = object
   container_name*: string
-  base*: Base
+  bases*: Bases
   plugins*: ContainerPlugins
   scripts*: ContainerScripts
 
@@ -46,5 +46,18 @@ type PackagesYamlPlugin* = object
   website*: string
   versions*: seq[PackagesYamlPluginVersion]
 
+type PackagesYamlBasisVersion* = object
+  version*: string
+  url*: string
+  sha3_512_hash*: string
+
+type PackagesYamlBasis* = object
+  id*: string
+  name*: string
+  description*: string
+  website*: string
+  versions*: seq[PackagesYamlBasisVersion]
+
 type PackagesYaml* = object
+  bases*: seq[PackagesYamlBasis]
   plugins*: seq[PackagesYamlPlugin]
