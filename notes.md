@@ -173,7 +173,7 @@ plugins:
         hash: abcdef123456abcdef123456abcdef123456abcdef123456abcdef123456
       - version: 1.3.1
         url: https://fuga.example.com/hoge-1.3.1.zip
-        hash: 123456abcdef123456abcdef123456abcdef123456abcdef123456abcdef
+        sha3_512_hash: 123456abcdef123456abcdef123456abcdef123456abcdef123456abcdef
 ```
 
 ## イメージ/コンテナとは?
