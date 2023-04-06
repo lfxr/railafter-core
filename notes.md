@@ -5,11 +5,11 @@
 ### AviUtliem
 
 ```text
-~/.aviutliem/
-├── aviutliem.exe         # AviUtliemの実行ファイル
-├── aviutliem_updater.exe # アップデータ
+~/.azanautl/
+├── azanautl.exe         # AviUtliemの実行ファイル
+├── azanautl_updater.exe # アップデータ
 ├── settings.json         # 設定ファイル
-├── aviutliem_cli/        # AviUtliem CLI
+├── azanautl_cli/        # AviUtliem CLI
 │   └── ...
 └── ...
 ```
@@ -17,9 +17,9 @@
 ### AviUtliem CLI
 
 ```text
-aviutliem_cli/
-├── aviutliem_cli.exe         # AviUtliem CLIの実行ファイル
-├── aviutliem_cli_updater.exe # アップデータ
+azanautl_cli/
+├── azanautl_cli.exe         # AviUtliem CLIの実行ファイル
+├── azanautl_cli_updater.exe # アップデータ
 ├── packages.yaml
 ├── temp/                     # プラグイン・スクリプトのインストール時に使用
 ├── cache/                    # ダウンロードしたファイルのキャッシュ
@@ -40,7 +40,7 @@ aviutliem_cli/
 
 ```text
 awesome_image_1/
-├── image.aviutliem.json    # 設定ファイル
+├── image.azanautl.json    # 設定ファイル
 └── ...
 ```
 
@@ -48,7 +48,7 @@ awesome_image_1/
 
 ```text
 awesome_container_1/
-├── container.aviutliem.json # 設定ファイル
+├── container.azanautl.json # 設定ファイル
 ├── aviutl/
 │   ├── aviutl.exe           # AviUtlの実行ファイル
 │   ├── plugins/             # プラグイン
@@ -58,47 +58,47 @@ awesome_container_1/
 ## コマンド
 
 ```bash
-utliem -h
+azanac -h
 ```
 
 ### image
 
 ```bash
-utliem images
-utliem images ls
-utliem images list
-utliem images create "image_1"
-utliem images import "image_1.image.aviutliem.json"
-utliem images export "image_1" --path "image_1.image.aviutliem.json"
-utliem images delete "image_1"
-utliem image "image_1" base
-utliem image "image_1" plugins add "hoge:1.2.0"
-utliem image "image_1" plugins ls
-utliem image "image_1" plugins list
-utliem image "image_1" plugins delete "hoge"
+azanac images
+azanac images ls
+azanac images list
+azanac images create "image_1"
+azanac images import "image_1.image.azanautl.json"
+azanac images export "image_1" --path "image_1.image.azanautl.json"
+azanac images delete "image_1"
+azanac image "image_1" base
+azanac image "image_1" plugins add "hoge:1.2.0"
+azanac image "image_1" plugins ls
+azanac image "image_1" plugins list
+azanac image "image_1" plugins delete "hoge"
 ```
 
 ### container
 
 ```bash
-utliem container
-utliem containers ls
-utliem containers list
-utliem containers create "container_1" "image_1"
-utliem containers delete "container_1"
-utliem container "container_1" plugins download "hoge:1.2.0"
-utliem container "container_1" plugins dl "hoge:1.2.0"
-utliem container "container_1" plugins install "hoge:1.2.0"
+azanac container
+azanac containers ls
+azanac containers list
+azanac containers create "container_1" "image_1"
+azanac containers delete "container_1"
+azanac container "container_1" plugins download "hoge:1.2.0"
+azanac container "container_1" plugins dl "hoge:1.2.0"
+azanac container "container_1" plugins install "hoge:1.2.0"
 ```
 
 ### packages
 
 ```bash
-utliem packages info
-utliem packages ls
-utliem packages list
-utliem packages find "hoge"
-utliem packages update
+azanac packages info
+azanac packages ls
+azanac packages list
+azanac packages find "hoge"
+azanac packages update
 ```
 
 ## UtliemCliオブジェクト
@@ -109,7 +109,7 @@ echo uc.image.list()
 uc.image.create("image_1")
 ```
 
-## イメージファイル (image.aviutliem.yaml) の中身の例
+## イメージファイル (image.azanautl.yaml) の中身の例
 
 ```yaml
 image_name: image_1
@@ -131,7 +131,7 @@ scripts:
     version: 6.12.9
 ```
 
-## コンテナファイル (container.aviutliem.yaml) の中身の例
+## コンテナファイル (container.azanautl.yaml) の中身の例
 
 ```yaml
 container_name: container_1
@@ -265,9 +265,9 @@ plugins:
 ファイルのダウンロードは行われない。
 
 - 追加
-  - 対象プラグイン情報を`image.aviutliem.yaml`に追加
+  - 対象プラグイン情報を`image.azanautl.yaml`に追加
 - 削除
-  - 対象プラグイン情報を`image.aviutliem.yaml`から削除
+  - 対象プラグイン情報を`image.azanautl.yaml`から削除
 
 ## コンテナの機能
 
@@ -277,22 +277,22 @@ plugins:
 
 - インストール
   - 対象プラグインのファイルをダウンロードして`plugins`ディレクトリに移動
-  - 対象プラグイン情報を`container.aviutliem.yaml`の`enabled`フィールドに追加
+  - 対象プラグイン情報を`container.azanautl.yaml`の`enabled`フィールドに追加
 - アンインストール
   - `plugins`ディレクトリ内のファイルを削除
-  - 対象プラグイン情報を`container.aviutliem.yaml`の`enabled`フィールドまたは`disabled`フィールドから削除
+  - 対象プラグイン情報を`container.azanautl.yaml`の`enabled`フィールドまたは`disabled`フィールドから削除
 - 無効にする
   - remove, 対象プラグインを一時的に`trash`ディレクトリに移動
-  - 対象プラグイン情報を`container.aviutliem.yaml`の`enabled`フィールドから`disabled`フィールドに移動
+  - 対象プラグイン情報を`container.azanautl.yaml`の`enabled`フィールドから`disabled`フィールドに移動
 - 有効にする
   - un-remove, 対象プラグインを`trash`ディレクトリから復活
-  - 対象プラグイン情報を`container.aviutliem.yaml`の`disabled`フィールドから`enabled`フィールドに移動
+  - 対象プラグイン情報を`container.azanautl.yaml`の`disabled`フィールドから`enabled`フィールドに移動
 
 ## プラグイン・スクリプトのダウンロード・インストール
 
 ### コマンド_
 
-`$ utliem container "container_1" plugins get "hoge:1.2.0"`
+`$ azanac container "container_1" plugins get "hoge:1.2.0"`
 
 ### 処理内容
 
