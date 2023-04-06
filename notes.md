@@ -163,17 +163,69 @@ scripts:
 plugins:
   - id: hoge
     name: ほげ
-    description: ほげするプラグイン
-    tags: [foo, bar]
-    author: fuga
-    website: https://fuga.example.com
+    type: language
+    description: AviUtlをほげする
+    tags: [fuga]
+    author: piyo
+    website: https://piyo.example.com/
+    tracked_files_and_dirs:
+      - conforming_versions: [2.0, 2.1]
+        body:
+          - path: hoge.aul
+            type: file
+            is_protected: false
+            move_to: plugins
+          - path: hoge.toml
+            type: file
+            is_protected: true
+            move_to: plugins
+      - conforming_versions: [1.0, 1.1]
+        body:
+          - path: hoge.aul
+            type: file
+            is_protected: false
+            move_to: plugins
+          - path: hoge.xml
+            type: file
+            is_protected: true
+            move_to: plugins
+    jobs:
+      - conforming_versions: [1.0, 1.1, 2.0, 2.1]
+        body:
+          - id: after_installation
+            tasks:
+              - command: remove
+                working_dir: aviutl
+                paths: [hoge.exe, hoge.exe.manifest]
+              - command: run
+                working_dir: downloaded_plugin
+                path: create_hoge.exe
+          - id: after_uninstallation
+            tasks:
+              - command: remove
+                working_dir: aviutl
+                paths: [hoge.exe, hoge.exe.manifest]
     versions:
-      - version: 1.2.0
-        url: https://fuga.example.com/hoge-1.2.0.zip
-        hash: abcdef123456abcdef123456abcdef123456abcdef123456abcdef123456
-      - version: 1.3.1
-        url: https://fuga.example.com/hoge-1.3.1.zip
-        sha3_512_hash: 123456abcdef123456abcdef123456abcdef123456abcdef123456abcdef
+      - version: 2.1
+        sha3_512_hash: kaoeih
+        sha3_512_hashes:
+          hoge.aul: zmlces
+          hoge.toml: binmmo
+      - version: 2.0
+        sha3_512_hash: qlksdf
+        sha3_512_hashes:
+          hoge.aul: pawasv
+          hoge.toml: binmmo
+      - version: 1.1
+        sha3_512_hash: waergn
+        sha3_512_hashes:
+          hoge.aul: oiegkl
+          hoge.xml: eqrtgf
+      - version: 1.0
+        sha3_512_hash: hgerwo
+        sha3_512_hashes:
+          hoge.aul: rwgpoj
+          hoge.xml: eqrtgf
 ```
 
 ## イメージ/コンテナとは?
