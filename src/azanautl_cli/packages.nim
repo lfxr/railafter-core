@@ -61,6 +61,12 @@ func version*(p: PackagesPlugin, version: string): PackagesYamlPluginVersion =
   ## 指定したバージョンのプラグインを返す
   p.packagesYamlPlugin.versions.filterIt(it.version == version)[0]
 
+func trackedFilesAndDirs*(p: PackagesPlugin, version: string): seq[
+    TrackedFilesAndDirs] =
+  for trackedFilesAndDirs in p.packagesYamlPlugin.tracked_files_and_dirs:
+    if version in trackedFilesAndDirs.conforming_versions:
+      return trackedFilesAndDirs.body
+
 
 func bases*(p: ref Packages): PackagesBases =
   ## packages.basesコマンド

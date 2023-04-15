@@ -190,8 +190,8 @@ proc create*(aucContainers: AucContainers, containerName: string,
           is_installed: false,
           is_enabled: false,
           previously_installed_versions: @[]
-        )
-      ),
+      )
+    ),
     )
   # コンテナファイルを作成
   let
@@ -241,7 +241,7 @@ proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin) =
     options = {poUsePath}
   )
 
-proc install*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin) =
+proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin) =
   ## プラグインをインストールする
   let
     packages = aucContainerPlugins.aucContainer.azanaUtlCli.packages
@@ -249,17 +249,35 @@ proc install*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin) =
     tempDestDirPath = aucContainerPlugins.tempDestDirPath
     pluginZipFilePath = listDirs(tempSrcDirPath)[0]
     pluginZipSha3_512Hash = sha3_512File(pluginZipFilePath)
+    packagePlugin = packages.plugin(targetPlugin.id)
     correctPluginZipSha3_512Hash =
-      packages.plugin(plugin.id).version(plugin.version).sha3_512_hash
+      packagePlugin.version(targetPlugin.version).sha3_512_hash
     containerPluginsDirPath = aucContainerPlugins.dirPath
+    trackedFilesAndDirs =
+      packagePlugin.trackedFilesAndDirs(targetPlugin.version)
   # ダウンロードしたzipファイルのハッシュ値を検証
   if pluginZipSha3_512Hash != correctPluginZipSha3_512Hash:
     invalidZipFileHashValue(pluginZipFilePath.absolutePath)
   # プラグインのzipファイルを解凍
   extractAll(pluginZipFilePath, tempDestDirPath)
-  # コンテナのaviutl/pluginsディレクトリに解凍されたファイルを移動
-  for file in walkDirRec(tempDestDirPath):
-    moveFile(file, containerPluginsDirPath / file.splitPath.tail)
+  # 解凍されたファイルをコンテナの指定されたディレクトリに移動
+  for trackedFileOrDir in trackedFilesAndDirs:
+    let
+      trackedFileOrDirPath = trackedFileOrDir.path
+      srcFilePath = tempDestDirPath / trackedFileOrDirPath
+      destFileOrDirPath =
+        (
+          case trackedFileOrDir.move_to:
+          of MoveTo.Root: aucContainerPlugins.aucContainer.aviutlDirPath
+          of MoveTo.Plugins: containerPluginsDirPath
+        ) / trackedFileOrDirPath
+    case trackedFileOrDir.fd_type:
+    of FdType.File:
+      if trackedFileOrDir.is_protected and destFileOrDirPath.fileExists: break
+      moveFile(srcFilePath, destFileOrDirPath)
+    of FdType.Dir:
+      if trackedFileOrDir.is_protected and destFileOrDirPath.dirExists: break
+      moveDir(srcFilePath, destFileOrDirPath)
   # 解凍されたファイルが存在していたディレクトリを削除
   removeDir(tempDestDirPath, checkDir = true)
   removeFile pluginZipFilePath
