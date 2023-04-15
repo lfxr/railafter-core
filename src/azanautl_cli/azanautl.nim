@@ -230,7 +230,10 @@ func plugins*(aucContainer: AucContainer): AucContainerPlugins =
 proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin) =
   ## プラグインをダウンロードする
   # プラグインの配布ページをデフォルトブラウザで開く
-  openDefaultBrowser("https://example.com")
+  let
+    packages = aucContainerPlugins.aucContainer.azanaUtlCli.packages
+    url = packages.plugin(plugin.id).version(plugin.version).url
+  openDefaultBrowser(url)
   # tempSrcディレクトリをエクスプローラーで開く
   discard execProcess(
     "explorer",
