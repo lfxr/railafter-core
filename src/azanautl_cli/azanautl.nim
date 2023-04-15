@@ -2,6 +2,7 @@ import
   browsers,
   os,
   osproc,
+  sequtils,
   strformat
 
 import
@@ -182,8 +183,15 @@ proc create*(aucContainers: AucContainers, containerName: string,
     containerYaml = ContainerYaml(
       container_name: containerName,
       bases: imageYaml.bases,
-      plugins: ContainerPlugins(enabled: imageYaml.plugins),
-      scripts: ContainerScripts(enabled: imageYaml.scripts),
+      plugins: imageYaml.plugins.mapIt(
+        ContainerPlugin(
+          id: it.id,
+          version: it.version,
+          is_installed: false,
+          is_enabled: false,
+          previously_installed_versions: @[]
+        )
+      ),
     )
   # コンテナファイルを作成
   let

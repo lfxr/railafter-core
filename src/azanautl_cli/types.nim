@@ -22,19 +22,16 @@ type ImageYaml* = object
   scripts*: seq[Script]
 
 
-type ContainerPlugins* = object
-  enabled*: seq[Plugin]
-  disabled*: seq[Plugin]
-
-type ContainerScripts* = object
-  enabled*: seq[Script]
-  disabled*: seq[Script]
+type ContainerPlugin* = object
+  id*: string
+  version*: string
+  is_installed*, is_enabled*: bool
+  previously_installed_versions*: seq[string]
 
 type ContainerYaml* = object
   container_name*: string
   bases*: Bases
-  plugins*: ContainerPlugins
-  scripts*: ContainerScripts
+  plugins*: seq[ContainerPlugin]
 
 
 type
