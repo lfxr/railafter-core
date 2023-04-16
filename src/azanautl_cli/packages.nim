@@ -12,7 +12,7 @@ type Packages* = object
   yamlFile: PackagesYamlFile
   yaml: PackagesYaml
 
-type Plugins* = object
+type PackagesPlugins* = object
   packages: ref Packages
 
 type PackagesPlugin* = object
@@ -35,15 +35,15 @@ proc newPackages*(filePath: string): ref Packages =
   result.yamlFile = PackagesYamlFile(filePath: filePath)
   result.load()
 
-func plugins*(p: ref Packages): Plugins =
+func plugins*(p: ref Packages): PackagesPlugins =
   ## packagesコマンド
   result.packages = p
 
-func list*(p: Plugins): seq[PackagesYamlPlugin] =
+func list*(p: PackagesPlugins): seq[PackagesYamlPlugin] =
   ## 入手可能なプラグイン一覧を返す
   p.packages.yaml.plugins
 
-func find*(p: Plugins, query: string): seq[PackagesYamlPlugin] =
+func find*(p: PackagesPlugins, query: string): seq[PackagesYamlPlugin] =
   for plugin in p.list:
     if query in plugin.id or
       query in plugin.name or
