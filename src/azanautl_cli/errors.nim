@@ -1,3 +1,7 @@
+import
+  strutils
+
+
 func raiseNewException(exception: typedesc, message: string) =
   ## 例外を吐く
   raise newException(exception, message)
@@ -21,4 +25,24 @@ func invalidZipFileHashValue*(zipFilePath: string) =
     ValueError,
     "Invalid zip file hash value: The hash value of zip file '" &
     zipFilePath & "' does not match the correct one."
+  )
+
+func dependencyNotSatisfied*(dependencyName: string, expectedVersion,
+    actualVersion: string) =
+  ## 依存関係が満たされていないエラーを吐く
+  raiseNewException(
+    ValueError,
+    "Dependency not satisfied: Dependency '" &
+    dependencyName & "' is not satisfied. Expected version is '" &
+    expectedVersion & "', but actual version is '" & actualVersion & "'."
+  )
+
+func dependencyNotSatisfied*(dependencyName: string, expectedVersions: seq[
+    string], actualVersion: string) =
+  ## 依存関係が満たされていないエラーを吐く
+  raiseNewException(
+    ValueError,
+    "Dependency not satisfied: Dependency '" &
+    dependencyName & "' is not satisfied. Expected version is '" &
+    expectedVersions.join(", ") & "', but actual version is '" & actualVersion & "'."
   )

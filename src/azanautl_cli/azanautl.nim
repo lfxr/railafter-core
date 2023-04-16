@@ -1,7 +1,9 @@
 import
   browsers,
+  options,
   os,
   osproc,
+  sequtils,
   strformat
 
 import
@@ -182,8 +184,15 @@ proc create*(aucContainers: AucContainers, containerName: string,
     containerYaml = ContainerYaml(
       container_name: containerName,
       bases: imageYaml.bases,
-      plugins: ContainerPlugins(enabled: imageYaml.plugins),
-      scripts: ContainerScripts(enabled: imageYaml.scripts),
+      plugins: imageYaml.plugins.mapIt(
+        ContainerPlugin(
+          id: it.id,
+          version: it.version,
+          is_installed: false,
+          is_enabled: false,
+          previously_installed_versions: @[]
+      )
+    ),
     )
   # コンテナファイルを作成
   let
@@ -211,6 +220,23 @@ func container*(auc: ref AzanaUtlCli, containerName: string): AucContainer =
   result.containerFilePath = result.containerDirPath / result.containerFileName
   result.aviutlDirPath = result.containerDirPath / "aviutl"
 
+func bases*(aucContainer: AucContainer): AucContainerBases =
+  ## container.baseコマンド
+  result.aucContainer = aucContainer
+  result.dirPath = aucContainer.aviutlDirPath
+  result.tempDirPath = aucContainer.tempDirPath / "base"
+  result.tempSrcDirPath = result.tempDirPath / "src"
+  result.tempDestDirPath = result.tempDirPath / "dest"
+
+proc list*(aucContainerBases: AucContainerBases): Bases =
+  ## コンテナ内の基盤を返す
+  let
+    containerYamlFile = ContainerYamlFile(
+      filePath: aucContainerBases.aucContainer.containerFilePath
+    )
+    containerYaml = containerYamlFile.load()
+  return containerYaml.bases
+
 func plugins*(aucContainer: AucContainer): AucContainerPlugins =
   ## container.pluginsコマンド
   result.aucContainer = aucContainer
@@ -219,10 +245,22 @@ func plugins*(aucContainer: AucContainer): AucContainerPlugins =
   result.tempSrcDirPath = result.tempDirPath / "src"
   result.tempDestDirPath = result.tempDirPath / "dest"
 
+proc list*(aucContainerPlugins: AucContainerPlugins): seq[ContainerPlugin] =
+  ## コンテナ内のプラグイン一覧を返す
+  let
+    containerYamlFile = ContainerYamlFile(
+      filePath: aucContainerPlugins.aucContainer.containerFilePath
+    )
+    containerYaml = containerYamlFile.load()
+  return containerYaml.plugins
+
 proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin) =
   ## プラグインをダウンロードする
   # プラグインの配布ページをデフォルトブラウザで開く
-  openDefaultBrowser("https://example.com")
+  let
+    packages = aucContainerPlugins.aucContainer.azanaUtlCli.packages
+    url = packages.plugin(plugin.id).version(plugin.version).url
+  openDefaultBrowser(url)
   # tempSrcディレクトリをエクスプローラーで開く
   discard execProcess(
     "explorer",
@@ -230,36 +268,115 @@ proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin) =
     options = {poUsePath}
   )
 
-proc install*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin) =
+proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin) =
   ## プラグインをインストールする
   let
     packages = aucContainerPlugins.aucContainer.azanaUtlCli.packages
+    packagePlugin = packages.plugin(targetPlugin.id)
+    dependencies = packagePlugin.dependencies(targetPlugin.version)
     tempSrcDirPath = aucContainerPlugins.tempSrcDirPath
     tempDestDirPath = aucContainerPlugins.tempDestDirPath
     pluginZipFilePath = listDirs(tempSrcDirPath)[0]
     pluginZipSha3_512Hash = sha3_512File(pluginZipFilePath)
     correctPluginZipSha3_512Hash =
-      packages.plugin(plugin.id).version(plugin.version).sha3_512_hash
+      packagePlugin.version(targetPlugin.version).sha3_512_hash
     containerPluginsDirPath = aucContainerPlugins.dirPath
+    trackedFilesAndDirs =
+      packagePlugin.trackedFilesAndDirs(targetPlugin.version)
+  # 依存関係を満たしているか確認
+  let
+    dependenciesBases = dependencies.bases.get(DependenciesBases())
+    dependenciesPlugins = dependencies.plugins.get(@[])
+    dependenciesTuple = (
+      bases: (
+        aviutl: dependenciesBases.aviutl_versions.get(@[]),
+        exedit: dependenciesBases.exedit_versions.get(@[]),
+      ),
+      plugins: dependenciesPlugins,
+    )
+    containerBases = aucContainerPlugins.aucContainer.bases.list
+    containerPlugins = aucContainerPlugins.list
+    installedPackagesTuple = (
+      bases: (
+        aviutl: containerBases.aviutl_version,
+        exedit: containerBases.exedit_version,
+      ),
+      plugins: containerPlugins,
+    )
+  # 依存関係の基盤がインストールされているか確認
+  if dependenciesTuple.bases.aviutl != @[]:
+    var isSatisfied = false
+    for version in dependenciesTuple.bases.aviutl:
+      if version == installedPackagesTuple.bases.aviutl:
+        isSatisfied = true
+        break
+    if not isSatisfied:
+      dependencyNotSatisfied(
+        "AviUtl",
+        dependenciesTuple.bases.aviutl,
+        installedPackagesTuple.bases.aviutl
+      )
+  if dependenciesTuple.bases.exedit != @[]:
+    var isSatisfied = false
+    for version in dependenciesTuple.bases.exedit:
+      if version == installedPackagesTuple.bases.exedit:
+        isSatisfied = true
+        break
+    if not isSatisfied:
+      dependencyNotSatisfied(
+        "拡張編集",
+        dependenciesTuple.bases.exedit,
+        installedPackagesTuple.bases.exedit
+      )
+  # 依存関係のプラグインがインストールされているか確認
+  for dependencyPlugin in dependenciesTuple.plugins:
+    var isDependencyPluginInstalledAndEnabled = false
+    for installedPlugin in installedPackagesTuple.plugins:
+      if dependencyPlugin.id == installedPlugin.id:
+        if not (installedPlugin.is_installed and installedPlugin.is_enabled):
+          break
+        isDependencyPluginInstalledAndEnabled = true
+        var isDependencyPluginVersionInstalled = false
+        for version in dependencyPlugin.versions:
+          if version == installedPlugin.version:
+            isDependencyPluginVersionInstalled = true
+            break
+        if not isDependencyPluginVersionInstalled:
+          dependencyNotSatisfied(
+            dependencyPlugin.id,
+            dependencyPlugin.versions,
+            installedPlugin.version
+          )
+    if not isDependencyPluginInstalledAndEnabled:
+      dependencyNotSatisfied(
+        dependencyPlugin.id, dependencyPlugin.versions, "None"
+      )
   # ダウンロードしたzipファイルのハッシュ値を検証
   if pluginZipSha3_512Hash != correctPluginZipSha3_512Hash:
     invalidZipFileHashValue(pluginZipFilePath.absolutePath)
   # プラグインのzipファイルを解凍
   extractAll(pluginZipFilePath, tempDestDirPath)
-  # コンテナのaviutl/pluginsディレクトリに解凍されたファイルを移動
-  for file in walkDirRec(tempDestDirPath):
-    moveFile(file, containerPluginsDirPath / file.splitPath.tail)
+  # 解凍されたファイルをコンテナの指定されたディレクトリに移動
+  for trackedFileOrDir in trackedFilesAndDirs:
+    let
+      trackedFileOrDirPath = trackedFileOrDir.path
+      srcFilePath = tempDestDirPath / trackedFileOrDirPath
+      destFileOrDirPath =
+        (
+          case trackedFileOrDir.move_to:
+          of MoveTo.Root: aucContainerPlugins.aucContainer.aviutlDirPath
+          of MoveTo.Plugins: containerPluginsDirPath
+        ) / trackedFileOrDirPath
+    case trackedFileOrDir.fd_type:
+    of FdType.File:
+      if trackedFileOrDir.is_protected and destFileOrDirPath.fileExists: break
+      moveFile(srcFilePath, destFileOrDirPath)
+    of FdType.Dir:
+      if trackedFileOrDir.is_protected and destFileOrDirPath.dirExists: break
+      moveDir(srcFilePath, destFileOrDirPath)
   # 解凍されたファイルが存在していたディレクトリを削除
   removeDir(tempDestDirPath, checkDir = true)
   removeFile pluginZipFilePath
-
-func bases*(aucContainer: AucContainer): AucContainerBases =
-  ## container.baseコマンド
-  result.aucContainer = aucContainer
-  result.dirPath = aucContainer.aviutlDirPath
-  result.tempDirPath = aucContainer.tempDirPath / "base"
-  result.tempSrcDirPath = result.tempDirPath / "src"
-  result.tempDestDirPath = result.tempDirPath / "dest"
 
 
 func packages*(auc: ref AzanaUtlCli): AucPackages =
