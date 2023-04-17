@@ -10,12 +10,12 @@ import
   zippy/ziparchives
 
 import
-  errors,
-  packages,
-  procs,
-  templates,
-  types,
-  yaml_file
+  private/errors,
+  private/packages,
+  private/procs,
+  private/templates,
+  private/types,
+  private/yaml_file
 
 
 type AzanaUtlCli = object

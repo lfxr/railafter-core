@@ -2,9 +2,9 @@ import
   strutils
 
 import
-  azanautl_cli/errors,
-  azanautl_cli/procs,
-  azanautl_cli/types,
+  azanautl_cli/private/errors,
+  azanautl_cli/private/procs,
+  azanautl_cli/private/types,
   azanautl_cli/azanautl
 
 
