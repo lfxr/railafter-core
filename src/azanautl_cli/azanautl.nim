@@ -283,6 +283,7 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin) =
     containerPluginsDirPath = aucContainerPlugins.dirPath
     trackedFilesAndDirs =
       packagePlugin.trackedFilesAndDirs(targetPlugin.version)
+    jobs = packagePlugin.jobs(targetPlugin.version)
   # 依存関係を満たしているか確認
   let
     dependenciesBases = dependencies.bases.get(DependenciesBases())
@@ -374,6 +375,24 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin) =
     of FdType.Dir:
       if trackedFileOrDir.is_protected and destFileOrDirPath.dirExists: break
       moveDir(srcFilePath, destFileOrDirPath)
+  # タイプがAfterInstallationであるJobを実行
+  for job in jobs.filterIt(it.id == AfterInstallation):
+    for task in job.tasks:
+      let workingDir =
+        case task.working_dir:
+          of WorkingDir.Root:
+            aucContainerPlugins.aucContainer.aviutlDirPath
+          of WorkingDir.Plugins:
+            containerPluginsDirPath
+          of WorkingDir.DownloadedPlugin:
+            tempDestDirPath
+      case task.command:
+        of Remove:
+          for path in task.paths:
+            removeFile(workingDir / sanitizeFileOrDirName(path))
+        of Run:
+          discard task.paths.mapIt(
+            execProcess(workingDir / sanitizeFileOrDirName(it)))
   # 解凍されたファイルが存在していたディレクトリを削除
   removeDir(tempDestDirPath, checkDir = true)
   removeFile pluginZipFilePath

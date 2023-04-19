@@ -74,6 +74,11 @@ func trackedFilesAndDirs*(p: PackagesPlugin, version: string): seq[
     if version in trackedFilesAndDirs.conforming_versions:
       return trackedFilesAndDirs.body
 
+func jobs*(p: PackagesPlugin, version: string): seq[Job] =
+  for jobs in p.packagesYamlPlugin.jobs.get(@[]):
+    if version in jobs.conforming_versions:
+      return jobs.body
+
 
 func bases*(p: ref Packages): PackagesBases =
   ## packages.basesコマンド
