@@ -1,11 +1,13 @@
 import
   os,
-  osproc
+  osproc,
+  strutils
 
 
 proc main() =
   for file in walkDirRec("."):
-    if file.splitFile.ext != ".nim": continue
+    if file.startsWith("./nimbledeps") or
+      file.splitFile.ext != ".nim": continue
     discard execProcess(
       "nimpretty",
       args = [file],
