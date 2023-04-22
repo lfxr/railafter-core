@@ -271,16 +271,20 @@ proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin,
       githubRepository = targetPlugin.githubRepository
       tag = specifiedPluginVersion.github_release_tag.get
       assetId = specifiedPluginVersion.github_asset_id.get
+    echo "[info] Downloading the ZIP file via GitHub API..."
     ghApi
       .repository(githubRepository)
       .release(tag)
       .asset(assetId)
       .download(destPath)
+    echo fmt"[info] Successfully downloaded plugin: {plugin.id}:{plugin.version}"
     return
   # `useGithuApi`がfalseの場合はブラウザでダウンロードする
   # プラグインの配布ページをデフォルトブラウザで開く
+  echo "[info] Opening the plugin's distribution page in the default browser..."
   openDefaultBrowser(specifiedPluginVersion.url)
   # tempSrcディレクトリをエクスプローラーで開く
+  echo "[info] Opening the temporary directory in Explorer..."
   discard execProcess(
     "explorer",
     args = [tempSrcDirPath],
@@ -304,6 +308,7 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin) =
       packagePlugin.trackedFilesAndDirs(targetPlugin.version)
     jobs = packagePlugin.jobs(targetPlugin.version)
   # 依存関係を満たしているか確認
+  echo "[info] Checking dependencies..."
   let
     dependenciesBases = dependencies.bases.get(DependenciesBases())
     dependenciesPlugins = dependencies.plugins.get(@[])
@@ -372,11 +377,14 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin) =
         dependencyPlugin.id, dependencyPlugin.versions, "None"
       )
   # ダウンロードしたzipファイルのハッシュ値を検証
+  echo "[info] Verifying the hash value of the ZIP file..."
   if pluginZipSha3_512Hash != correctPluginZipSha3_512Hash:
     invalidZipFileHashValue(pluginZipFilePath.absolutePath)
   # プラグインのzipファイルを解凍
+  echo "[info] Extracting the ZIP file..."
   extractAll(pluginZipFilePath, tempDestDirPath)
   # 解凍されたファイルをコンテナの指定されたディレクトリに移動
+  echo "[info] Moving files..."
   for trackedFileOrDir in trackedFilesAndDirs:
     let
       trackedFileOrDirPath = trackedFileOrDir.path
@@ -395,6 +403,7 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin) =
       if trackedFileOrDir.is_protected and destFileOrDirPath.dirExists: break
       moveDir(srcFilePath, destFileOrDirPath)
   # タイプがAfterInstallationであるJobを実行
+  echo "[info] Running tasks..."
   for job in jobs.filterIt(it.id == AfterInstallation):
     for task in job.tasks:
       let workingDir =
@@ -413,8 +422,10 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin) =
           discard task.paths.mapIt(
             execProcess(workingDir / sanitizeFileOrDirName(it)))
   # 解凍されたファイルが存在していたディレクトリを削除
+  echo "[info] Deleting temporary directory..."
   removeDir(tempDestDirPath, checkDir = true)
   removeFile pluginZipFilePath
+  echo fmt"[info] Successfully installed plugin: {targetPlugin.id}:{targetPlugin.version}"
 
 
 func packages*(auc: ref AzanaUtlCli): AucPackages =
