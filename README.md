@@ -70,6 +70,10 @@ cd azanautl-cli
 # Git Hooksをインストール
 chmod +x scripts/git_hooks/pre-commit
 git config --local core.hooksPath scripts/git_hooks
+
+# 依存外部ライブラリをインストール
+nimble refresh -l
+nimble install -dy
 ```
 
 ### 依存外部ライブラリ
