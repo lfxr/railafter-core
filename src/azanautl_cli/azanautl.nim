@@ -11,6 +11,7 @@ import
 
 import
   private/errors,
+  private/github_api,
   private/packages,
   private/procs,
   private/templates,
@@ -254,17 +255,35 @@ proc list*(aucContainerPlugins: AucContainerPlugins): seq[ContainerPlugin] =
     containerYaml = containerYamlFile.load()
   return containerYaml.plugins
 
-proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin) =
+proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin,
+    useGitHubApi: bool) =
   ## プラグインをダウンロードする
-  # プラグインの配布ページをデフォルトブラウザで開く
   let
     packages = aucContainerPlugins.aucContainer.azanaUtlCli.packages
-    url = packages.plugin(plugin.id).version(plugin.version).url
-  openDefaultBrowser(url)
+    targetPlugin = packages.plugin(plugin.id)
+    specifiedPluginVersion = targetPlugin.version(plugin.version)
+    tempSrcDirPath = aucContainerPlugins.tempSrcDirPath
+  # `useGithuApi`がtrueの場合はGitHub APIを使用してダウンロードする
+  if useGitHubApi:
+    let
+      ghApi = newGitHubApi()
+      destPath = tempSrcDirPath / "asset.zip"
+      githubRepository = targetPlugin.githubRepository
+      tag = specifiedPluginVersion.github_release_tag.get
+      assetId = specifiedPluginVersion.github_asset_id.get
+    ghApi
+      .repository(githubRepository)
+      .release(tag)
+      .asset(assetId)
+      .download(destPath)
+    return
+  # `useGithuApi`がfalseの場合はブラウザでダウンロードする
+  # プラグインの配布ページをデフォルトブラウザで開く
+  openDefaultBrowser(specifiedPluginVersion.url)
   # tempSrcディレクトリをエクスプローラーで開く
   discard execProcess(
     "explorer",
-    args = [aucContainerPlugins.tempSrcDirPath],
+    args = [tempSrcDirPath],
     options = {poUsePath}
   )
 

@@ -135,7 +135,10 @@ proc container(args: seq[string]) =
           if options[1..^1].len != expectedNumberOfArgs: invalidNumberOfArgs(
               expectedNumberOfArgs, options[1..^1].len, commandName)
           let plugin = deserializePlugin(options[1])
-          auc.container(containerName).plugins.download(plugin)
+          auc
+            .container(containerName)
+            .plugins
+            .download(plugin, useGitHubApi = true)
         of "install":
           const commandName = "container plugins install"
           echo commandName
