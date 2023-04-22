@@ -34,6 +34,10 @@ type ContainerYaml* = object
   plugins*: seq[ContainerPlugin]
 
 
+type GitHubRepository* = tuple
+  owner: string
+  repo: string
+
 type
   DependenciesBases* = object
     aviutl_versions*, exedit_versions*: Option[seq[string]]
@@ -100,6 +104,7 @@ type PackagesYamlPluginVersion* = object
   version*: string
   url*: string
   github_release_tag*: Option[string]
+  github_asset_id*: Option[int]
   sha3_512_hash*: string
   released_on*: string
   tracked_file_or_dir_hashes*: Table[string, string]
@@ -112,7 +117,7 @@ type PackagesYamlPlugin* = object
   tags*: seq[string]
   author*: string
   website*: string
-  github_repo*: Option[string]
+  github_repository*: Option[GitHubRepository]
   niconico_commons_id*: Option[string]
   dependencies*: Option[seq[PackagesYamlPluginDependencies]]
   tracked_files_and_dirs*: seq[PackagesYamlPluginTrackedFilesAndDirs]

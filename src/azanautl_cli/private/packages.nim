@@ -68,6 +68,10 @@ func dependencies*(p: PackagesPlugin, version: string): Dependencies =
     if version in dependencies.conforming_versions:
       return dependencies.body
 
+func githubRepository*(p: PackagesPlugin): GitHubRepository =
+  ## 指定したプラグインのGitHubリポジトリを返す
+  p.packagesYamlPlugin.github_repository.get
+
 func trackedFilesAndDirs*(p: PackagesPlugin, version: string): seq[
     TrackedFilesAndDirs] =
   for trackedFilesAndDirs in p.packagesYamlPlugin.tracked_files_and_dirs:
