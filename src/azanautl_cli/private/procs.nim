@@ -20,8 +20,13 @@ func sanitizeFileOrDirName*(s: string): string =
 func deserializePlugin*(raw: string): Plugin =
   ## プラグインの文字列をパースし, Pluginオブジェクトに変換する
   let
-    pluginId = raw.split(":")[0]
-    pluginVersion = raw.split(":")[1]
+    doesRawContainVersion = raw.contains(":")
+    pluginId =
+      if doesRawContainVersion: raw.split(":")[0]
+      else: raw
+    pluginVersion =
+      if doesRawContainVersion: raw.split(":")[1]
+      else: "latest"
   Plugin(
     id: pluginId,
     version: pluginVersion

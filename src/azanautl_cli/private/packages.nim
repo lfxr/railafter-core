@@ -60,7 +60,10 @@ func plugin*(p: ref Packages, id: string): PackagesPlugin =
 
 func version*(p: PackagesPlugin, version: string): PackagesYamlPluginVersion =
   ## 指定したバージョンのプラグインを返す
-  p.packagesYamlPlugin.versions.filterIt(it.version == version)[0]
+  p.packagesYamlPlugin.versions.filterIt(
+    if version == "latest": it.is_latest
+    else: it.version == version
+  )[0]
 
 func dependencies*(p: PackagesPlugin, version: string): Dependencies =
   ## 指定したバージョンの依存関係を返す

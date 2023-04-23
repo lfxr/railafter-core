@@ -102,6 +102,7 @@ type
 
 type PackagesYamlPluginVersion* = object
   version*: string
+  is_latest*: bool
   url*: string
   github_release_tag*: Option[string]
   github_asset_id*: Option[int]
