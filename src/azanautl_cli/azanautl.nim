@@ -256,40 +256,42 @@ proc list*(aucContainerPlugins: AucContainerPlugins): seq[ContainerPlugin] =
   return containerYaml.plugins
 
 proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin,
-    useGitHubApi: bool) =
+    useBrowser: bool = false) =
   ## プラグインをダウンロードする
   let
     packages = aucContainerPlugins.aucContainer.azanaUtlCli.packages
     targetPlugin = packages.plugin(plugin.id)
     specifiedPluginVersion = targetPlugin.version(plugin.version)
     tempSrcDirPath = aucContainerPlugins.tempSrcDirPath
-  # `useGithuApi`がtrueの場合はGitHub APIを使用してダウンロードする
-  if useGitHubApi:
-    let
-      ghApi = newGitHubApi()
-      destPath = tempSrcDirPath / "asset.zip"
-      githubRepository = targetPlugin.githubRepository
-      tag = specifiedPluginVersion.github_release_tag.get
-      assetId = specifiedPluginVersion.github_asset_id.get
-    echo "[info] Downloading the ZIP file via GitHub API..."
-    ghApi
-      .repository(githubRepository)
-      .release(tag)
-      .asset(assetId)
-      .download(destPath)
-    echo fmt"[info] Successfully downloaded plugin: {plugin.id}:{plugin.version}"
+    assetId = specifiedPluginVersion.github_asset_id.get(-1)
+  if useBrowser or assetId == -1:
+    if not useBrowser:
+      echo "[error] The plugin cannot be downloaded via GitHub API."
+      echo "[info] Use the default browser instead."
+    # プラグインの配布ページをデフォルトブラウザで開く
+    echo "[info] Opening the plugin's distribution page in the default browser..."
+    openDefaultBrowser(specifiedPluginVersion.url)
+    # tempSrcディレクトリをエクスプローラーで開く
+    echo "[info] Opening the temporary directory in Explorer..."
+    discard execProcess(
+      "explorer",
+      args = [tempSrcDirPath],
+      options = {poUsePath}
+    )
     return
-  # `useGithuApi`がfalseの場合はブラウザでダウンロードする
-  # プラグインの配布ページをデフォルトブラウザで開く
-  echo "[info] Opening the plugin's distribution page in the default browser..."
-  openDefaultBrowser(specifiedPluginVersion.url)
-  # tempSrcディレクトリをエクスプローラーで開く
-  echo "[info] Opening the temporary directory in Explorer..."
-  discard execProcess(
-    "explorer",
-    args = [tempSrcDirPath],
-    options = {poUsePath}
-  )
+  # GitHub APIを使ってZIPファイルをダウンロードする
+  let
+    ghApi = newGitHubApi()
+    destPath = tempSrcDirPath / "asset.zip"
+    githubRepository = targetPlugin.githubRepository
+    tag = specifiedPluginVersion.github_release_tag.get
+  echo "[info] Downloading the ZIP file via GitHub API..."
+  ghApi
+    .repository(githubRepository)
+    .release(tag)
+    .asset(assetId)
+    .download(destPath)
+  echo fmt"[info] Successfully downloaded plugin: {plugin.id}:{plugin.version}"
 
 proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin) =
   ## プラグインをインストールする

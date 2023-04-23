@@ -118,7 +118,7 @@ proc containers(args: seq[string]) =
     else:
       echo "unknown command"
 
-proc container(args: seq[string]) =
+proc container(useBrowser: bool = false, args: seq[string]) =
   ## containerコマンド
   echo "container command"
   let
@@ -138,7 +138,7 @@ proc container(args: seq[string]) =
           auc
             .container(containerName)
             .plugins
-            .download(plugin, useGitHubApi = true)
+            .download(plugin, useBrowser)
         of "install":
           const commandName = "container plugins install"
           echo commandName
@@ -199,6 +199,6 @@ when isMainModule:
     [azanautl_cli.images],
     [azanautl_cli.image],
     [azanautl_cli.containers],
-    [azanautl_cli.container],
+    [azanautl_cli.container, short = {"useBrowser": 'b'}],
     [azanautl_cli.packages]
   )
