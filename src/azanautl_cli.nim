@@ -126,6 +126,15 @@ proc container(useBrowser: bool = false, args: seq[string]) =
     subcommand = args[1]
     options = args[2..^1]
   case subcommand:
+    of "bases":
+      case options[0]:
+        of "get":
+          const commandName = "container bases get"
+          echo commandName
+          const expectedNumberOfArgs: Natural = 0
+          if options[1..^1].len != expectedNumberOfArgs: invalidNumberOfArgs(
+              expectedNumberOfArgs, options[1..^1].len, commandName)
+          auc.container(containerName).bases.get()
     of "plugins":
       case options[0]:
         of "dl", "download":

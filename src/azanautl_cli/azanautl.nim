@@ -1,5 +1,6 @@
 import
   browsers,
+  httpclient,
   options,
   os,
   osproc,
@@ -237,6 +238,36 @@ proc list*(aucContainerBases: AucContainerBases): Bases =
     )
     containerYaml = containerYamlFile.load()
   return containerYaml.bases
+
+proc get*(aucContainerBases: AucContainerBases) =
+  ## AviUtl本体と拡張編集を入手 (ダウンロード・インストール) する
+  proc get(id, version: string) =
+    let
+      packages = aucContainerBases.aucContainer.azanaUtlCli.packages
+      targetBasis = packages.basis(id).version(version)
+      tempSrcDirPath = aucContainerBases.tempSrcDirPath
+      tempDestDirPath = aucContainerBases.tempDestDirPath
+      dirPath = aucContainerBases.dirPath
+      downloadedFilePath = tempSrcDirPath / id & ".zip"
+    newHttpClient().downloadFile(targetBasis.url, downloadedFilePath)
+    # ダウンロードされたファイルのハッシュ値を検証
+    let
+      downloadedFileSha3_512Hash = sha3_512File(downloadedFilePath)
+      correctDownloadedFileSha3_512Hash = targetBasis.sha3_512_hash
+    if downloadedFileSha3_512Hash != correctDownloadedFileSha3_512Hash:
+      invalidZipFileHashValue(downloadedFilePath.absolutePath)
+    # ダウンロードされたファイルを解凍
+    extractAll(downloadedFilePath, tempDestDirPath)
+    # コンテナのaviutlディレクトリに解凍されたファイルを移動
+    for file in walkDirRec(tempDestDirPath):
+      moveFile(file, dirPath / file.splitPath.tail)
+    # 解凍されたファイルが存在していたディレクトリとダウンロードされたファイルを削除
+    removeDir(tempDestDirPath, checkDir = true)
+    removeFile downloadedFilePath
+  get("aviutl", aucContainerBases.list.aviutl_version)
+  sleep 5000
+  get("exedit", aucContainerBases.list.exedit_version)
+  createDir(aucContainerBases.dirPath / "plugins")
 
 func plugins*(aucContainer: AucContainer): AucContainerPlugins =
   ## container.pluginsコマンド
