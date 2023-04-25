@@ -458,6 +458,38 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin) =
   echo "[info] Deleting temporary directory..."
   removeDir(tempDestDirPath, checkDir = true)
   removeFile pluginZipFilePath
+  # インストールしたプラグインの情報をコンテナファイルに書き込む
+  let
+    containerYamlFile = ContainerYamlFile(
+      filePath: aucContainerPlugins.aucContainer.containerFilePath
+    )
+  var
+    containerYaml = containerYamlFile.load()
+    isPluginInContainerFile = false
+  for i, plugin in containerYaml.plugins:
+    if plugin.id == targetPlugin.id:
+      isPluginInContainerFile = true
+      if containerYaml.plugins[i].version != targetPlugin.version:
+        containerYaml.plugins[i]
+          .previously_installed_versions
+          .add(containerYaml.plugins[i].version)
+      containerYaml.plugins[i].version = targetPlugin.version
+      containerYaml.plugins[i].is_installed = true
+      containerYaml.plugins[i].is_enabled = true
+      break
+  # コンテナファイルにプラグインが存在しない場合は追加
+  if not isPluginInContainerFile:
+    containerYaml.plugins.add(
+      ContainerPlugin(
+        id: targetPlugin.id,
+        version: targetPlugin.version,
+        is_installed: true,
+        is_enabled: true,
+        previously_installed_versions: @[]
+      )
+    )
+  discard containerYamlFile.update(containerYaml)
+
   echo fmt"[info] Successfully installed plugin: {targetPlugin.id}:{targetPlugin.version}"
 
 
