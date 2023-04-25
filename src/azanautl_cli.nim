@@ -18,7 +18,7 @@ proc images(args: seq[string]) =
     subcommand = args[0]
     options = args[1..^1]
   case subcommand:
-    of "ls", "list":
+    of "list", "ls":
       # images.list(options)
       const commandName = "images list"
       const expectedNumberOfArgs: Natural = 0
@@ -34,7 +34,7 @@ proc images(args: seq[string]) =
           expectedNumberOfArgs, options.len, commandName)
       let imageName = options[0]
       auc.images.create(imageName)
-    of "del", "delete":
+    of "delete", "del":
       const commandName = "images delete"
       echo commandName
       const expectedNumberOfArgs: Natural = 1
@@ -55,7 +55,7 @@ proc image(args: seq[string]) =
   case subcommand:
     of "plugins":
       case options[0]:
-        of "ls", "list":
+        of "list", "ls":
           const commandName = "plugins list"
           echo commandName
           const expectedNumberOfArgs: Natural = 0
@@ -70,7 +70,7 @@ proc image(args: seq[string]) =
               expectedNumberOfArgs, options[1..^1].len, commandName)
           let plugin = deserializePlugin(options[1])
           auc.image(imageName).plugins.add(plugin)
-        of "del", "delete":
+        of "delete", "del":
           const commandName = "plugins delete"
           echo commandName
           const expectedNumberOfArgs: Natural = 1
@@ -90,7 +90,7 @@ proc containers(args: seq[string]) =
     subcommand = args[0]
     options = args[1..^1]
   case subcommand:
-    of "ls", "list":
+    of "list", "ls":
       const commandName = "containers list"
       const expectedNumberOfArgs: Natural = 0
       if options.len != expectedNumberOfArgs: invalidNumberOfArgs(
@@ -107,7 +107,7 @@ proc containers(args: seq[string]) =
         containerName = options[0]
         imageName = options[1]
       auc.containers.create(containerName, imageName)
-    of "del", "delete":
+    of "delete", "del":
       const commandName = "containers delete"
       echo commandName
       const expectedNumberOfArgs: Natural = 1
@@ -137,7 +137,7 @@ proc container(useBrowser: bool = false, args: seq[string]) =
           auc.container(containerName).bases.get()
     of "plugins":
       case options[0]:
-        of "dl", "download":
+        of "download", "dl":
           const commandName = "container plugins download"
           echo commandName
           const expectedNumberOfArgs: Natural = 1
@@ -148,7 +148,7 @@ proc container(useBrowser: bool = false, args: seq[string]) =
             .container(containerName)
             .plugins
             .download(plugin, useBrowser)
-        of "i", "install":
+        of "install", "i":
           const commandName = "container plugins install"
           echo commandName
           const expectedNumberOfArgs: Natural = 1
@@ -170,7 +170,7 @@ proc packages(args: seq[string]) =
   case subcommand:
     of "bases":
       case options[0]:
-        of "ls", "list":
+        of "list", "ls":
           const commandName = "packages bases list"
           echo commandName
           const expectedNumberOfArgs: Natural = 0
@@ -182,7 +182,7 @@ proc packages(args: seq[string]) =
           echo "unknown command"
     of "plugins":
       case options[0]
-        of "ls", "list":
+        of "list", "ls":
           const commandName = "packages list"
           const expectedNumberOfArgs: Natural = 0
           if options.len != expectedNumberOfArgs: invalidNumberOfArgs(
