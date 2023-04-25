@@ -81,7 +81,10 @@ nimble install -dy
 | ライブラリ名 | 用途                               | リポジトリ                               |
 | :----------- | :--------------------------------- | :--------------------------------------- |
 | cligen       | コマンドライン引数のパース         | <https://github.com/c-blake/cligen>      |
+| libcurl      | (Puppyの依存パッケージ)            | <https://github.com/Araq/libcurl>        |
 | nimcrypto    | SHA3-512ハッシュ値の計算           | <https://github.com/cheatfate/nimcrypto> |
+| Puppy        | HTTP/HTTPSクライアント             | <https://github.com/treeform/puppy>      |
+| Webby        | (Puppyの依存パッケージ)            | <https://github.com/treeform/webby>      |
 | NimYAML      | YAMLのシリアライズ・デシリアライズ | <https://github.com/flyx/NimYAML>        |
 | Zippy        | zipファイルの解凍                  | <https://github.com/guzba/zippy>         |
 
