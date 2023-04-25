@@ -148,7 +148,7 @@ proc container(useBrowser: bool = false, args: seq[string]) =
             .container(containerName)
             .plugins
             .download(plugin, useBrowser)
-        of "install":
+        of "i", "install":
           const commandName = "container plugins install"
           echo commandName
           const expectedNumberOfArgs: Natural = 1
