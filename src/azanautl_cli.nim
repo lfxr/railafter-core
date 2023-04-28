@@ -29,19 +29,21 @@ proc images(args: seq[string]) =
     of "create":
       const commandName = "images create"
       echo commandName
-      const expectedNumberOfArgs: Natural = 1
+      const expectedNumberOfArgs: Natural = 2
       if options.len != expectedNumberOfArgs: invalidNumberOfArgs(
           expectedNumberOfArgs, options.len, commandName)
-      let imageName = options[0]
-      auc.images.create(imageName)
+      let 
+        imageId = options[0]
+        imageName = options[1]
+      auc.images.create(imageId, imageName)
     of "delete", "del":
       const commandName = "images delete"
       echo commandName
       const expectedNumberOfArgs: Natural = 1
       if options.len != expectedNumberOfArgs: invalidNumberOfArgs(
           expectedNumberOfArgs, options.len, commandName)
-      let imageName = options[0]
-      auc.images.delete(imageName)
+      let imageId = options[0]
+      auc.images.delete(imageId)
     else:
       echo "unknown command"
 

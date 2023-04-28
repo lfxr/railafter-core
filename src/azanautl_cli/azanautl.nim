@@ -15,7 +15,6 @@ import
   private/github_api,
   private/packages,
   private/procs,
-  private/templates,
   private/types,
   private/yaml_file
 
@@ -95,28 +94,28 @@ proc list*(aucImages: AucImages): seq[string] =
   for fileOrDir in aucImages.imagesDirPath.listDirs:
     result.add(fileOrDir.splitPath.tail)
 
-proc create*(aucImages: AucImages, imageName: string) =
+proc create*(aucImages: AucImages, imageId, imageName: string) =
   ## イメージを作成する
   let
-    sanitizedImageName = imageName.sanitizeFileOrDirName
-    newImageDirPath = aucImages.imagesDirPath / sanitizedImageName
+    sanitizedImageId = imageId.sanitizeFileOrDirName
+    newImageDirPath = aucImages.imagesDirPath / sanitizedImageId
   if dirExists(newImageDirPath):
-    raise newException(ValueError, fmt"Image named '{sanitizedImageName}' already exists")
+    raise newException(ValueError, fmt"Image named '{sanitizedImageId}' already exists")
   createDir newImageDirPath
   let
     newImageFilePath = newImageDirPath / "image.aviutliem.yaml"
     imageYamlFile = ImageYamlFile(filePath: newImageFilePath)
-  discard imageYamlFile.update(yamlTemplates.imageYaml)
+  discard imageYamlFile.update(ImageYaml(imageName: imageName))
 
-proc delete*(aucImages: AucImages, imageName: string) =
+proc delete*(aucImages: AucImages, imageId: string) =
   ## イメージを削除する
   let
-    sanitizedImageName = imageName.sanitizeFileOrDirName
-    targetImageDirPath = aucImages.imagesDirPath / sanitizedImageName
+    sanitizedImageId = imageId.sanitizeFileOrDirName
+    targetImageDirPath = aucImages.imagesDirPath / sanitizedImageId
   try:
     removeDir(targetImageDirPath, checkDir = true)
   except OSError:
-    raise newException(ValueError, fmt"Image named '{sanitizedImageName}' does not exist")
+    raise newException(ValueError, fmt"Image named '{sanitizedImageId}' does not exist")
 
 
 func image*(auc: ref AzanaUtlCli, imageName: string): AucImage =
