@@ -102,21 +102,22 @@ proc containers(args: seq[string]) =
     of "create":
       const commandName = "containers create"
       echo commandName
-      const expectedNumberOfArgs: Natural = 2
+      const expectedNumberOfArgs: Natural = 3
       if options.len != expectedNumberOfArgs: invalidNumberOfArgs(
           expectedNumberOfArgs, options.len, commandName)
       let
-        containerName = options[0]
-        imageName = options[1]
-      auc.containers.create(containerName, imageName)
+        containerId = options[0]
+        containerName = options[1]
+        imageId = options[2]
+      auc.containers.create(containerId, containerName, imageId)
     of "delete", "del":
       const commandName = "containers delete"
       echo commandName
       const expectedNumberOfArgs: Natural = 1
       if options.len != expectedNumberOfArgs: invalidNumberOfArgs(
           expectedNumberOfArgs, options.len, commandName)
-      let containerName = options[0]
-      auc.containers.delete(containerName)
+      let containerId = options[0]
+      auc.containers.delete(containerId)
     else:
       echo "unknown command"
 
