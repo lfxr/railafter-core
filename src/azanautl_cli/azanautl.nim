@@ -215,7 +215,7 @@ proc delete*(aucContainers: AucContainers, containerId: string) =
 func container*(auc: ref AzanaUtlCli, containerId: string): AucContainer =
   ## containerコマンド
   result.azanaUtlCli = auc
-  result.tempDirPath = auc.tempDirPath / "container"
+  result.tempDirPath = auc.tempDirPath / "containers" / containerId
   result.containerDirPath = auc.appDirPath / "containers" / containerId
   result.containerFileName = "container.aviutliem.yaml"
   result.containerFilePath = result.containerDirPath / result.containerFileName
