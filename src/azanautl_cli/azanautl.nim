@@ -15,7 +15,6 @@ import
   private/github_api,
   private/packages,
   private/procs,
-  private/templates,
   private/types,
   private/yaml_file
 
@@ -95,34 +94,34 @@ proc list*(aucImages: AucImages): seq[string] =
   for fileOrDir in aucImages.imagesDirPath.listDirs:
     result.add(fileOrDir.splitPath.tail)
 
-proc create*(aucImages: AucImages, imageName: string) =
+proc create*(aucImages: AucImages, imageId, imageName: string) =
   ## イメージを作成する
   let
-    sanitizedImageName = imageName.sanitizeFileOrDirName
-    newImageDirPath = aucImages.imagesDirPath / sanitizedImageName
+    sanitizedImageId = imageId.sanitizeFileOrDirName
+    newImageDirPath = aucImages.imagesDirPath / sanitizedImageId
   if dirExists(newImageDirPath):
-    raise newException(ValueError, fmt"Image named '{sanitizedImageName}' already exists")
+    raise newException(ValueError, fmt"Image named '{sanitizedImageId}' already exists")
   createDir newImageDirPath
   let
     newImageFilePath = newImageDirPath / "image.aviutliem.yaml"
     imageYamlFile = ImageYamlFile(filePath: newImageFilePath)
-  discard imageYamlFile.update(yamlTemplates.imageYaml)
+  discard imageYamlFile.update(ImageYaml(imageId: imageId, imageName: imageName))
 
-proc delete*(aucImages: AucImages, imageName: string) =
+proc delete*(aucImages: AucImages, imageId: string) =
   ## イメージを削除する
   let
-    sanitizedImageName = imageName.sanitizeFileOrDirName
-    targetImageDirPath = aucImages.imagesDirPath / sanitizedImageName
+    sanitizedImageId = imageId.sanitizeFileOrDirName
+    targetImageDirPath = aucImages.imagesDirPath / sanitizedImageId
   try:
     removeDir(targetImageDirPath, checkDir = true)
   except OSError:
-    raise newException(ValueError, fmt"Image named '{sanitizedImageName}' does not exist")
+    raise newException(ValueError, fmt"Image named '{sanitizedImageId}' does not exist")
 
 
-func image*(auc: ref AzanaUtlCli, imageName: string): AucImage =
+func image*(auc: ref AzanaUtlCli, imageId: string): AucImage =
   ## imageコマンド
   result.azanaUtlCli = auc
-  result.imageDirPath = auc.appDirPath / "images" / imageName
+  result.imageDirPath = auc.appDirPath / "images" / imageId
   result.imageFileName = "image.aviutliem.yaml"
   result.imageFilePath = result.imageDirPath / result.imageFileName
 
@@ -169,22 +168,22 @@ proc list*(aucContainers: AucContainers): seq[string] =
   for fileOrDir in aucContainers.containersDirPath.listDirs:
     result.add(fileOrDir.splitPath.tail)
 
-proc create*(aucContainers: AucContainers, containerName: string,
-    imageName: string) =
+proc create*(aucContainers: AucContainers, containerId, containerName, imageId: string) =
   ## コンテナを作成する
   let
-    sanitizedContainerName = containerName.sanitizeFileOrDirName
-    newContainerDirPath = aucContainers.containersDirPath / sanitizedContainerName
+    sanitizedContainerId = containerId.sanitizeFileOrDirName
+    newContainerDirPath = aucContainers.containersDirPath / sanitizedContainerId
   if dirExists(newContainerDirPath):
-    raise newException(ValueError, fmt"Container named '{sanitizedContainerName}' already exists")
+    raise newException(ValueError, fmt"Container named '{sanitizedContainerId}' already exists")
   createDir newContainerDirPath
   # 対象イメージをイメージファイルから読み込む
   let
-    image = aucContainers.azanaUtlCli.image(imageName)
+    image = aucContainers.azanaUtlCli.image(imageId)
     imageYamlFile = ImageYamlFile(filePath: image.imageFilePath)
     imageYaml = imageYamlFile.load()
     containerYaml = ContainerYaml(
-      container_name: sanitizedContainerName,
+      container_id: containerId,
+      container_name: containerName,
       bases: imageYaml.bases,
       plugins: imageYaml.plugins.mapIt(
         ContainerPlugin(
@@ -193,8 +192,8 @@ proc create*(aucContainers: AucContainers, containerName: string,
           is_installed: false,
           is_enabled: false,
           previously_installed_versions: @[]
-      )
-    ),
+        )
+      ),
     )
   # コンテナファイルを作成
   let
@@ -202,22 +201,22 @@ proc create*(aucContainers: AucContainers, containerName: string,
     containerYamlFile = ContainerYamlFile(filePath: newContainerFilePath)
   discard containerYamlFile.update(containerYaml)
 
-proc delete*(aucContainers: AucContainers, containerName: string) =
+proc delete*(aucContainers: AucContainers, containerId: string) =
   ## コンテナを削除する
   let
-    sanitizedContainerName = containerName.sanitizeFileOrDirName
-    targetContainerDirPath = aucContainers.containersDirPath / sanitizedContainerName
+    sanitizedContainerId = containerId.sanitizeFileOrDirName
+    targetContainerDirPath = aucContainers.containersDirPath / sanitizedContainerId
   try:
     removeDir(targetContainerDirPath, checkDir = true)
   except OSError:
-    raise newException(ValueError, fmt"Container named '{sanitizedContainerName}' does not exist")
+    raise newException(ValueError, fmt"Container named '{sanitizedContainerId}' does not exist")
 
 
-func container*(auc: ref AzanaUtlCli, containerName: string): AucContainer =
+func container*(auc: ref AzanaUtlCli, containerId: string): AucContainer =
   ## containerコマンド
   result.azanaUtlCli = auc
   result.tempDirPath = auc.tempDirPath / "container"
-  result.containerDirPath = auc.appDirPath / "containers" / containerName
+  result.containerDirPath = auc.appDirPath / "containers" / containerId
   result.containerFileName = "container.aviutliem.yaml"
   result.containerFilePath = result.containerDirPath / result.containerFileName
   result.aviutlDirPath = result.containerDirPath / "aviutl"

@@ -16,7 +16,7 @@ type Script = object
   version*: string
 
 type ImageYaml* = object
-  image_name*: string
+  image_id*, image_name*: string
   bases*: Bases
   plugins*: seq[Plugin]
   scripts*: seq[Script]
@@ -29,7 +29,7 @@ type ContainerPlugin* = object
   previously_installed_versions*: seq[string]
 
 type ContainerYaml* = object
-  container_name*: string
+  container_id*, container_name*: string
   bases*: Bases
   plugins*: seq[ContainerPlugin]
 
