@@ -105,7 +105,7 @@ proc create*(aucImages: AucImages, imageId, imageName: string) =
   let
     newImageFilePath = newImageDirPath / "image.aviutliem.yaml"
     imageYamlFile = ImageYamlFile(filePath: newImageFilePath)
-  discard imageYamlFile.update(ImageYaml(imageName: imageName))
+  discard imageYamlFile.update(ImageYaml(imageId: imageId, imageName: imageName))
 
 proc delete*(aucImages: AucImages, imageId: string) =
   ## イメージを削除する
@@ -182,6 +182,7 @@ proc create*(aucContainers: AucContainers, containerId, containerName, imageId: 
     imageYamlFile = ImageYamlFile(filePath: image.imageFilePath)
     imageYaml = imageYamlFile.load()
     containerYaml = ContainerYaml(
+      container_id: containerId,
       container_name: containerName,
       bases: imageYaml.bases,
       plugins: imageYaml.plugins.mapIt(
