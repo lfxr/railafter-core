@@ -118,10 +118,10 @@ proc delete*(aucImages: AucImages, imageId: string) =
     raise newException(ValueError, fmt"Image named '{sanitizedImageId}' does not exist")
 
 
-func image*(auc: ref AzanaUtlCli, imageName: string): AucImage =
+func image*(auc: ref AzanaUtlCli, imageId: string): AucImage =
   ## imageコマンド
   result.azanaUtlCli = auc
-  result.imageDirPath = auc.appDirPath / "images" / imageName
+  result.imageDirPath = auc.appDirPath / "images" / imageId
   result.imageFileName = "image.aviutliem.yaml"
   result.imageFilePath = result.imageDirPath / result.imageFileName
 
@@ -211,11 +211,11 @@ proc delete*(aucContainers: AucContainers, containerId: string) =
     raise newException(ValueError, fmt"Container named '{sanitizedContainerId}' does not exist")
 
 
-func container*(auc: ref AzanaUtlCli, containerName: string): AucContainer =
+func container*(auc: ref AzanaUtlCli, containerId: string): AucContainer =
   ## containerコマンド
   result.azanaUtlCli = auc
   result.tempDirPath = auc.tempDirPath / "container"
-  result.containerDirPath = auc.appDirPath / "containers" / containerName
+  result.containerDirPath = auc.appDirPath / "containers" / containerId
   result.containerFileName = "container.aviutliem.yaml"
   result.containerFilePath = result.containerDirPath / result.containerFileName
   result.aviutlDirPath = result.containerDirPath / "aviutl"
