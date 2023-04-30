@@ -184,7 +184,10 @@ proc create*(aucContainers: AucContainers, unsafeContainerId, containerName, uns
     containerYaml = ContainerYaml(
       container_id: sanitizedContainerId,
       container_name: containerName,
-      bases: imageYaml.bases,
+      bases: ContainerBases(
+        aviutl: (version: imageYaml.bases.aviutlVersion, isInstalled: false),
+        exedit: (version: imageYaml.bases.exeditVersion, isInstalled: false),
+      ),
       plugins: imageYaml.plugins.mapIt(
         ContainerPlugin(
           id: it.id,
@@ -230,7 +233,7 @@ func bases*(aucContainer: AucContainer): AucContainerBases =
   result.tempSrcDirPath = result.tempDirPath / "src"
   result.tempDestDirPath = result.tempDirPath / "dest"
 
-proc list*(aucContainerBases: AucContainerBases): Bases =
+proc list*(aucContainerBases: AucContainerBases): ContainerBases =
   ## コンテナ内の基盤を返す
   let
     containerYamlFile = ContainerYamlFile(
@@ -264,9 +267,9 @@ proc get*(aucContainerBases: AucContainerBases) =
     # 解凍されたファイルが存在していたディレクトリとダウンロードされたファイルを削除
     removeDir(tempDestDirPath, checkDir = true)
     removeFile downloadedFilePath
-  get("aviutl", aucContainerBases.list.aviutl_version)
+  get("aviutl", aucContainerBases.list.aviutl.version)
   sleep 5000
-  get("exedit", aucContainerBases.list.exedit_version)
+  get("exedit", aucContainerBases.list.exedit.version)
   createDir(aucContainerBases.dirPath / "plugins")
 
 func plugins*(aucContainer: AucContainer): AucContainerPlugins =
@@ -356,35 +359,49 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin) =
     containerPlugins = aucContainerPlugins.list
     installedPackagesTuple = (
       bases: (
-        aviutl: containerBases.aviutl_version,
-        exedit: containerBases.exedit_version,
+        aviutl: containerBases.aviutl,
+        exedit: containerBases.exedit,
       ),
       plugins: containerPlugins,
     )
   # 依存関係の基盤がインストールされているか確認
+  # AviUtl
+  if not installedPackagesTuple.bases.aviutl.isInstalled:
+    dependencyNotSatisfied(
+      "AviUtl",
+      dependenciesTuple.bases.aviutl,
+      "None",
+    )
   if dependenciesTuple.bases.aviutl != @[]:
     var isSatisfied = false
     for version in dependenciesTuple.bases.aviutl:
-      if version == installedPackagesTuple.bases.aviutl:
+      if version == installedPackagesTuple.bases.aviutl.version:
         isSatisfied = true
         break
     if not isSatisfied:
       dependencyNotSatisfied(
         "AviUtl",
         dependenciesTuple.bases.aviutl,
-        installedPackagesTuple.bases.aviutl
+        installedPackagesTuple.bases.aviutl.version
       )
+  # 拡張編集
+  if not installedPackagesTuple.bases.exedit.isInstalled:
+    dependencyNotSatisfied(
+      "拡張編集",
+      dependenciesTuple.bases.exedit,
+      "None",
+    )
   if dependenciesTuple.bases.exedit != @[]:
     var isSatisfied = false
     for version in dependenciesTuple.bases.exedit:
-      if version == installedPackagesTuple.bases.exedit:
+      if version == installedPackagesTuple.bases.exedit.version:
         isSatisfied = true
         break
     if not isSatisfied:
       dependencyNotSatisfied(
         "拡張編集",
         dependenciesTuple.bases.exedit,
-        installedPackagesTuple.bases.exedit
+        installedPackagesTuple.bases.exedit.version
       )
   # 依存関係のプラグインがインストールされているか確認
   for dependencyPlugin in dependenciesTuple.plugins:

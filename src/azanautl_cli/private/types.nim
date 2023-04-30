@@ -22,6 +22,9 @@ type ImageYaml* = object
   scripts*: seq[Script]
 
 
+type ContainerBases* = object
+  aviutl*, exedit*: tuple[version: string, is_installed: bool]
+
 type ContainerPlugin* = object
   id*: string
   version*: string
@@ -30,7 +33,7 @@ type ContainerPlugin* = object
 
 type ContainerYaml* = object
   container_id*, container_name*: string
-  bases*: Bases
+  bases*: ContainerBases
   plugins*: seq[ContainerPlugin]
 
 

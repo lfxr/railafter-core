@@ -4,6 +4,7 @@
 !pre-commit
 
 *.exe
+*.out
 app/
 bin/
 nimbledeps/
