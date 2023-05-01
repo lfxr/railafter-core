@@ -48,6 +48,8 @@ type AucContainer = object
   containerFileName: string
   containerFilePath: string
   aviutlDirPath: string
+  isolatedDirPath: string
+  isolatedPluginsDirPath: string
 
 type AucContainerPlugins = object
   aucContainer: AucContainer
@@ -224,6 +226,8 @@ func container*(auc: ref AzanaUtlCli, unsafeContainerId: string): AucContainer =
   result.containerFileName = "container.aviutliem.yaml"
   result.containerFilePath = result.containerDirPath / result.containerFileName
   result.aviutlDirPath = result.containerDirPath / "aviutl"
+  result.isolatedDirPath = result.containerDirPath / "isolated"
+  result.isolatedPluginsDirPath = result.isolatedDirPath / "plugins"
 
 func bases*(aucContainer: AucContainer): AucContainerBases =
   ## container.baseコマンド
@@ -508,6 +512,44 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin) =
   discard containerYamlFile.update(containerYaml)
 
   echo fmt"[info] Successfully installed plugin: {targetPlugin.id}:{targetPlugin.version}"
+
+proc disable*(aucContainerPlugins: AucContainerPlugins, pluginId: string) =
+  ## プラグインを無効化する
+  let containerYamlFile = ContainerYamlFile(
+    filePath: aucContainerPlugins.aucContainer.containerFilePath
+  )
+  var 
+    containerYaml = containerYamlFile.load()
+    isPluginInContainerFile = false
+    pluginVersion = ""
+  for i, plugin in containerYaml.plugins:
+    if plugin.id == pluginId:
+      pluginVersion = plugin.version
+      isPluginInContainerFile = true
+      containerYaml.plugins[i].isEnabled = false
+      break
+  if not isPluginInContainerFile:
+    discard
+    # pluginNotInstalled(pluginId)
+  discard containerYamlFile.update(containerYaml)
+
+  let packages = aucContainerPlugins.aucContainer.azanaUtlCli.packages
+  for trackedFileOrDir in packages.plugin(pluginId).trackedFilesAndDirs(pluginVersion):
+    echo trackedFileOrDir
+    let
+      trackedFileOrDirPath = trackedFileOrDir.path
+      srcFileOrDirPath =
+        (
+          case trackedFileOrDir.moveTo:
+          of MoveTo.Root: aucContainerPlugins.aucContainer.aviutlDirPath
+          of MoveTo.Plugins: aucContainerPlugins.dirPath
+        ) / trackedFileOrDirPath
+      isolatedPluginsDirPath = aucContainerPlugins.aucContainer.isolatedPluginsDirPath
+    case trackedFileOrDir.fd_type:
+      of FdType.File:
+        moveFile(srcFileOrDirPath, isolatedPluginsDirPath / pluginId / trackedFileOrDirPath)
+      of FdType.Dir:
+        moveDir(srcFileOrDirPath, isolatedPluginsDirPath / pluginId / trackedFileOrDirPath)
 
 
 func packages*(auc: ref AzanaUtlCli): AucPackages =
