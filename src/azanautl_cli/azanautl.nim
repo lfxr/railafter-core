@@ -48,6 +48,8 @@ type AucContainer = object
   containerFileName: string
   containerFilePath: string
   aviutlDirPath: string
+  isolatedDirPath: string
+  isolatedPluginsDirPath: string
 
 type AucContainerPlugins = object
   aucContainer: AucContainer
@@ -224,6 +226,8 @@ func container*(auc: ref AzanaUtlCli, unsafeContainerId: string): AucContainer =
   result.containerFileName = "container.aviutliem.yaml"
   result.containerFilePath = result.containerDirPath / result.containerFileName
   result.aviutlDirPath = result.containerDirPath / "aviutl"
+  result.isolatedDirPath = result.containerDirPath / "isolated"
+  result.isolatedPluginsDirPath = result.isolatedDirPath / "plugins"
 
 func bases*(aucContainer: AucContainer): AucContainerBases =
   ## container.baseコマンド
@@ -508,6 +512,68 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin) =
   discard containerYamlFile.update(containerYaml)
 
   echo fmt"[info] Successfully installed plugin: {targetPlugin.id}:{targetPlugin.version}"
+
+proc enable*(aucContainerPlugins: AucContainerPlugins, pluginId: string) =
+  ## プラグインを有効化する
+  let containerYamlFile = ContainerYamlFile(
+    filePath: aucContainerPlugins.aucContainer.containerFilePath
+  )
+  var
+    containerYaml = containerYamlFile.load()
+    isPluginInContainerFile = false
+    pluginVersion = ""
+  for i, plugin in containerYaml.plugins:
+    if plugin.id == pluginId:
+      pluginVersion = plugin.version
+      isPluginInContainerFile = true
+      containerYaml.plugins[i].isEnabled = true
+      break
+  if not isPluginInContainerFile:
+    discard
+    # pluginNotInstalled(pluginId)
+  discard containerYamlFile.update(containerYaml)
+
+  let
+    packages = aucContainerPlugins.aucContainer.azanaUtlCli.packages
+    trackedFds = packages.plugin(pluginId).trackedFilesAndDirs(pluginVersion)
+    isolatedPluginsDirPath = aucContainerPlugins.aucContainer.isolatedPluginsDirPath
+  processTrackedFds(
+    trackedFds,
+    (root: aucContainerPlugins.aucContainer.aviutlDirPath, plugins: aucContainerPlugins.dirPath),
+    (src: false, dest: true),
+    (src: isolatedPluginsDirPath / pluginId, dest: "")
+  )
+
+proc disable*(aucContainerPlugins: AucContainerPlugins, pluginId: string) =
+  ## プラグインを無効化する
+  let containerYamlFile = ContainerYamlFile(
+    filePath: aucContainerPlugins.aucContainer.containerFilePath
+  )
+  var
+    containerYaml = containerYamlFile.load()
+    isPluginInContainerFile = false
+    pluginVersion = ""
+  for i, plugin in containerYaml.plugins:
+    if plugin.id == pluginId:
+      pluginVersion = plugin.version
+      isPluginInContainerFile = true
+      containerYaml.plugins[i].isEnabled = false
+      break
+  if not isPluginInContainerFile:
+    discard
+    # pluginNotInstalled(pluginId)
+  discard containerYamlFile.update(containerYaml)
+
+  let
+    packages = aucContainerPlugins.aucContainer.azanaUtlCli.packages
+    trackedFds = packages.plugin(pluginId).trackedFilesAndDirs(pluginVersion)
+    isolatedPluginsDirPath = aucContainerPlugins.aucContainer.isolatedPluginsDirPath
+  processTrackedFds(
+    trackedFds,
+    (root: aucContainerPlugins.aucContainer.aviutlDirPath, plugins: aucContainerPlugins.dirPath),
+    (src: true, dest: false),
+    (src: "", dest: isolatedPluginsDirPath / pluginId)
+  )
 
 
 func packages*(auc: ref AzanaUtlCli): AucPackages =

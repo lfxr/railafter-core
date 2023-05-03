@@ -159,6 +159,22 @@ proc container(useBrowser: bool = false, args: seq[string]) =
               expectedNumberOfArgs, options[1..^1].len, commandName)
           let plugin = deserializePlugin(options[1])
           auc.container(containerId).plugins.install(plugin)
+        of "enable":
+          const commandName = "container plugins enable"
+          echo commandName
+          const expectedNumberOfArgs: Natural = 1
+          if options[1..^1].len != expectedNumberOfArgs: invalidNumberOfArgs(
+              expectedNumberOfArgs, options[1..^1].len, commandName)
+          let pluginId = options[1]
+          auc.container(containerId).plugins.enable(pluginId)
+        of "disable":
+          const commandName = "container plugins disable"
+          echo commandName
+          const expectedNumberOfArgs: Natural = 1
+          if options[1..^1].len != expectedNumberOfArgs: invalidNumberOfArgs(
+              expectedNumberOfArgs, options[1..^1].len, commandName)
+          let pluginId = options[1]
+          auc.container(containerId).plugins.disable(pluginId)
         else:
           echo "unknown command"
     else:
