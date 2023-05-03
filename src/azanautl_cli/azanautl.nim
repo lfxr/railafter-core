@@ -15,8 +15,8 @@ import
   private/github_api,
   private/packages,
   private/procs,
-  private/types,
-  private/yaml_file
+  private/templates,
+  private/types
 
 
 type AzanaUtlCli = object
@@ -104,10 +104,8 @@ proc create*(aucImages: AucImages, unsafeImageId, imageName: string) =
   if dirExists(newImageDirPath):
     raise newException(ValueError, fmt"Image named '{sanitizedImageId}' already exists")
   createDir newImageDirPath
-  let
-    newImageFilePath = newImageDirPath / "image.aviutliem.yaml"
-    imageYamlFile = ImageYamlFile(filePath: newImageFilePath)
-  discard imageYamlFile.update(ImageYaml(imageId: sanitizedImageId, imageName: imageName))
+  openImageYamlFile(newImageDirPath / "image.aviutliem.yaml", fmWrite):
+    imageYaml = ImageYaml(imageId: sanitizedImageId, imageName: imageName)
 
 proc delete*(aucImages: AucImages, unsafeImageId: string) =
   ## イメージを削除する
@@ -133,31 +131,18 @@ func plugins*(aucImage: AucImage): AucPlugins =
 
 proc list*(aucPlugins: AucPlugins): seq[Plugin] =
   ## イメージ内のプラグイン一覧を返す
-  let
-    imageYamlFile = ImageYamlFile(filePath: aucPlugins.aucImage.imageFilePath)
-    imageYaml = imageYamlFile.load()
-  return imageYaml.plugins
+  openImageYamlFile(aucPlugins.aucImage.imageFilePath, fmRead):
+    return imageYaml.plugins
 
 proc add*(aucPlugins: AucPlugins, plugin: Plugin) =
   ## プラグインを追加する
-  let imageYamlFile = ImageYamlFile(filePath: aucPlugins.aucImage.imageFilePath)
-  var imageYaml = imageYamlFile.load()
-  imageYaml.plugins.add(plugin)
-  discard imageYamlFile.update(imageYaml)
+  openImageYamlFile(aucPlugins.aucImage.imageFilePath, fmWrite):
+    imageYaml.plugins.add(plugin)
 
 proc delete*(aucPlugins: AucPlugins, pluginId: string) =
   ## プラグインを削除する
-  let imageYamlFile = ImageYamlFile(filePath: aucPlugins.aucImage.imageFilePath)
-  var imageYaml = imageYamlFile.load()
-
-  var remainedPlugins: seq[Plugin] = @[]
-  for i, plugin in imageYaml.plugins:
-    if plugin.id != pluginId:
-      remainedPlugins.add(plugin)
-
-  imageYaml.plugins = remainedPlugins
-
-  discard imageYamlFile.update(imageYaml)
+  openImageYamlFile(aucPlugins.aucImage.imageFilePath, fmWrite):
+    imageYaml.plugins = imageYaml.plugins.filterIt(it.id != pluginId)
 
 
 func containers*(auc: ref AzanaUtlCli): AucContainers =
@@ -181,11 +166,10 @@ proc create*(aucContainers: AucContainers, unsafeContainerId, containerName, uns
   # 対象イメージをイメージファイルから読み込む
   let
     image = aucContainers.azanaUtlCli.image(unsafeImageId.sanitizeFileOrDirName)
-    imageYamlFile = ImageYamlFile(filePath: image.imageFilePath)
-    imageYaml = imageYamlFile.load()
-    containerYaml = ContainerYaml(
-      container_id: sanitizedContainerId,
-      container_name: containerName,
+  openImageYamlFile(image.imageFilePath, fmRead):
+    let generatedContainerYaml = ContainerYaml(
+      containerId: sanitizedContainerId,
+      containerName: containerName,
       bases: ContainerBases(
         aviutl: (version: imageYaml.bases.aviutlVersion, isInstalled: false),
         exedit: (version: imageYaml.bases.exeditVersion, isInstalled: false),
@@ -194,17 +178,14 @@ proc create*(aucContainers: AucContainers, unsafeContainerId, containerName, uns
         ContainerPlugin(
           id: it.id,
           version: it.version,
-          is_installed: false,
-          is_enabled: false,
-          previously_installed_versions: @[]
+          isInstalled: false,
+          isEnabled: false,
+          previouslyInstalledVersions: @[]
         )
       ),
     )
-  # コンテナファイルを作成
-  let
-    newContainerFilePath = newContainerDirPath / "container.aviutliem.yaml"
-    containerYamlFile = ContainerYamlFile(filePath: newContainerFilePath)
-  discard containerYamlFile.update(containerYaml)
+    openContainerYamlFile(newContainerDirPath / "container.aviutliem.yaml", fmWrite):
+      containerYaml = generatedContainerYaml
 
 proc delete*(aucContainers: AucContainers, unsafeContainerId: string) =
   ## コンテナを削除する
@@ -239,12 +220,8 @@ func bases*(aucContainer: AucContainer): AucContainerBases =
 
 proc list*(aucContainerBases: AucContainerBases): ContainerBases =
   ## コンテナ内の基盤を返す
-  let
-    containerYamlFile = ContainerYamlFile(
-      filePath: aucContainerBases.aucContainer.containerFilePath
-    )
-    containerYaml = containerYamlFile.load()
-  return containerYaml.bases
+  openContainerYamlFile(aucContainerBases.aucContainer.containerFilePath, fmRead):
+    return containerYaml.bases
 
 proc get*(aucContainerBases: AucContainerBases) =
   ## AviUtl本体と拡張編集を入手 (ダウンロード・インストール) する
@@ -286,12 +263,8 @@ func plugins*(aucContainer: AucContainer): AucContainerPlugins =
 
 proc list*(aucContainerPlugins: AucContainerPlugins): seq[ContainerPlugin] =
   ## コンテナ内のプラグイン一覧を返す
-  let
-    containerYamlFile = ContainerYamlFile(
-      filePath: aucContainerPlugins.aucContainer.containerFilePath
-    )
-    containerYaml = containerYamlFile.load()
-  return containerYaml.plugins
+  openContainerYamlFile(aucContainerPlugins.aucContainer.containerFilePath, fmRead):
+    return containerYaml.plugins
 
 proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin,
     useBrowser: bool = false) =
@@ -480,59 +453,45 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin) =
   removeDir(tempDestDirPath, checkDir = true)
   removeFile pluginZipFilePath
   # インストールしたプラグインの情報をコンテナファイルに書き込む
-  let
-    containerYamlFile = ContainerYamlFile(
-      filePath: aucContainerPlugins.aucContainer.containerFilePath
-    )
-  var
-    containerYaml = containerYamlFile.load()
-    isPluginInContainerFile = false
-  for i, plugin in containerYaml.plugins:
-    if plugin.id == targetPlugin.id:
-      isPluginInContainerFile = true
-      if containerYaml.plugins[i].version != targetPlugin.version:
-        containerYaml.plugins[i]
-          .previously_installed_versions
-          .add(containerYaml.plugins[i].version)
-      containerYaml.plugins[i].version = targetPlugin.version
-      containerYaml.plugins[i].is_installed = true
-      containerYaml.plugins[i].is_enabled = true
-      break
-  # コンテナファイルにプラグインが存在しない場合は追加
+  var isPluginInContainerFile = false
+  let filePath = aucContainerPlugins.aucContainer.containerFilePath
+  openContainerYamlFile(filePath, fmWrite):
+    for i, plugin in containerYaml.plugins:
+      if plugin.id == targetPlugin.id:
+        isPluginInContainerFile = true
+        if containerYaml.plugins[i].version != targetPlugin.version:
+          containerYaml.plugins[i]
+            .previously_installed_versions
+            .add(containerYaml.plugins[i].version)
+        containerYaml.plugins[i].version = targetPlugin.version
+        containerYaml.plugins[i].isInstalled = true
+        containerYaml.plugins[i].isEnabled = true
+        break
   if not isPluginInContainerFile:
     containerYaml.plugins.add(
       ContainerPlugin(
         id: targetPlugin.id,
         version: targetPlugin.version,
-        is_installed: true,
-        is_enabled: true,
-        previously_installed_versions: @[]
+        isInstalled: true,
+        isEnabled: true,
+        previouslyInstalledVersions: @[],
       )
     )
-  discard containerYamlFile.update(containerYaml)
-
   echo fmt"[info] Successfully installed plugin: {targetPlugin.id}:{targetPlugin.version}"
 
 proc enable*(aucContainerPlugins: AucContainerPlugins, pluginId: string) =
   ## プラグインを有効化する
-  let containerYamlFile = ContainerYamlFile(
-    filePath: aucContainerPlugins.aucContainer.containerFilePath
-  )
   var
-    containerYaml = containerYamlFile.load()
     isPluginInContainerFile = false
     pluginVersion = ""
-  for i, plugin in containerYaml.plugins:
-    if plugin.id == pluginId:
-      pluginVersion = plugin.version
-      isPluginInContainerFile = true
-      containerYaml.plugins[i].isEnabled = true
-      break
-  if not isPluginInContainerFile:
-    discard
-    # pluginNotInstalled(pluginId)
-  discard containerYamlFile.update(containerYaml)
-
+  let filePath = aucContainerPlugins.aucContainer.containerFilePath
+  openContainerYamlFile(filePath, fmWrite):
+    for i, plugin in containeryaml.plugins:
+      if plugin.id == pluginId:
+        isPluginInContainerFile = true
+        pluginVersion = plugin.version
+        containeryaml.plugins[i].isEnabled = true
+        break
   let
     packages = aucContainerPlugins.aucContainer.azanaUtlCli.packages
     trackedFds = packages.plugin(pluginId).trackedFilesAndDirs(pluginVersion)
@@ -546,24 +505,17 @@ proc enable*(aucContainerPlugins: AucContainerPlugins, pluginId: string) =
 
 proc disable*(aucContainerPlugins: AucContainerPlugins, pluginId: string) =
   ## プラグインを無効化する
-  let containerYamlFile = ContainerYamlFile(
-    filePath: aucContainerPlugins.aucContainer.containerFilePath
-  )
   var
-    containerYaml = containerYamlFile.load()
     isPluginInContainerFile = false
     pluginVersion = ""
-  for i, plugin in containerYaml.plugins:
-    if plugin.id == pluginId:
-      pluginVersion = plugin.version
-      isPluginInContainerFile = true
-      containerYaml.plugins[i].isEnabled = false
-      break
-  if not isPluginInContainerFile:
-    discard
-    # pluginNotInstalled(pluginId)
-  discard containerYamlFile.update(containerYaml)
-
+  let containerFilePath = aucContainerPlugins.aucContainer.containerFilePath
+  openContainerYamlFile(containerFilePath, fmWrite):
+    for i, plugin in containeryaml.plugins:
+      if plugin.id == pluginId:
+        isPluginInContainerFile = true
+        pluginVersion = plugin.version
+        containerYaml.plugins[i].isEnabled = false
+        break
   let
     packages = aucContainerPlugins.aucContainer.azanaUtlCli.packages
     trackedFds = packages.plugin(pluginId).trackedFilesAndDirs(pluginVersion)
