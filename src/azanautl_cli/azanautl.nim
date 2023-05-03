@@ -513,6 +513,37 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin) =
 
   echo fmt"[info] Successfully installed plugin: {targetPlugin.id}:{targetPlugin.version}"
 
+proc enable*(aucContainerPlugins: AucContainerPlugins, pluginId: string) =
+  ## プラグインを有効化する
+  let containerYamlFile = ContainerYamlFile(
+    filePath: aucContainerPlugins.aucContainer.containerFilePath
+  )
+  var
+    containerYaml = containerYamlFile.load()
+    isPluginInContainerFile = false
+    pluginVersion = ""
+  for i, plugin in containerYaml.plugins:
+    if plugin.id == pluginId:
+      pluginVersion = plugin.version
+      isPluginInContainerFile = true
+      containerYaml.plugins[i].isEnabled = true
+      break
+  if not isPluginInContainerFile:
+    discard
+    # pluginNotInstalled(pluginId)
+  discard containerYamlFile.update(containerYaml)
+
+  let
+    packages = aucContainerPlugins.aucContainer.azanaUtlCli.packages
+    trackedFds = packages.plugin(pluginId).trackedFilesAndDirs(pluginVersion)
+    isolatedPluginsDirPath = aucContainerPlugins.aucContainer.isolatedPluginsDirPath
+  processTrackedFds(
+    trackedFds,
+    (root: aucContainerPlugins.aucContainer.aviutlDirPath, plugins: aucContainerPlugins.dirPath),
+    (src: false, dest: true),
+    (src: isolatedPluginsDirPath / pluginId, dest: "")
+  )
+
 proc disable*(aucContainerPlugins: AucContainerPlugins, pluginId: string) =
   ## プラグインを無効化する
   let containerYamlFile = ContainerYamlFile(
