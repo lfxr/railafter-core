@@ -274,7 +274,7 @@ proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin,
     targetPlugin = packages.plugin(plugin.id)
     specifiedPluginVersion = targetPlugin.version(plugin.version)
     tempSrcDirPath = aucContainerPlugins.tempSrcDirPath
-    assetId = specifiedPluginVersion.github_asset_id.get(-1)
+    assetId = specifiedPluginVersion.githubAssetId.get(-1)
   if useBrowser or assetId == -1:
     if not useBrowser:
       echo "[error] The plugin cannot be downloaded via GitHub API."
@@ -295,7 +295,7 @@ proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin,
     ghApi = newGitHubApi()
     destPath = tempSrcDirPath / "asset.zip"
     githubRepository = targetPlugin.githubRepository
-    tag = specifiedPluginVersion.github_release_tag.get
+    tag = specifiedPluginVersion.githubReleaseTag.get
   echo "[info] Downloading the ZIP file via GitHub API..."
   ghApi
     .repository(githubRepository)
@@ -327,8 +327,8 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin) =
     dependenciesPlugins = dependencies.plugins.get(@[])
     dependenciesTuple = (
       bases: (
-        aviutl: dependenciesBases.aviutl_versions.get(@[]),
-        exedit: dependenciesBases.exedit_versions.get(@[]),
+        aviutl: dependenciesBases.aviutlVersions.get(@[]),
+        exedit: dependenciesBases.exeditVersions.get(@[]),
       ),
       plugins: dependenciesPlugins,
     )
@@ -385,7 +385,7 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin) =
     var isDependencyPluginInstalledAndEnabled = false
     for installedPlugin in installedPackagesTuple.plugins:
       if dependencyPlugin.id == installedPlugin.id:
-        if not (installedPlugin.is_installed and installedPlugin.is_enabled):
+        if not (installedPlugin.isInstalled and installedPlugin.isEnabled):
           break
         isDependencyPluginInstalledAndEnabled = true
         var isDependencyPluginVersionInstalled = false
@@ -418,23 +418,23 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin) =
       srcFilePath = tempDestDirPath / trackedFileOrDirPath
       destFileOrDirPath =
         (
-          case trackedFileOrDir.move_to:
+          case trackedFileOrDir.moveTo:
           of MoveTo.Root: aucContainerPlugins.aucContainer.aviutlDirPath
           of MoveTo.Plugins: containerPluginsDirPath
         ) / trackedFileOrDirPath
-    case trackedFileOrDir.fd_type:
+    case trackedFileOrDir.fdType:
     of FdType.File:
-      if trackedFileOrDir.is_protected and destFileOrDirPath.fileExists: break
+      if trackedFileOrDir.isProtected and destFileOrDirPath.fileExists: break
       moveFile(srcFilePath, destFileOrDirPath)
     of FdType.Dir:
-      if trackedFileOrDir.is_protected and destFileOrDirPath.dirExists: break
+      if trackedFileOrDir.isProtected and destFileOrDirPath.dirExists: break
       moveDir(srcFilePath, destFileOrDirPath)
   # タイプがAfterInstallationであるJobを実行
   echo "[info] Running tasks..."
   for job in jobs.filterIt(it.id == AfterInstallation):
     for task in job.tasks:
       let workingDir =
-        case task.working_dir:
+        case task.workingDir:
           of WorkingDir.Root:
             aucContainerPlugins.aucContainer.aviutlDirPath
           of WorkingDir.Plugins:
@@ -461,7 +461,7 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin) =
         isPluginInContainerFile = true
         if containerYaml.plugins[i].version != targetPlugin.version:
           containerYaml.plugins[i]
-            .previously_installed_versions
+            .previouslyInstalledVersions
             .add(containerYaml.plugins[i].version)
         containerYaml.plugins[i].version = targetPlugin.version
         containerYaml.plugins[i].isInstalled = true
