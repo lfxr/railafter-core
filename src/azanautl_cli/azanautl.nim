@@ -518,7 +518,7 @@ proc disable*(aucContainerPlugins: AucContainerPlugins, pluginId: string) =
   let containerYamlFile = ContainerYamlFile(
     filePath: aucContainerPlugins.aucContainer.containerFilePath
   )
-  var 
+  var
     containerYaml = containerYamlFile.load()
     isPluginInContainerFile = false
     pluginVersion = ""
@@ -533,23 +533,16 @@ proc disable*(aucContainerPlugins: AucContainerPlugins, pluginId: string) =
     # pluginNotInstalled(pluginId)
   discard containerYamlFile.update(containerYaml)
 
-  let packages = aucContainerPlugins.aucContainer.azanaUtlCli.packages
-  for trackedFileOrDir in packages.plugin(pluginId).trackedFilesAndDirs(pluginVersion):
-    echo trackedFileOrDir
-    let
-      trackedFileOrDirPath = trackedFileOrDir.path
-      srcFileOrDirPath =
-        (
-          case trackedFileOrDir.moveTo:
-          of MoveTo.Root: aucContainerPlugins.aucContainer.aviutlDirPath
-          of MoveTo.Plugins: aucContainerPlugins.dirPath
-        ) / trackedFileOrDirPath
-      isolatedPluginsDirPath = aucContainerPlugins.aucContainer.isolatedPluginsDirPath
-    case trackedFileOrDir.fd_type:
-      of FdType.File:
-        moveFile(srcFileOrDirPath, isolatedPluginsDirPath / pluginId / trackedFileOrDirPath)
-      of FdType.Dir:
-        moveDir(srcFileOrDirPath, isolatedPluginsDirPath / pluginId / trackedFileOrDirPath)
+  let
+    packages = aucContainerPlugins.aucContainer.azanaUtlCli.packages
+    trackedFds = packages.plugin(pluginId).trackedFilesAndDirs(pluginVersion)
+    isolatedPluginsDirPath = aucContainerPlugins.aucContainer.isolatedPluginsDirPath
+  processTrackedFds(
+    trackedFds,
+    (root: aucContainerPlugins.aucContainer.aviutlDirPath, plugins: aucContainerPlugins.dirPath),
+    (src: true, dest: false),
+    (src: "", dest: isolatedPluginsDirPath / pluginId)
+  )
 
 
 func packages*(auc: ref AzanaUtlCli): AucPackages =

@@ -1,4 +1,5 @@
 import
+  os,
   strutils
 
 import
@@ -39,3 +40,30 @@ proc sha3_512File*(filePath: string): string =
     fileContent = file.readAll()
   defer: file.close()
   $sha3_512.digest(fileContent)
+
+proc processTrackedFds*(
+  trackedFds: seq[TrackedFilesAndDirs],
+  moveToTuple: tuple[root, plugins: string],
+  useMoveTo: tuple[src, dest: bool],
+  dirs: tuple[src, dest: string]
+) =
+  for trackedFd in trackedFds:
+    let
+      srcFdPath = (
+        if useMoveTo.src:
+          (case trackedFd.moveTo:
+           of MoveTo.Root: moveToTuple.root 
+           of MoveTo.Plugins: moveToTuple.plugins)
+        else: "") / dirs.src / trackedFd.path
+      destFdPath = (
+        if useMoveTo.dest:
+          (case trackedFd.moveTo:
+           of MoveTo.Root: moveToTuple.root 
+           of MoveTo.Plugins: moveToTuple.plugins)
+        else: "") / dirs.dest / trackedFd.path
+    case trackedFd.fdType:
+    of FdType.File:
+      moveFile(srcFdPath, destFdPath)
+    of FdType.Dir:
+      moveDir(srcFdPath, destFdPath)
+
