@@ -1,5 +1,6 @@
 import
   os,
+  osproc,
   strutils
 
 import
@@ -40,6 +41,14 @@ proc sha3_512File*(filePath: string): string =
     fileContent = file.readAll()
   defer: file.close()
   $sha3_512.digest(fileContent)
+
+proc revealDirInExplorer*(dirPath: string) =
+  ## ディレクトリをエクスプローラーで開く
+  discard execProcess(
+    "explorer.exe",
+    args = [dirPath],
+    options = {poUsePath}
+  )
 
 proc processTrackedFds*(
   trackedFds: seq[TrackedFilesAndDirs],

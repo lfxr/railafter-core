@@ -284,11 +284,7 @@ proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin,
     openDefaultBrowser(specifiedPluginVersion.url)
     # tempSrcディレクトリをエクスプローラーで開く
     echo "[info] Opening the temporary directory in Explorer..."
-    discard execProcess(
-      "explorer",
-      args = [tempSrcDirPath],
-      options = {poUsePath}
-    )
+    revealDirInExplorer(tempSrcDirPath)
     return
   # GitHub APIを使ってZIPファイルをダウンロードする
   let
