@@ -248,6 +248,12 @@ proc get*(aucContainerBases: AucContainerBases) =
     # 解凍されたファイルが存在していたディレクトリとダウンロードされたファイルを削除
     removeDir(tempDestDirPath, checkDir = true)
     removeFile downloadedFilePath
+    # インストールした基盤の情報をコンテナファイルに書き込む
+    openContainerYamlFile(aucContainerBases.aucContainer.containerFilePath, fmWrite):
+      if id == "aviutl":
+        containerYaml.bases.aviutl.isInstalled = true
+      elif id == "exedit":
+        containerYaml.bases.exedit.isInstalled = true
   get("aviutl", aucContainerBases.list.aviutl.version)
   sleep 5000
   get("exedit", aucContainerBases.list.exedit.version)
