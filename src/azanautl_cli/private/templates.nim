@@ -14,6 +14,10 @@ let yamlTemplates* = YamlTemplates()
 
 template openImageYamlFile*(path: string, mode: FileMode, body: untyped) =
   let imageYamlFile = ImageYamlFile(filePath: path)
+  try:
+    discard imageYamlFile.load()
+  except AssertionDefect:
+    discard imageYamlFile.update(ImageYaml())
   var imageYaml {.inject.} = imageYamlFile.load()
   try: body
   finally:
@@ -21,6 +25,10 @@ template openImageYamlFile*(path: string, mode: FileMode, body: untyped) =
 
 template openContainerYamlFile*(path: string, mode: FileMode, body: untyped) =
   let containerYamlFile = ContainerYamlFile(filePath: path)
+  try:
+    discard containerYamlFile.load()
+  except AssertionDefect:
+    discard containerYamlFile.update(ContainerYaml())
   var containerYaml {.inject.} = containerYamlFile.load()
   try: body
   finally:
