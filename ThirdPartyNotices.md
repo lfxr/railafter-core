@@ -2,6 +2,8 @@
 
 ## Nim and Nim's Runtime Library
 
+<https://github.com/nim-lang/nim>
+
 ```text
 =====================================================
 Nim -- a Compiler for Nim. https://nim-lang.org/
@@ -31,6 +33,8 @@ THE SOFTWARE.
 
 ## cligen
 
+<https://github.com/c-blake/cligen>
+
 ```text
 Copyright (c) 2015,2016,2017,2018,2019,2020,2021 Charles L. Blake.
 
@@ -48,6 +52,8 @@ PERFORMANCE OF THIS SOFTWARE.
 ```
 
 ## nimcrypto
+
+<https://github.com/cheatfate/nimcrypto>
 
 ```text
 MIT License
@@ -74,6 +80,8 @@ SOFTWARE.
 ```
 
 ## NimYAML
+
+<https://github.com/flyx/NimYAML>
 
 ```text
 =====================================================
@@ -103,6 +111,8 @@ THE SOFTWARE.
 ```
 
 ## Zippy
+
+<https://github.com/guzba/zippy/>
 
 ```text
 Copyright (c) 2020 Ryan Oldenburg
