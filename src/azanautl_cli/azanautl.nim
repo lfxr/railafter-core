@@ -11,7 +11,6 @@ import
   zippy/ziparchives
 
 import
-  private/errors,
   private/github_api,
   private/packages,
   private/procs,
@@ -96,26 +95,34 @@ proc list*(aucImages: AucImages): seq[string] =
   for fileOrDir in aucImages.imagesDirPath.listDirs:
     result.add(fileOrDir.splitPath.tail)
 
-proc create*(aucImages: AucImages, unsafeImageId, imageName: string) =
+proc create*(aucImages: AucImages, unsafeImageId, imageName: string): Result[void] =
   ## イメージを作成する
+  result = result.typeof()()
   let
     sanitizedImageId = unsafeImageId.sanitizeFileOrDirName
     newImageDirPath = aucImages.imagesDirPath / sanitizedImageId
   if dirExists(newImageDirPath):
-    raise newException(ValueError, fmt"Image named '{sanitizedImageId}' already exists")
+    result.err = option(
+      Error(kind: imageAlreadyExistsError, imageId: sanitizedImageId)
+    )
+    return
   createDir newImageDirPath
   openImageYamlFile(newImageDirPath / "image.aviutliem.yaml", fmWrite):
     imageYaml = ImageYaml(imageId: sanitizedImageId, imageName: imageName)
 
-proc delete*(aucImages: AucImages, unsafeImageId: string) =
+proc delete*(aucImages: AucImages, unsafeImageId: string): Result[void] =
   ## イメージを削除する
+  result = result.typeof()()
   let
     sanitizedImageId = unsafeImageId.sanitizeFileOrDirName
     targetImageDirPath = aucImages.imagesDirPath / sanitizedImageId
   try:
     removeDir(targetImageDirPath, checkDir = true)
   except OSError:
-    raise newException(ValueError, fmt"Image named '{sanitizedImageId}' does not exist")
+    result.err = option(
+      Error(kind: imageDoesNotExistError, imageId: sanitizedImageId)
+    )
+    return
 
 
 func image*(auc: ref AzanaUtlCli, unsafeImageId: string): AucImage =
@@ -155,13 +162,18 @@ proc list*(aucContainers: AucContainers): seq[string] =
   for fileOrDir in aucContainers.containersDirPath.listDirs:
     result.add(fileOrDir.splitPath.tail)
 
-proc create*(aucContainers: AucContainers, unsafeContainerId, containerName, unsafeImageId: string) =
+proc create*(aucContainers: AucContainers,
+    unsafeContainerId, containerName, unsafeImageId: string): Result[void] =
   ## コンテナを作成する
+  result = result.typeof()()
   let
     sanitizedContainerId = unsafeContainerId.sanitizeFileOrDirName
     newContainerDirPath = aucContainers.containersDirPath / sanitizedContainerId
   if dirExists(newContainerDirPath):
-    raise newException(ValueError, fmt"Container named '{sanitizedContainerId}' already exists")
+    result.err = option(
+      Error(kind: containerAlreadyExistsError, containerId: sanitizedContainerId)
+    )
+    return
   createDir newContainerDirPath
   # 対象イメージをイメージファイルから読み込む
   let
@@ -187,7 +199,7 @@ proc create*(aucContainers: AucContainers, unsafeContainerId, containerName, uns
     openContainerYamlFile(newContainerDirPath / "container.aviutliem.yaml", fmWrite):
       containerYaml = generatedContainerYaml
 
-proc delete*(aucContainers: AucContainers, unsafeContainerId: string) =
+proc delete*(aucContainers: AucContainers, unsafeContainerId: string): Result[void] =
   ## コンテナを削除する
   let
     sanitizedContainerId = unsafeContainerId.sanitizeFileOrDirName
@@ -195,8 +207,10 @@ proc delete*(aucContainers: AucContainers, unsafeContainerId: string) =
   try:
     removeDir(targetContainerDirPath, checkDir = true)
   except OSError:
-    raise newException(ValueError, fmt"Container named '{sanitizedContainerId}' does not exist")
-
+    result.err = option(
+      Error(kind: containerDoesNotExistError, containerId: sanitizedContainerId)
+    )
+    return
 
 func container*(auc: ref AzanaUtlCli, unsafeContainerId: string): AucContainer =
   ## containerコマンド
@@ -306,8 +320,10 @@ proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin,
     .download(destPath)
   echo fmt"[info] Successfully downloaded plugin: {plugin.id}:{plugin.version}"
 
-proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin) =
+proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
+    Result[void] =
   ## プラグインをインストールする
+  result = result.typeof()()
   let
     packages = aucContainerPlugins.aucContainer.azanaUtlCli.packages
     packagePlugin = packages.plugin(targetPlugin.id)
@@ -346,11 +362,15 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin) =
   # 依存関係の基盤がインストールされているか確認
   # AviUtl
   if not installedPackagesTuple.bases.aviutl.isInstalled:
-    dependencyNotSatisfied(
-      "AviUtl",
-      dependenciesTuple.bases.aviutl,
-      "None",
+    result.err = option(
+      Error(
+        kind: depencyNotSatisfiedError,
+        depencyName: "AviUtl",
+        expectedVersions: dependenciesTuple.bases.aviutl,
+        actualVersion: "None",
+      )
     )
+    return
   if dependenciesTuple.bases.aviutl != @[]:
     var isSatisfied = false
     for version in dependenciesTuple.bases.aviutl:
@@ -358,18 +378,26 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin) =
         isSatisfied = true
         break
     if not isSatisfied:
-      dependencyNotSatisfied(
-        "AviUtl",
-        dependenciesTuple.bases.aviutl,
-        installedPackagesTuple.bases.aviutl.version
+      result.err = option(
+        Error(
+          kind: depencyNotSatisfiedError,
+          depencyName: "AviUtl",
+          expectedVersions: dependenciesTuple.bases.aviutl,
+          actualVersion: installedPackagesTuple.bases.aviutl.version,
+        )
       )
+      return
   # 拡張編集
   if not installedPackagesTuple.bases.exedit.isInstalled:
-    dependencyNotSatisfied(
-      "拡張編集",
-      dependenciesTuple.bases.exedit,
-      "None",
+    result.err = option(
+      Error(
+        kind: depencyNotSatisfiedError,
+        depencyName: "拡張編集",
+        expectedVersions: dependenciesTuple.bases.exedit,
+        actualVersion: "None",
+      )
     )
+    return
   if dependenciesTuple.bases.exedit != @[]:
     var isSatisfied = false
     for version in dependenciesTuple.bases.exedit:
@@ -377,11 +405,15 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin) =
         isSatisfied = true
         break
     if not isSatisfied:
-      dependencyNotSatisfied(
-        "拡張編集",
-        dependenciesTuple.bases.exedit,
-        installedPackagesTuple.bases.exedit.version
+      result.err = option(
+        Error(
+          kind: depencyNotSatisfiedError,
+          depencyName: "拡張編集",
+          expectedVersions: dependenciesTuple.bases.exedit,
+          actualVersion: installedPackagesTuple.bases.exedit.version,
+        )
       )
+      return
   # 依存関係のプラグインがインストールされているか確認
   for dependencyPlugin in dependenciesTuple.plugins:
     var isDependencyPluginInstalledAndEnabled = false
@@ -396,19 +428,37 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin) =
             isDependencyPluginVersionInstalled = true
             break
         if not isDependencyPluginVersionInstalled:
-          dependencyNotSatisfied(
-            dependencyPlugin.id,
-            dependencyPlugin.versions,
-            installedPlugin.version
+          result.err = option(
+            Error(
+              kind: depencyNotSatisfiedError,
+              depencyName: dependencyPlugin.id,
+              expectedVersions: dependencyPlugin.versions,
+              actualVersion: installedPlugin.version,
+            )
           )
+          return
     if not isDependencyPluginInstalledAndEnabled:
-      dependencyNotSatisfied(
-        dependencyPlugin.id, dependencyPlugin.versions, "None"
+      result.err = option(
+        Error(
+          kind: depencyNotSatisfiedError,
+          depencyName: dependencyPlugin.id,
+          expectedVersions: dependencyPlugin.versions,
+          actualVersion: "None",
+        )
       )
+      return
   # ダウンロードしたzipファイルのハッシュ値を検証
   echo "[info] Verifying the hash value of the ZIP file..."
   if pluginZipSha3_512Hash != correctPluginZipSha3_512Hash:
-    invalidZipFileHashValue(pluginZipFilePath.absolutePath)
+    result.err = option(
+      Error(
+        kind: invalidZipFileHashValueError,
+        zipFilePath: pluginZipFilePath.absolutePath,
+        expectedHashValue: correctPluginZipSha3_512Hash,
+        actualHashValue: pluginZipSha3_512Hash,
+      )
+    )
+    return
   # プラグインのzipファイルを解凍
   echo "[info] Extracting the ZIP file..."
   extractAll(pluginZipFilePath, tempDestDirPath)
