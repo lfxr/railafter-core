@@ -237,9 +237,10 @@ proc list*(aucContainerBases: AucContainerBases): ContainerBases =
   openContainerYamlFile(aucContainerBases.aucContainer.containerFilePath, fmRead):
     return containerYaml.bases
 
-proc get*(aucContainerBases: AucContainerBases) =
+proc get*(aucContainerBases: AucContainerBases): Result[void] =
   ## AviUtl本体と拡張編集を入手 (ダウンロード・インストール) する
-  proc get(id, version: string) =
+  proc get(id, version: string): Result[void] =
+    result = result.typeof()()
     let
       packages = aucContainerBases.aucContainer.azanaUtlCli.packages
       targetBasis = packages.basis(id).version(version)
@@ -253,7 +254,15 @@ proc get*(aucContainerBases: AucContainerBases) =
       downloadedFileSha3_512Hash = sha3_512File(downloadedFilePath)
       correctDownloadedFileSha3_512Hash = targetBasis.sha3_512_hash
     if downloadedFileSha3_512Hash != correctDownloadedFileSha3_512Hash:
-      invalidZipFileHashValue(downloadedFilePath.absolutePath)
+      result.err = option(
+        Error(
+          kind: invalidZipFileHashValueError,
+          zipFilePath: downloadedFilePath.absolutePath,
+          expectedHashValue: correctDownloadedFileSha3_512Hash,
+          actualHashValue: downloadedFileSha3_512Hash
+        )
+      )
+      return
     # ダウンロードされたファイルを解凍
     extractAll(downloadedFilePath, tempDestDirPath)
     # コンテナのaviutlディレクトリに解凍されたファイルを移動
@@ -268,9 +277,19 @@ proc get*(aucContainerBases: AucContainerBases) =
         containerYaml.bases.aviutl.isInstalled = true
       elif id == "exedit":
         containerYaml.bases.exedit.isInstalled = true
-  get("aviutl", aucContainerBases.list.aviutl.version)
+  result = result.typeof()()
+  let res = result
+  block:
+    get("aviutl", aucContainerBases.list.aviutl.version).err.map(
+      proc(err: Error) = res.err = option(err)
+    )
+    if res.err.isSome: return
   sleep 5000
-  get("exedit", aucContainerBases.list.exedit.version)
+  block:
+    get("exedit", aucContainerBases.list.exedit.version).err.map(
+      proc(err: Error) = res.err = option(err)
+    )
+    if res.err.isSome: return
   createDir(aucContainerBases.dirPath / "plugins")
 
 func plugins*(aucContainer: AucContainer): AucContainerPlugins =
