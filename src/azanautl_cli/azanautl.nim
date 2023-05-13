@@ -384,8 +384,8 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
   if not installedPackagesTuple.bases.aviutl.isInstalled:
     result.err = option(
       Error(
-        kind: depencyNotSatisfiedError,
-        depencyName: "AviUtl",
+        kind: dependencyNotSatisfiedError,
+        dependencyName: "AviUtl",
         expectedVersions: dependenciesTuple.bases.aviutl,
         actualVersion: "None",
       )
@@ -400,8 +400,8 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
     if not isSatisfied:
       result.err = option(
         Error(
-          kind: depencyNotSatisfiedError,
-          depencyName: "AviUtl",
+          kind: dependencyNotSatisfiedError,
+          dependencyName: "AviUtl",
           expectedVersions: dependenciesTuple.bases.aviutl,
           actualVersion: installedPackagesTuple.bases.aviutl.version,
         )
@@ -411,8 +411,8 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
   if not installedPackagesTuple.bases.exedit.isInstalled:
     result.err = option(
       Error(
-        kind: depencyNotSatisfiedError,
-        depencyName: "拡張編集",
+        kind: dependencyNotSatisfiedError,
+        dependencyName: "拡張編集",
         expectedVersions: dependenciesTuple.bases.exedit,
         actualVersion: "None",
       )
@@ -427,8 +427,8 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
     if not isSatisfied:
       result.err = option(
         Error(
-          kind: depencyNotSatisfiedError,
-          depencyName: "拡張編集",
+          kind: dependencyNotSatisfiedError,
+          dependencyName: "拡張編集",
           expectedVersions: dependenciesTuple.bases.exedit,
           actualVersion: installedPackagesTuple.bases.exedit.version,
         )
@@ -450,8 +450,8 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
         if not isDependencyPluginVersionInstalled:
           result.err = option(
             Error(
-              kind: depencyNotSatisfiedError,
-              depencyName: dependencyPlugin.id,
+              kind: dependencyNotSatisfiedError,
+              dependencyName: dependencyPlugin.id,
               expectedVersions: dependencyPlugin.versions,
               actualVersion: installedPlugin.version,
             )
@@ -460,8 +460,8 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
     if not isDependencyPluginInstalledAndEnabled:
       result.err = option(
         Error(
-          kind: depencyNotSatisfiedError,
-          depencyName: dependencyPlugin.id,
+          kind: dependencyNotSatisfiedError,
+          dependencyName: dependencyPlugin.id,
           expectedVersions: dependencyPlugin.versions,
           actualVersion: "None",
         )

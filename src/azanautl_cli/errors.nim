@@ -20,8 +20,8 @@ func message*(err: Error): string =
     fmt"ZIPファイル'{err.zipFilePath}'のハッシュ値が不正です;" & '\n' &
     fmt"予期されているハッシュ値: '{err.expectedHashValue}'" & '\n' &
     fmt"実際のハッシュ値: '{err.actualHashValue}'"
-  of depencyNotSatisfiedError:
-    fmt"依存関係'{err.depencyName}'が満たされていません;" & '\n' &
+  of dependencyNotSatisfiedError:
+    fmt"依存関係'{err.dependencyName}'が満たされていません;" & '\n' &
     &"予期されているバージョン: '{err.expectedVersions.join(\",\")}'" &
     '\n' & fmt"実際のバージョン: '{err.actualVersion}'"
 
