@@ -25,7 +25,9 @@ proc images(args: seq[string]) =
       const commandName = "images list"
       const expectedNumberOfArgs: Natural = 0
       if options.len != expectedNumberOfArgs:
-        echo invalidNumberOfArgsError(commandName, expectedNumberOfArgs, options.len)
+        occurFatalError(
+          invalidNumberOfArgsError(commandName, expectedNumberOfArgs, options.len)
+        )
       for image in auc.images.list:
         echo image
     of "create":
@@ -33,24 +35,26 @@ proc images(args: seq[string]) =
       echo commandName
       const expectedNumberOfArgs: Natural = 2
       if options.len != expectedNumberOfArgs:
-        echo invalidNumberOfArgsError(commandName, expectedNumberOfArgs, options.len)
+        occurFatalError(
+          invalidNumberOfArgsError(commandName, expectedNumberOfArgs, options.len)
+        )
       let 
         imageId = options[0]
         imageName = options[1]
       auc.images.create(imageId, imageName).err.map(
-        proc(err: Error) =
-          raise newException(ImageAlreadyExistsError, err.message)
+        proc(err: Error) = occurFatalError(err.message)
       )
     of "delete", "del":
       const commandName = "images delete"
       echo commandName
       const expectedNumberOfArgs: Natural = 1
       if options.len != expectedNumberOfArgs:
-        echo invalidNumberOfArgsError(commandName, expectedNumberOfArgs, options.len)
+        occurFatalError(
+          invalidNumberOfArgsError(commandName, expectedNumberOfArgs, options.len)
+        )
       let imageId = options[0]
       auc.images.delete(imageId).err.map(
-        proc(err: Error) =
-          raise newException(ImageDoesNotExistError, err.message)
+        proc(err: Error) = occurFatalError(err.message)
       )
     else:
       echo "unknown command"
@@ -70,8 +74,10 @@ proc image(args: seq[string]) =
           echo commandName
           const expectedNumberOfArgs: Natural = 0
           if options[1..^1].len != expectedNumberOfArgs:
-            echo invalidNumberOfArgsError(
-              commandName, expectedNumberOfArgs, options[1..^1].len
+            occurFatalError(
+              invalidNumberOfArgsError(
+                commandName, expectedNumberOfArgs, options[1..^1].len
+              )
             )
           echo auc.image(imageId).plugins.list
         of "add":
@@ -79,8 +85,10 @@ proc image(args: seq[string]) =
           echo commandName
           const expectedNumberOfArgs: Natural = 1
           if options[1..^1].len != expectedNumberOfArgs:
-            echo invalidNumberOfArgsError(
-              commandName, expectedNumberOfArgs, options[1..^1].len
+            occurFatalError(
+              invalidNumberOfArgsError(
+                commandName, expectedNumberOfArgs, options[1..^1].len
+              )
             )
           let plugin = deserializePlugin(options[1])
           auc.image(imageId).plugins.add(plugin)
@@ -89,8 +97,10 @@ proc image(args: seq[string]) =
           echo commandName
           const expectedNumberOfArgs: Natural = 1
           if options[1..^1].len != expectedNumberOfArgs:
-            echo invalidNumberOfArgsError(
-              commandName, expectedNumberOfArgs, options[1..^1].len
+            occurFatalError(
+              invalidNumberOfArgsError(
+                commandName, expectedNumberOfArgs, options[1..^1].len
+              )
             )
           let pluginId = options[1]
           auc.image(imageId).plugins.delete(pluginId)
@@ -110,7 +120,9 @@ proc containers(args: seq[string]) =
       const commandName = "containers list"
       const expectedNumberOfArgs: Natural = 0
       if options.len != expectedNumberOfArgs:
-        echo invalidNumberOfArgsError(commandName, expectedNumberOfArgs, options.len)
+        occurFatalError(
+          invalidNumberOfArgsError(commandName, expectedNumberOfArgs, options.len)
+        )
       for container in auc.containers.list:
         echo container
     of "create":
@@ -118,25 +130,27 @@ proc containers(args: seq[string]) =
       echo commandName
       const expectedNumberOfArgs: Natural = 3
       if options.len != expectedNumberOfArgs:
-        echo invalidNumberOfArgsError(commandName, expectedNumberOfArgs, options.len)
+        occurFatalError(
+          invalidNumberOfArgsError(commandName, expectedNumberOfArgs, options.len)
+        )
       let
         containerId = options[0]
         containerName = options[1]
         imageId = options[2]
       auc.containers.create(containerId, containerName, imageId).err.map(
-        proc(err: Error) =
-          raise newException(ContainerAlreadyExistsError, err.message)
+        proc(err: Error) = occurFatalError(err.message)
       )
     of "delete", "del":
       const commandName = "containers delete"
       echo commandName
       const expectedNumberOfArgs: Natural = 1
       if options.len != expectedNumberOfArgs:
-        echo invalidNumberOfArgsError(commandName, expectedNumberOfArgs, options.len)
+        occurFatalError(
+          invalidNumberOfArgsError(commandName, expectedNumberOfArgs, options.len)
+        )
       let containerId = options[0]
       auc.containers.delete(containerId).err.map(
-        proc(err: Error) =
-          raise newException(ContainerDoesNotExistError, err.message)
+        proc(err: Error) = occurFatalError(err.message)
       )
     else:
       echo "unknown command"
@@ -156,12 +170,13 @@ proc container(useBrowser: bool = false, args: seq[string]) =
           echo commandName
           const expectedNumberOfArgs: Natural = 0
           if options[1..^1].len != expectedNumberOfArgs:
-            echo invalidNumberOfArgsError(
-              commandName, expectedNumberOfArgs, options[1..^1].len
+            occurFatalError(
+              invalidNumberOfArgsError(
+                commandName, expectedNumberOfArgs, options[1..^1].len
+              )
             )
           auc.container(containerId).bases.get.err.map(
-            proc(err: Error) =
-              raise newException(InvalidZipFileHashValueError, err.message)
+            proc(err: Error) = occurFatalError(err.message)
           )
     of "plugins":
       case options[0]:
@@ -170,8 +185,10 @@ proc container(useBrowser: bool = false, args: seq[string]) =
           echo commandName
           const expectedNumberOfArgs: Natural = 1
           if options[1..^1].len != expectedNumberOfArgs:
-            echo invalidNumberOfArgsError(
-              commandName, expectedNumberOfArgs, options[1..^1].len
+            occurFatalError(
+              invalidNumberOfArgsError(
+                commandName, expectedNumberOfArgs, options[1..^1].len
+              )
             )
           let plugin = deserializePlugin(options[1])
           auc
@@ -183,27 +200,24 @@ proc container(useBrowser: bool = false, args: seq[string]) =
           echo commandName
           const expectedNumberOfArgs: Natural = 1
           if options[1..^1].len != expectedNumberOfArgs:
-            echo invalidNumberOfArgsError(
-              commandName, expectedNumberOfArgs, options[1..^1].len
+            occurFatalError(
+              invalidNumberOfArgsError(
+                commandName, expectedNumberOfArgs, options[1..^1].len
+              )
             )
           let plugin = deserializePlugin(options[1])
           auc.container(containerId).plugins.install(plugin).err.map(
-            proc(err: Error) =
-              case err.kind:
-              of depencyNotSatisfiedError:
-                raise newException(DepencyNotSatisfiedError, err.message)
-              of invalidZipFileHashValueError:
-                raise newException(InvalidZipFileHashValueError, err.message)
-              else:
-                discard
+            proc(err: Error) = occurFatalError(err.message)
           )
         of "enable":
           const commandName = "container plugins enable"
           echo commandName
           const expectedNumberOfArgs: Natural = 1
           if options[1..^1].len != expectedNumberOfArgs:
-            echo invalidNumberOfArgsError(
-              commandName, expectedNumberOfArgs, options[1..^1].len
+            occurFatalError(
+              invalidNumberOfArgsError(
+                commandName, expectedNumberOfArgs, options[1..^1].len
+              )
             )
           let pluginId = options[1]
           auc.container(containerId).plugins.enable(pluginId)
@@ -212,8 +226,10 @@ proc container(useBrowser: bool = false, args: seq[string]) =
           echo commandName
           const expectedNumberOfArgs: Natural = 1
           if options[1..^1].len != expectedNumberOfArgs:
-            echo invalidNumberOfArgsError(
-              commandName, expectedNumberOfArgs, options[1..^1].len
+            occurFatalError(
+              invalidNumberOfArgsError(
+                commandName, expectedNumberOfArgs, options[1..^1].len
+              )
             )
           let pluginId = options[1]
           auc.container(containerId).plugins.disable(pluginId)
@@ -236,8 +252,10 @@ proc packages(args: seq[string]) =
           echo commandName
           const expectedNumberOfArgs: Natural = 0
           if options[1..^1].len != expectedNumberOfArgs:
-            echo invalidNumberOfArgsError(
-              commandName, expectedNumberOfArgs, options[1..^1].len
+            occurFatalError(
+              invalidNumberOfArgsError(
+                commandName, expectedNumberOfArgs, options[1..^1].len
+              )
             )
           for basis in auc.packages.bases.list:
             echo basis
@@ -249,17 +267,21 @@ proc packages(args: seq[string]) =
           const commandName = "packages list"
           const expectedNumberOfArgs: Natural = 0
           if options.len != expectedNumberOfArgs:
-            echo invalidNumberOfArgsError(
-              commandName, expectedNumberOfArgs, options.len
-            ) 
+            occurFatalError(
+              invalidNumberOfArgsError(
+                commandName, expectedNumberOfArgs, options.len
+              )
+            )
           echo auc.packages.plugins.list
         of "find":
           const commandName = "packages find"
           echo commandName
           const expectedNumberOfArgs: Natural = 1
           if options.len != expectedNumberOfArgs:
-            echo invalidNumberOfArgsError(
-              commandName, expectedNumberOfArgs, options.len
+            occurFatalError(
+              invalidNumberOfArgsError(
+                commandName, expectedNumberOfArgs, options.len
+              )
             )
           let query = options[0]
           echo auc.packages.plugins.find(query)

@@ -316,13 +316,13 @@ proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin,
     assetId = specifiedPluginVersion.githubAssetId.get(-1)
   if useBrowser or assetId == -1:
     if not useBrowser:
-      echo "[error] The plugin cannot be downloaded via GitHub API."
-      echo "[info] Use the default browser instead."
+      occurNonfatalError "このプラグインをGitHub API経由でダウンロードできません"
+      showInfo "代わりにデフォルトブラウザを使用します"
     # プラグインの配布ページをデフォルトブラウザで開く
-    echo "[info] Opening the plugin's distribution page in the default browser..."
+    showInfo "プラグインの配布ページをデフォルトブラウザで開いています..."
     openDefaultBrowser(specifiedPluginVersion.url)
     # tempSrcディレクトリをエクスプローラーで開く
-    echo "[info] Opening the temporary directory in Explorer..."
+    showInfo "一時ディレクトリをエクスプローラーで開いています..."
     revealDirInExplorer(tempSrcDirPath)
     return
   # GitHub APIを使ってZIPファイルをダウンロードする
@@ -331,13 +331,13 @@ proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin,
     destPath = tempSrcDirPath / "asset.zip"
     githubRepository = targetPlugin.githubRepository
     tag = specifiedPluginVersion.githubReleaseTag.get
-  echo "[info] Downloading the ZIP file via GitHub API..."
+  showInfo "ZIPファイルをGitHub API経由でダウンロードしています..."
   ghApi
     .repository(githubRepository)
     .release(tag)
     .asset(assetId)
     .download(destPath)
-  echo fmt"[info] Successfully downloaded plugin: {plugin.id}:{plugin.version}"
+  showInfo fmt"プラグインが正常にダウンロードされました: {plugin.id}:{plugin.version}"
 
 proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
     Result[void] =
@@ -358,7 +358,7 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
       packagePlugin.trackedFilesAndDirs(targetPlugin.version)
     jobs = packagePlugin.jobs(targetPlugin.version)
   # 依存関係を満たしているか確認
-  echo "[info] Checking dependencies..."
+  showInfo "依存関係を確認しています..."
   let
     dependenciesBases = dependencies.bases.get(DependenciesBases())
     dependenciesPlugins = dependencies.plugins.get(@[])
@@ -467,7 +467,7 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
       )
       return
   # ダウンロードしたzipファイルのハッシュ値を検証
-  echo "[info] Verifying the hash value of the ZIP file..."
+  showInfo "ZIPファイルのハッシュ値を検証しています..."
   if pluginZipSha3_512Hash != correctPluginZipSha3_512Hash:
     result.err = option(
       Error(
@@ -479,10 +479,10 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
     )
     return
   # プラグインのzipファイルを解凍
-  echo "[info] Extracting the ZIP file..."
+  showInfo "ZIPファイルを解凍しています..."
   extractAll(pluginZipFilePath, tempDestDirPath)
   # 解凍されたファイルをコンテナの指定されたディレクトリに移動
-  echo "[info] Moving files..."
+  showInfo "ファイルを移動しています..."
   for trackedFileOrDir in trackedFilesAndDirs:
     let
       trackedFileOrDirPath = trackedFileOrDir.path
@@ -501,7 +501,7 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
       if trackedFileOrDir.isProtected and destFileOrDirPath.dirExists: break
       moveDir(srcFilePath, destFileOrDirPath)
   # タイプがAfterInstallationであるJobを実行
-  echo "[info] Running tasks..."
+  showInfo "タスクを実行しています..."
   for job in jobs.filterIt(it.id == AfterInstallation):
     for task in job.tasks:
       let workingDir =
@@ -520,7 +520,7 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
           discard task.paths.mapIt(
             execProcess(workingDir / sanitizeFileOrDirName(it)))
   # 解凍されたファイルが存在していたディレクトリを削除
-  echo "[info] Deleting temporary directory..."
+  showInfo "一時ディレクトリを削除しています..."
   removeDir(tempDestDirPath, checkDir = true)
   removeFile pluginZipFilePath
   # インストールしたプラグインの情報をコンテナファイルに書き込む
@@ -548,7 +548,7 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
         previouslyInstalledVersions: @[],
       )
     )
-  echo fmt"[info] Successfully installed plugin: {targetPlugin.id}:{targetPlugin.version}"
+  showInfo fmt"プラグインが正常にインストールされました: {targetPlugin.id}:{targetPlugin.version}"
 
 proc enable*(aucContainerPlugins: AucContainerPlugins, pluginId: string) =
   ## プラグインを有効化する
