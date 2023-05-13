@@ -1,7 +1,8 @@
 import
   os,
   osproc,
-  strutils
+  strutils,
+  terminal
 
 import
   nimcrypto
@@ -9,6 +10,27 @@ import
 import
   types
 
+
+proc echoWithColors*(
+    msg: string,
+    foregroundColor: ForegroundColor,
+    backgroundColor: BackgroundColor = bgDefault
+) =
+  ## 色付きでメッセージを出力する
+  styledEcho(foregroundColor, backgroundColor, msg)
+
+proc occurFatalError*(msg: string) =
+  ## 致命的なエラーを発生させて終了する
+  echoWithColors("[致命的なエラー] " & msg, fgWhite, bgRed)
+  quit(1)
+
+proc occurNonfatalError*(msg: string) =
+  ## 致命的でないエラーを発生させる
+  echoWithColors("[エラー] " & msg, fgRed)
+
+proc showInfo*(msg: string) =
+  ## 情報を表示する
+  echoWithColors("[情報] " & msg, fgCyan)
 
 func sanitizeFileOrDirName*(s: string): string =
   ## ファイル名やディレクトリ名に含まれる使用できない文字をハイフンに置換する

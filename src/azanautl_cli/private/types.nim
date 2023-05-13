@@ -3,6 +3,34 @@ import
   tables
 
 
+type ErrorKind* = enum
+  imageAlreadyExistsError,
+  imageDoesNotExistError,
+  containerAlreadyExistsError,
+  containerDoesNotExistError,
+  invalidZipFileHashValueError,
+  depencyNotSatisfiedError
+
+type Error* = object of CatchableError
+  case kind*: ErrorKind
+  of imageAlreadyExistsError, imageDoesNotExistError:
+    imageId*: string
+  of containerAlreadyExistsError, containerDoesNotExistError:
+    containerId*: string
+  of invalidZipFileHashValueError:
+    zipFilePath*: string
+    expectedHashValue*: string
+    actualHashValue*: string
+  of depencyNotSatisfiedError:
+    depencyName*: string
+    expectedVersions*: seq[string]
+    actualVersion*: string
+
+type Result*[S] = ref object
+  res*: S
+  err*: Option[Error]
+
+
 type Bases* = object
   aviutl_version*: string
   exedit_version*: string
