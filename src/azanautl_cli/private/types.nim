@@ -3,14 +3,6 @@ import
   tables
 
 
-type
-  ImageAlreadyExistsError* = object of CatchableError
-  ImageDoesNotExistError* = object of CatchableError
-  ContainerAlreadyExistsError* = object of CatchableError
-  ContainerDoesNotExistError* = object of CatchableError
-  InvalidZipFileHashValueError* = object of CatchableError
-  DepencyNotSatisfiedError* = object of CatchableError
-
 type ErrorKind* = enum
   imageAlreadyExistsError,
   imageDoesNotExistError,
