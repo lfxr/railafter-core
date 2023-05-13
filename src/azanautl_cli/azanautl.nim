@@ -201,6 +201,7 @@ proc create*(aucContainers: AucContainers,
 
 proc delete*(aucContainers: AucContainers, unsafeContainerId: string): Result[void] =
   ## コンテナを削除する
+  result = result.typeof()()
   let
     sanitizedContainerId = unsafeContainerId.sanitizeFileOrDirName
     targetContainerDirPath = aucContainers.containersDirPath / sanitizedContainerId
