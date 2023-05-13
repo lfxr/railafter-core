@@ -37,7 +37,7 @@ type AucContainers = object
   azanaUtlCli: ref AzanaUtlCli
   containersDirPath: string
 
-type AucPlugins = object
+type AucImagePlugins = object
   aucImage: AucImage
 
 type AucContainer = object
@@ -132,23 +132,23 @@ func image*(auc: ref AzanaUtlCli, unsafeImageId: string): AucImage =
   result.imageFileName = "image.aviutliem.yaml"
   result.imageFilePath = result.imageDirPath / result.imageFileName
 
-func plugins*(aucImage: AucImage): AucPlugins =
+func plugins*(aucImage: AucImage): AucImagePlugins =
   ## image.pluginsコマンド
   result.aucImage = aucImage
 
-proc list*(aucPlugins: AucPlugins): seq[Plugin] =
+proc list*(aucImagePlugins: AucImagePlugins): seq[Plugin] =
   ## イメージ内のプラグイン一覧を返す
-  openImageYamlFile(aucPlugins.aucImage.imageFilePath, fmRead):
+  openImageYamlFile(aucImagePlugins.aucImage.imageFilePath, fmRead):
     return imageYaml.plugins
 
-proc add*(aucPlugins: AucPlugins, plugin: Plugin) =
+proc add*(aucImagePlugins: AucImagePlugins, plugin: Plugin) =
   ## プラグインを追加する
-  openImageYamlFile(aucPlugins.aucImage.imageFilePath, fmWrite):
+  openImageYamlFile(aucImagePlugins.aucImage.imageFilePath, fmWrite):
     imageYaml.plugins.add(plugin)
 
-proc delete*(aucPlugins: AucPlugins, pluginId: string) =
+proc delete*(aucImagePlugins: AucImagePlugins, pluginId: string) =
   ## プラグインを削除する
-  openImageYamlFile(aucPlugins.aucImage.imageFilePath, fmWrite):
+  openImageYamlFile(aucImagePlugins.aucImage.imageFilePath, fmWrite):
     imageYaml.plugins = imageYaml.plugins.filterIt(it.id != pluginId)
 
 
