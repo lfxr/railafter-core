@@ -9,7 +9,7 @@ type ErrorKind* = enum
   containerAlreadyExistsError,
   containerDoesNotExistError,
   invalidZipFileHashValueError,
-  depencyNotSatisfiedError
+  dependencyNotSatisfiedError
 
 type Error* = object of CatchableError
   case kind*: ErrorKind
@@ -21,8 +21,8 @@ type Error* = object of CatchableError
     zipFilePath*: string
     expectedHashValue*: string
     actualHashValue*: string
-  of depencyNotSatisfiedError:
-    depencyName*: string
+  of dependencyNotSatisfiedError:
+    dependencyName*: string
     expectedVersions*: seq[string]
     actualVersion*: string
 
