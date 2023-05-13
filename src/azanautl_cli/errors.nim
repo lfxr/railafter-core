@@ -23,6 +23,6 @@ func message*(err: Error): string =
   of depencyNotSatisfiedError:
     fmt"依存関係'{err.depencyName}'が満たされていません;" & '\n' &
     &"予期されているバージョン: '{err.expectedVersions.join(\",\")}'" &
-    '\n' &
+    '\n' & fmt"実際のバージョン: '{err.actualVersion}'"
     fmt"実際のバージョン: '{err.actualVersion}'"
 
