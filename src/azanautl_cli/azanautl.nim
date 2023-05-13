@@ -331,11 +331,9 @@ proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin,
     ghApi = newGitHubApi()
     destPath = tempSrcDirPath / "asset.zip"
     githubRepository = targetPlugin.githubRepository
-    tag = specifiedPluginVersion.githubReleaseTag.get
   showInfo "ZIPファイルをGitHub API経由でダウンロードしています..."
   ghApi
     .repository(githubRepository)
-    .release(tag)
     .asset(assetId)
     .download(destPath)
   showInfo fmt"プラグインが正常にダウンロードされました: {plugin.id}:{plugin.version}"

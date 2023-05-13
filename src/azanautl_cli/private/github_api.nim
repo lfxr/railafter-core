@@ -16,14 +16,8 @@ type Repository* = object
   owner, repo: string
   url: string
 
-type Release* = object
-  repository: Repository
-  id: int
-  tag: string
-  url: string
-
 type Asset* = object
-  release: Release
+  repository: Repository
   id: int
   url: string
 
@@ -40,24 +34,16 @@ func repository*(api: ref GitHubApi, githubRepository: GitHubRepository): Reposi
   result.url =
     fmt"https://api.github.com/repos/{result.owner}/{result.repo}"
 
-proc release*(repository: Repository, tag: string): Release =
-  ## 指定したタグのリリースを取得
-  let url = fmt"{repository.url}/releases/tags/{tag}"
-  result.repository = repository
-  result.tag = tag
-  result.id = newHttpClient().getContent(url).parseJson["id"].getInt
-
-func asset*(release: Release, id: int): Asset =
+func asset*(repository: Repository, id: int): Asset =
   ## 指定したIDのアセットを取得
-  let repositoryUrl = release.repository.url
-  result.release = release
+  result.repository = repository
   result.id = id
-  result.url = fmt"{repositoryUrl}/releases/assets/{id}"
+  result.url = fmt"{repository.url}/releases/assets/{id}"
 
 proc download*(asset: Asset, filename: string) =
   ## 指定したファイル名でアセットをダウンロード
   let
-    apiVersion = asset.release.repository.api.version
+    apiVersion = asset.repository.api.version
     headers = HttpHeaders(
       table: newTable(
         {
