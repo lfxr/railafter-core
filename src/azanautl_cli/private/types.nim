@@ -13,18 +13,18 @@ type ErrorKind* = enum
 
 type Error* = object of CatchableError
   case kind*: ErrorKind
-  of imageAlreadyExistsError, imageDoesNotExistError:
-    imageId*: string
-  of containerAlreadyExistsError, containerDoesNotExistError:
-    containerId*: string
-  of invalidZipFileHashValueError:
-    zipFilePath*: string
-    expectedHashValue*: string
-    actualHashValue*: string
-  of dependencyNotSatisfiedError:
-    dependencyName*: string
-    expectedVersions*: seq[string]
-    actualVersion*: string
+    of imageAlreadyExistsError, imageDoesNotExistError:
+      imageId*: string
+    of containerAlreadyExistsError, containerDoesNotExistError:
+      containerId*: string
+    of invalidZipFileHashValueError:
+      zipFilePath*: string
+      expectedHashValue*: string
+      actualHashValue*: string
+    of dependencyNotSatisfiedError:
+      dependencyName*: string
+      expectedVersions*: seq[string]
+      actualVersion*: string
 
 type Result*[S] = ref object
   res*: S
@@ -81,7 +81,7 @@ type
     bases*: Option[DependenciesBases]
     plugins*: Option[seq[DependenciesPlugin]]
 
-  PackagesYamlPluginDependencies* = object
+  PackagesYamlPluginDependencies * = object
     conforming_versions*: seq[string]
     body*: Dependencies
 
@@ -127,7 +127,7 @@ type
     id*: JobType
     tasks*: seq[Task]
 
-  PackagesYamlPluginJobs* = object
+  PackagesYamlPluginJobs * = object
     conforming_versions*: seq[string]
     body*: seq[Job]
 
