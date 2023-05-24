@@ -133,6 +133,10 @@ func image*(auc: ref AzanaUtlCli, unsafeImageId: string): AucImage =
   result.imageFileName = "image.aviutliem.yaml"
   result.imageFilePath = result.imageDirPath / result.imageFileName
 
+func exists(aucImage: AucImage): bool =
+  ## イメージが存在するかどうかを返す
+  aucImage.imageFilePath.fileExists
+
 func plugins*(aucImage: AucImage): AucImagePlugins =
   ## image.pluginsコマンド
   result.aucImage = aucImage
@@ -177,9 +181,16 @@ proc create*(aucContainers: AucContainers,
     )
     return
   createDir newContainerDirPath
-  # 対象イメージをイメージファイルから読み込む
   let
-    image = aucContainers.azanaUtlCli.image(unsafeImageId.sanitizeFileOrDirName)
+    sanitizedImageId = unsafeImageId.sanitizeFileOrDirName
+    image = aucContainers.azanaUtlCli.image(sanitizedImageId)
+  # 対象イメージが存在しない場合はエラーを返す
+  if not image.exists:
+    result.err = option(
+      Error(kind: imageDoesNotExistError, imageId: sanitizedImageId)
+    )
+    return
+  # 対象イメージをイメージファイルから読み込む
   openImageYamlFile(image.imageFilePath, fmRead):
     let generatedContainerYaml = ContainerYaml(
       containerId: sanitizedContainerId,
