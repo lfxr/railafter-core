@@ -38,7 +38,7 @@ proc images(args: seq[string]) =
         occurFatalError(
           invalidNumberOfArgsError(commandName, expectedNumberOfArgs, options.len)
         )
-      let 
+      let
         imageId = options[0]
         imageName = options[1]
       auc.images.create(imageId, imageName).err.map(

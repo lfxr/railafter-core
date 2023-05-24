@@ -82,16 +82,16 @@ proc processTrackedFds*(
     let
       srcFdPath = (
         if useMoveTo.src:
-          (case trackedFd.moveTo:
-           of MoveTo.Root: moveToTuple.root 
-           of MoveTo.Plugins: moveToTuple.plugins)
-        else: "") / dirs.src / trackedFd.path
+        (case trackedFd.moveTo:
+          of MoveTo.Root: moveToTuple.root
+          of MoveTo.Plugins: moveToTuple.plugins)
+      else: "") / dirs.src / trackedFd.path
       destFdPath = (
         if useMoveTo.dest:
-          (case trackedFd.moveTo:
-           of MoveTo.Root: moveToTuple.root 
-           of MoveTo.Plugins: moveToTuple.plugins)
-        else: "") / dirs.dest / trackedFd.path
+        (case trackedFd.moveTo:
+          of MoveTo.Root: moveToTuple.root
+          of MoveTo.Plugins: moveToTuple.plugins)
+      else: "") / dirs.dest / trackedFd.path
     case trackedFd.fdType:
     of FdType.File:
       moveFile(srcFdPath, destFdPath)

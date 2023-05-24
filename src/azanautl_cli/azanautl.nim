@@ -128,7 +128,8 @@ proc delete*(aucImages: AucImages, unsafeImageId: string): Result[void] =
 func image*(auc: ref AzanaUtlCli, unsafeImageId: string): AucImage =
   ## imageコマンド
   result.azanaUtlCli = auc
-  result.imageDirPath = auc.appDirPath / "images" / unsafeImageId.sanitizeFileOrDirName
+  result.imageDirPath = auc.appDirPath / "images" /
+      unsafeImageId.sanitizeFileOrDirName
   result.imageFileName = "image.aviutliem.yaml"
   result.imageFilePath = result.imageDirPath / result.imageFileName
 
@@ -171,7 +172,8 @@ proc create*(aucContainers: AucContainers,
     newContainerDirPath = aucContainers.containersDirPath / sanitizedContainerId
   if dirExists(newContainerDirPath):
     result.err = option(
-      Error(kind: containerAlreadyExistsError, containerId: sanitizedContainerId)
+      Error(kind: containerAlreadyExistsError,
+          containerId: sanitizedContainerId)
     )
     return
   createDir newContainerDirPath
@@ -568,7 +570,8 @@ proc enable*(aucContainerPlugins: AucContainerPlugins, pluginId: string) =
     isolatedPluginsDirPath = aucContainerPlugins.aucContainer.isolatedPluginsDirPath
   processTrackedFds(
     trackedFds,
-    (root: aucContainerPlugins.aucContainer.aviutlDirPath, plugins: aucContainerPlugins.dirPath),
+    (root: aucContainerPlugins.aucContainer.aviutlDirPath,
+        plugins: aucContainerPlugins.dirPath),
     (src: false, dest: true),
     (src: isolatedPluginsDirPath / pluginId, dest: "")
   )
@@ -592,7 +595,8 @@ proc disable*(aucContainerPlugins: AucContainerPlugins, pluginId: string) =
     isolatedPluginsDirPath = aucContainerPlugins.aucContainer.isolatedPluginsDirPath
   processTrackedFds(
     trackedFds,
-    (root: aucContainerPlugins.aucContainer.aviutlDirPath, plugins: aucContainerPlugins.dirPath),
+    (root: aucContainerPlugins.aucContainer.aviutlDirPath,
+        plugins: aucContainerPlugins.dirPath),
     (src: true, dest: false),
     (src: "", dest: isolatedPluginsDirPath / pluginId)
   )
