@@ -57,7 +57,7 @@ proc images(args: seq[string]) =
         proc(err: Error) = occurFatalError(err.message)
       )
     else:
-      echo "unknown command"
+      occurFatalError(unknownCommandError("images " & subcommand))
 
 proc image(args: seq[string]) =
   ## imageコマンド
@@ -105,9 +105,9 @@ proc image(args: seq[string]) =
           let pluginId = options[1]
           auc.image(imageId).plugins.delete(pluginId)
         else:
-          echo "unknown command"
+          occurFatalError(unknownCommandError("image plugins " & options[0]))
     else:
-      echo "unknown command"
+      occurFatalError(unknownCommandError("image " & subcommand))
 
 proc containers(args: seq[string]) =
   ## containersコマンド
@@ -153,7 +153,7 @@ proc containers(args: seq[string]) =
         proc(err: Error) = occurFatalError(err.message)
       )
     else:
-      echo "unknown command"
+      occurFatalError(unknownCommandError("containers " & subcommand))
 
 proc container(useBrowser: bool = false, args: seq[string]) =
   ## containerコマンド
@@ -178,6 +178,8 @@ proc container(useBrowser: bool = false, args: seq[string]) =
           auc.container(containerId).bases.get.err.map(
             proc(err: Error) = occurFatalError(err.message)
           )
+        else:
+          occurFatalError(unknownCommandError("container bases " & options[0]))
     of "plugins":
       case options[0]:
         of "download", "dl":
@@ -234,9 +236,9 @@ proc container(useBrowser: bool = false, args: seq[string]) =
           let pluginId = options[1]
           auc.container(containerId).plugins.disable(pluginId)
         else:
-          echo "unknown command"
+          occurFatalError(unknownCommandError("container plugins " & options[0]))
     else:
-      echo "unknown command"
+      occurFatalError(unknownCommandError("container " & subcommand))
 
 proc packages(args: seq[string]) =
   ## packagesコマンド
@@ -260,7 +262,7 @@ proc packages(args: seq[string]) =
           for basis in auc.packages.bases.list:
             echo basis
         else:
-          echo "unknown command"
+          occurFatalError(unknownCommandError("packages bases " & options[0]))
     of "plugins":
       case options[0]
         of "list", "ls":
@@ -286,9 +288,9 @@ proc packages(args: seq[string]) =
           let query = options[0]
           echo auc.packages.plugins.find(query)
         else:
-          echo "unknown command"
+          occurFatalError(unknownCommandError("packages plugins" & options[0]))
     else:
-      echo "unknown command"
+      occurFatalError(unknownCommandError("packages " & subcommand))
 
 
 when isMainModule:
