@@ -97,4 +97,3 @@ proc processTrackedFds*(
       moveFile(srcFdPath, destFdPath)
     of FdType.Dir:
       moveDir(srcFdPath, destFdPath)
-

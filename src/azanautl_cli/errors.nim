@@ -24,4 +24,3 @@ func message*(err: Error): string =
     fmt"依存関係'{err.dependencyName}'が満たされていません;" & '\n' &
     &"予期されているバージョン: '{err.expectedVersions.join(\",\")}'" &
     '\n' & fmt"実際のバージョン: '{err.actualVersion}'"
-
