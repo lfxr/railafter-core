@@ -11,6 +11,7 @@ import
   zippy/ziparchives
 
 import
+  private/cache,
   private/github_api,
   private/packages,
   private/procs,
@@ -21,6 +22,7 @@ import
 type AzanaUtlCli = object
   appDirPath: string
   tempDirPath: string
+  cache: ref Cache
   packages: ref Packages
 
 type AucImages = object
@@ -75,10 +77,12 @@ type AucPackagesPlugins = object
 
 
 proc newAzanaUtlCli*(appDirPath: string): ref AzanaUtlCli =
+  let packagesFilePath = appDirPath / "packages.yaml"
   result = new AzanaUtlCli
   result.appDirPath = appDirPath
   result.tempDirPath = appDirPath / "temp"
-  result.packages = newPackages(appDirPath / "packages.yaml")
+  result.cache = newCache(packagesFilePath, appDirPath / "cache")
+  result.packages = newPackages(packagesFilePath)
 
 proc listDirs(dirPath: string): seq[string] =
   ## 指定されたディレクトリ下のサブディレクトリのパスを返す
@@ -356,6 +360,17 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
     trackedFilesAndDirs =
       packagePlugin.trackedFilesAndDirs(targetPlugin.version)
     jobs = packagePlugin.jobs(targetPlugin.version)
+  # プラグインがキャッシュされていない場合はキャッシュ
+  let cache = aucContainerPlugins.aucContainer.azanautlCli.cache
+  if not cache.plugin(targetPlugin).exists:
+    showInfo "プラグインをキャッシュしています..."
+    result = cache.plugins.cache(targetPlugin, pluginZipFilePath).err.map(
+      proc(err: Error): Result[void] =
+        result = result.typeof()()
+        result.err = option(err)
+        return
+    ).get(result.typeof()())
+    if result.err.isSome: return
   # 依存関係を満たしているか確認
   showInfo "依存関係を確認しています..."
   let
