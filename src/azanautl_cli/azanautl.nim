@@ -311,8 +311,9 @@ proc list*(aucContainerPlugins: AucContainerPlugins): seq[ContainerPlugin] =
     return containerYaml.plugins
 
 proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin,
-    useBrowser: bool = false) =
+    useBrowser: bool = false): Result[void] =
   ## プラグインをダウンロードする
+  result = result.typeof()()
   let
     packages = aucContainerPlugins.aucContainer.azanaUtlCli.packages
     targetPlugin = packages.plugin(plugin.id)
@@ -340,6 +341,16 @@ proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin,
     .repository(githubRepository)
     .asset(assetId)
     .download(destPath)
+  # プラグインがキャッシュされていない場合はキャッシュする
+  let cache = aucContainerPlugins.aucContainer.azanaUtlCli.cache
+  if not cache.plugin(plugin).exists:
+    showinfo "プラグインをキャッシュしています..."
+    result = cache.plugins.cache(plugin, destPath).err.map(
+      func(err: Error): Result[void] =
+        result.err = option(err)
+        return
+    ).get(result.typeof()())
+    if result.err.isSome: return
   showInfo fmt"プラグインが正常にダウンロードされました: {plugin.id}:{plugin.version}"
 
 proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):

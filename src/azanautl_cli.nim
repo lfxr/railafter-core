@@ -191,10 +191,10 @@ proc container(useBrowser: bool = false, args: seq[string]) =
               )
             )
           let plugin = deserializePlugin(options[1])
-          auc
-            .container(containerId)
-            .plugins
-            .download(plugin, useBrowser)
+          auc.container(containerId).plugins.download(plugin, useBrowser)
+            .err.map(
+              proc(err: Error) = occurFatalError(err.message)
+            )
         of "install", "i":
           const commandName = "container plugins install"
           echo commandName
