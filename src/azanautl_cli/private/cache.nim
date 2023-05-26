@@ -82,6 +82,10 @@ proc cache*(
   extractAll(zipFilePath, pluginVersionCacheExtractedDirPath)
 
 
+func exists*(cachePlugin: CachePlugin): bool =
+  dirExists(cachePlugin.dirPath)
+
+
 proc apply*(cachePlugin: CachePlugin, destDirPath: string): Result[void] =
   ## プラグインのキャッシュを適用する
   let
