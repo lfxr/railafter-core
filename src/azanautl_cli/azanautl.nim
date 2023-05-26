@@ -244,7 +244,7 @@ proc list*(aucContainerBases: AucContainerBases): ContainerBases =
 
 proc get*(aucContainerBases: AucContainerBases): Result[void] =
   ## AviUtl本体と拡張編集を入手 (ダウンロード・インストール) する
-  proc get(id, version: string): Result[void] =
+  proc get(id, version: string, cache: ref Cache): Result[void] =
     result = result.typeof()()
     let
       packages = aucContainerBases.aucContainer.azanaUtlCli.packages
@@ -268,6 +268,15 @@ proc get*(aucContainerBases: AucContainerBases): Result[void] =
         )
       )
       return
+    # 基盤がキャッシュされていない場合はキャッシュする
+    let basis = Basis(id: id, version: version)
+    if not cache.basis(basis).exists:
+      result = cache.bases.cache(basis, downloadedFilePath).err.map(
+        func(err: Error): Result[void] =
+          result.err = option(err)
+          return
+      ).get(result.typeof()())
+      if result.err.isSome: return
     # ダウンロードされたファイルを解凍
     extractAll(downloadedFilePath, tempDestDirPath)
     # コンテナのaviutlディレクトリに解凍されたファイルを移動
@@ -283,15 +292,17 @@ proc get*(aucContainerBases: AucContainerBases): Result[void] =
       elif id == "exedit":
         containerYaml.bases.exedit.isInstalled = true
   result = result.typeof()()
-  let res = result
+  let
+    res = result
+    cache = aucContainerBases.aucContainer.azanautlCli.cache
   block:
-    get("aviutl", aucContainerBases.list.aviutl.version).err.map(
+    get("aviutl", aucContainerBases.list.aviutl.version, cache).err.map(
       proc(err: Error) = res.err = option(err)
     )
     if res.err.isSome: return
   sleep 5000
   block:
-    get("exedit", aucContainerBases.list.exedit.version).err.map(
+    get("exedit", aucContainerBases.list.exedit.version, cache).err.map(
       proc(err: Error) = res.err = option(err)
     )
     if res.err.isSome: return
