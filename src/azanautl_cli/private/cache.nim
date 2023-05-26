@@ -14,7 +14,7 @@ import
 const UnextracedZipFileName = "unextracted.zip"
 
 
-type Cache = object
+type Cache* = object
   packages: ref Packages
   dirPath: string
 
@@ -52,6 +52,7 @@ proc cache*(
     plugin: Plugin,
     zipFilePath: string
 ): Result[void] =
+  result = result.typeof()()
   let
     packages = cachePlugins.cache.packages
     pluginVersionCacheDirPath = cachePlugins.dirPath / plugin.id / plugin.version
@@ -71,12 +72,13 @@ proc cache*(
        )
     )
     return
+  # ZIPファイルのコピー先ディレクトリを作成
+  createDir(pluginVersionCacheDirPath)
 
   # ZIPファイルをコピー
   copyFile(zipFilePath, pluginVersionCacheDirPath / "unextracted.zip")
 
-  # ZIPファイルを展開して生成されたファイル群を, 作成した展開先ディレクトリにコピー
-  createDir(pluginVersionCacheExtractedDirPath)
+  # ZIPファイルを展開して生成されたファイル群を, 展開先ディレクトリにコピー
   extractAll(zipFilePath, pluginVersionCacheExtractedDirPath)
 
 
