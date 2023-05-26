@@ -11,7 +11,9 @@ import
   types
 
 
-const UnextracedZipFileName = "unextracted.zip"
+const
+  ExtractedDirName = "extracted"
+  UnextracedZipFileName = "unextracted.zip"
 
 
 type Cache* = object
@@ -67,7 +69,7 @@ proc cache*(
   let
     packages = cachePlugins.cache.packages
     pluginVersionCacheDirPath = cachePlugins.dirPath / plugin.id / plugin.version
-    pluginVersionCacheExtractedDirPath = pluginVersionCacheDirPath / "extracted"
+    pluginVersionCacheExtractedDirPath = pluginVersionCacheDirPath / ExtractedDirName
     expectedHashValue =
       packages.plugin(plugin.id).version(plugin.version).sha3_512_hash
     actualHashValue = sha3_512File(zipFilePath)
@@ -87,7 +89,7 @@ proc cache*(
   createDir(pluginVersionCacheDirPath)
 
   # ZIPファイルをコピー
-  copyFile(zipFilePath, pluginVersionCacheDirPath / "unextracted.zip")
+  copyFile(zipFilePath, pluginVersionCacheDirPath / UnextracedZipFileName)
 
   # ZIPファイルを展開して生成されたファイル群を, 展開先ディレクトリにコピー
   extractAll(zipFilePath, pluginVersionCacheExtractedDirPath)
@@ -146,7 +148,7 @@ proc cache*(
   let
     packages = cacheBases.cache.packages
     basisVersionCacheDirPath = cacheBases.dirPath / basis.id / basis.version
-    basisVersionCacheExtractedDirPath = basisVersionCacheDirPath / "extracted"
+    basisVersionCacheExtractedDirPath = basisVersionCacheDirPath / ExtractedDirName
     expectedHashValue =
       packages.basis(basis.id).version(basis.version).sha3_512_hash
     actualHashValue = sha3_512File(zipFilePath)
@@ -167,7 +169,7 @@ proc cache*(
   createDir(basisVersionCacheDirPath)
 
   # ZIPファイルをコピー
-  copyFile(zipFilePath, basisVersionCacheDirPath / "unextracted.zip")
+  copyFile(zipFilePath, basisVersionCacheDirPath / UnextracedZipFileName)
 
   # ZIPファイルを展開して生成されたファイル群を, 展開先ディレクトリにコピー
   extractAll(zipFilePath, basisVersionCacheExtractedDirPath)
