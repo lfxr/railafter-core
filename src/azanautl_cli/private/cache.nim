@@ -99,14 +99,15 @@ func exists*(cachePlugin: CachePlugin): bool =
   dirExists(cachePlugin.dirPath)
 
 
-proc apply*(cachePlugin: CachePlugin, destDirPath: string): Result[void] =
+proc apply*(cachePlugin: CachePlugin, destFilePath: string): Result[void] =
   ## プラグインのキャッシュを適用する
+  result = result.typeof()()
   let
     packages = cachePlugin.cache.packages
     plugin = cachePlugin.plugin
     expectedHashValue =
       packages.plugin(plugin.id).version(plugin.version).sha3_512_hash
-    actualHashValue = sha3_512File(cachePlugin.dirPath)
+    actualHashValue = sha3_512File(cachePlugin.dirPath / UnextracedZipFileName)
 
   # ZIPファイルのハッシュ値を検証
   if expectedHashValue != actualHashValue:
@@ -123,7 +124,7 @@ proc apply*(cachePlugin: CachePlugin, destDirPath: string): Result[void] =
   # ZIPファイルをコピー
   copyFile(
     cachePlugin.dirPath / UnextracedZipFileName,
-    destDirPath / UnextracedZipFileName
+    destFilePath
   )
 
 
@@ -179,14 +180,15 @@ func exists*(cacheBasis: CacheBasis): bool =
   dirExists(cacheBasis.dirPath)
 
 
-proc apply*(cacheBasis: CacheBasis, destDirPath: string): Result[void] =
+proc apply*(cacheBasis: CacheBasis, destFilePath: string): Result[void] =
   ## 基盤のキャッシュを適用する
+  result = result.typeof()()
   let
     packages = cacheBasis.cache.packages
     basis = cacheBasis.basis
     expectedHashValue =
       packages.basis(basis.id).version(basis.version).sha3_512_hash
-    actualHashValue = sha3_512File(cacheBasis.dirPath)
+    actualHashValue = sha3_512File(cacheBasis.dirPath / UnextracedZipFileName)
 
   # ZIPファイルのハッシュ値を検証
   if expectedHashValue != actualHashValue:
@@ -203,6 +205,6 @@ proc apply*(cacheBasis: CacheBasis, destDirPath: string): Result[void] =
   # ZIPファイルをコピー
   copyFile(
     cacheBasis.dirPath / UnextracedZipFileName,
-    destDirPath / UnextracedZipFileName
+    destFilePath
   )
 
