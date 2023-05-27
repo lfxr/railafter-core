@@ -100,7 +100,6 @@ func jobs*(p: PackagesPlugin, version: string): seq[Job] =
       return jobs.body
 
 
-
 func bases*(p: ref Packages): PackagesBases =
   ## packages.basesコマンド
   result.packages = p
