@@ -11,6 +11,7 @@ import
   zippy/ziparchives
 
 import
+  private/cache,
   private/github_api,
   private/packages,
   private/procs,
@@ -21,6 +22,7 @@ import
 type AzanaUtlCli = object
   appDirPath: string
   tempDirPath: string
+  cache: ref Cache
   packages: ref Packages
 
 type AucImages = object
@@ -75,10 +77,12 @@ type AucPackagesPlugins = object
 
 
 proc newAzanaUtlCli*(appDirPath: string): ref AzanaUtlCli =
+  let packagesFilePath = appDirPath / "packages.yaml"
   result = new AzanaUtlCli
   result.appDirPath = appDirPath
   result.tempDirPath = appDirPath / "temp"
-  result.packages = newPackages(appDirPath / "packages.yaml")
+  result.cache = newCache(packagesFilePath, appDirPath / "cache")
+  result.packages = newPackages(packagesFilePath)
 
 proc listDirs(dirPath: string): seq[string] =
   ## 指定されたディレクトリ下のサブディレクトリのパスを返す
@@ -253,20 +257,30 @@ proc list*(aucContainerBases: AucContainerBases): ContainerBases =
 
 proc get*(aucContainerBases: AucContainerBases): Result[void] =
   ## AviUtl本体と拡張編集を入手 (ダウンロード・インストール) する
-  proc get(id, version: string): Result[void] =
+  proc get(id, version: string, cache: ref Cache): Result[void] =
     result = result.typeof()()
     let
       packages = aucContainerBases.aucContainer.azanaUtlCli.packages
-      targetBasis = packages.basis(id).version(version)
+      targetBasisPackage = packages.basis(id).version(version)
       tempSrcDirPath = aucContainerBases.tempSrcDirPath
       tempDestDirPath = aucContainerBases.tempDestDirPath
       dirPath = aucContainerBases.dirPath
       downloadedFilePath = tempSrcDirPath / id & ".zip"
-    newHttpClient().downloadFile(targetBasis.url, downloadedFilePath)
+    # キャッシュが存在する場合はインターネットからダウンロードせずキャッシュを適用する
+    let
+      res = result
+      targetBasis = Basis(id: id, version: version)
+    if cache.basis(targetBasis).exists:
+      cache.basis(targetBasis).apply(downloadedFilePath).err.map(
+        func(err: Error): void = res.err = option(err)
+      )
+      if res.err.isSome: return
+    else:
+      newHttpClient().downloadFile(targetBasisPackage.url, downloadedFilePath)
     # ダウンロードされたファイルのハッシュ値を検証
     let
       downloadedFileSha3_512Hash = sha3_512File(downloadedFilePath)
-      correctDownloadedFileSha3_512Hash = targetBasis.sha3_512_hash
+      correctDownloadedFileSha3_512Hash = targetBasisPackage.sha3_512_hash
     if downloadedFileSha3_512Hash != correctDownloadedFileSha3_512Hash:
       result.err = option(
         Error(
@@ -277,6 +291,15 @@ proc get*(aucContainerBases: AucContainerBases): Result[void] =
         )
       )
       return
+    # 基盤がキャッシュされていない場合はキャッシュする
+    let basis = Basis(id: id, version: version)
+    if not cache.basis(basis).exists:
+      result = cache.bases.cache(basis, downloadedFilePath).err.map(
+        func(err: Error): Result[void] =
+          result.err = option(err)
+          return
+      ).get(result.typeof()())
+      if result.err.isSome: return
     # ダウンロードされたファイルを解凍
     extractAll(downloadedFilePath, tempDestDirPath)
     # コンテナのaviutlディレクトリに解凍されたファイルを移動
@@ -292,15 +315,17 @@ proc get*(aucContainerBases: AucContainerBases): Result[void] =
       elif id == "exedit":
         containerYaml.bases.exedit.isInstalled = true
   result = result.typeof()()
-  let res = result
+  let
+    res = result
+    cache = aucContainerBases.aucContainer.azanautlCli.cache
   block:
-    get("aviutl", aucContainerBases.list.aviutl.version).err.map(
+    get("aviutl", aucContainerBases.list.aviutl.version, cache).err.map(
       proc(err: Error) = res.err = option(err)
     )
     if res.err.isSome: return
   sleep 5000
   block:
-    get("exedit", aucContainerBases.list.exedit.version).err.map(
+    get("exedit", aucContainerBases.list.exedit.version, cache).err.map(
       proc(err: Error) = res.err = option(err)
     )
     if res.err.isSome: return
@@ -320,35 +345,55 @@ proc list*(aucContainerPlugins: AucContainerPlugins): seq[ContainerPlugin] =
     return containerYaml.plugins
 
 proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin,
-    useBrowser: bool = false) =
+    useBrowser: bool = false): Result[void] =
   ## プラグインをダウンロードする
+  result = result.typeof()()
   let
+    cache = aucContainerPlugins.aucContainer.azanautlCli.cache
     packages = aucContainerPlugins.aucContainer.azanaUtlCli.packages
     targetPlugin = packages.plugin(plugin.id)
     specifiedPluginVersion = targetPlugin.version(plugin.version)
     tempSrcDirPath = aucContainerPlugins.tempSrcDirPath
     assetId = specifiedPluginVersion.githubAssetId.get(-1)
-  if useBrowser or assetId == -1:
-    if not useBrowser:
-      occurNonfatalError "このプラグインをGitHub API経由でダウンロードできません"
-      showInfo "代わりにデフォルトブラウザを使用します"
-    # プラグインの配布ページをデフォルトブラウザで開く
-    showInfo "プラグインの配布ページをデフォルトブラウザで開いています..."
-    openDefaultBrowser(specifiedPluginVersion.url)
-    # tempSrcディレクトリをエクスプローラーで開く
-    showInfo "一時ディレクトリをエクスプローラーで開いています..."
-    revealDirInExplorer(tempSrcDirPath)
-    return
-  # GitHub APIを使ってZIPファイルをダウンロードする
-  let
-    ghApi = newGitHubApi()
-    destPath = tempSrcDirPath / "asset.zip"
-    githubRepository = targetPlugin.githubRepository
-  showInfo "ZIPファイルをGitHub API経由でダウンロードしています..."
-  ghApi
-    .repository(githubRepository)
-    .asset(assetId)
-    .download(destPath)
+  # キャッシュが存在する場合はせずキャッシュを適用する
+  if cache.plugin(plugin).exists:
+    let res = result
+    cache.plugin(plugin).apply(tempSrcDirPath / "asset.zip").err.map(
+      func(err: Error): void = res.err = option(err)
+    )
+    if res.err.isSome: return
+    showInfo "キャッシュを適用しました"
+  else:
+    if useBrowser or assetId == -1:
+      if not useBrowser:
+        occurNonfatalError "このプラグインをGitHub API経由でダウンロードできません"
+        showInfo "代わりにデフォルトブラウザを使用します"
+      # プラグインの配布ページをデフォルトブラウザで開く
+      showInfo "プラグインの配布ページをデフォルトブラウザで開いています..."
+      openDefaultBrowser(specifiedPluginVersion.url)
+      # tempSrcディレクトリをエクスプローラーで開く
+      showInfo "一時ディレクトリをエクスプローラーで開いています..."
+      revealDirInExplorer(tempSrcDirPath)
+      return
+    # GitHub APIを使ってZIPファイルをダウンロードする
+    let
+      ghApi = newGitHubApi()
+      destPath = tempSrcDirPath / "asset.zip"
+      githubRepository = targetPlugin.githubRepository
+    showInfo "ZIPファイルをGitHub API経由でダウンロードしています..."
+    ghApi
+      .repository(githubRepository)
+      .asset(assetId)
+      .download(destPath)
+    # プラグインがキャッシュされていない場合はキャッシュする
+    if not cache.plugin(plugin).exists:
+      showinfo "プラグインをキャッシュしています..."
+      result = cache.plugins.cache(plugin, destPath).err.map(
+        func(err: Error): Result[void] =
+          result.err = option(err)
+          return
+      ).get(result.typeof()())
+      if result.err.isSome: return
   showInfo fmt"プラグインが正常にダウンロードされました: {plugin.id}:{plugin.version}"
 
 proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
@@ -369,6 +414,17 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
     trackedFilesAndDirs =
       packagePlugin.trackedFilesAndDirs(targetPlugin.version)
     jobs = packagePlugin.jobs(targetPlugin.version)
+  # プラグインがキャッシュされていない場合はキャッシュ
+  let cache = aucContainerPlugins.aucContainer.azanautlCli.cache
+  if not cache.plugin(targetPlugin).exists:
+    showInfo "プラグインをキャッシュしています..."
+    result = cache.plugins.cache(targetPlugin, pluginZipFilePath).err.map(
+      proc(err: Error): Result[void] =
+        result = result.typeof()()
+        result.err = option(err)
+        return
+    ).get(result.typeof()())
+    if result.err.isSome: return
   # 依存関係を満たしているか確認
   showInfo "依存関係を確認しています..."
   let

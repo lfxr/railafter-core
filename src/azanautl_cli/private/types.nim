@@ -30,6 +30,8 @@ type Result*[S] = ref object
   res*: S
   err*: Option[Error]
 
+type Basis* = object
+  id*, version*: string
 
 type Bases* = object
   aviutl_version*: string
