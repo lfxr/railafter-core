@@ -248,16 +248,26 @@ proc get*(aucContainerBases: AucContainerBases): Result[void] =
     result = result.typeof()()
     let
       packages = aucContainerBases.aucContainer.azanaUtlCli.packages
-      targetBasis = packages.basis(id).version(version)
+      targetBasisPackage = packages.basis(id).version(version)
       tempSrcDirPath = aucContainerBases.tempSrcDirPath
       tempDestDirPath = aucContainerBases.tempDestDirPath
       dirPath = aucContainerBases.dirPath
       downloadedFilePath = tempSrcDirPath / id & ".zip"
-    newHttpClient().downloadFile(targetBasis.url, downloadedFilePath)
+    # キャッシュが存在する場合はインターネットからダウンロードせずキャッシュを適用する
+    let
+      res = result
+      targetBasis = Basis(id: id, version: version)
+    if cache.basis(targetBasis).exists:
+      cache.basis(targetBasis).apply(downloadedFilePath).err.map(
+        func(err: Error): void = res.err = option(err)
+      )
+      if res.err.isSome: return
+    else:
+      newHttpClient().downloadFile(targetBasisPackage.url, downloadedFilePath)
     # ダウンロードされたファイルのハッシュ値を検証
     let
       downloadedFileSha3_512Hash = sha3_512File(downloadedFilePath)
-      correctDownloadedFileSha3_512Hash = targetBasis.sha3_512_hash
+      correctDownloadedFileSha3_512Hash = targetBasisPackage.sha3_512_hash
     if downloadedFileSha3_512Hash != correctDownloadedFileSha3_512Hash:
       result.err = option(
         Error(
