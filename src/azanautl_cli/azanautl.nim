@@ -336,42 +336,51 @@ proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin,
   ## プラグインをダウンロードする
   result = result.typeof()()
   let
+    cache = aucContainerPlugins.aucContainer.azanautlCli.cache
     packages = aucContainerPlugins.aucContainer.azanaUtlCli.packages
     targetPlugin = packages.plugin(plugin.id)
     specifiedPluginVersion = targetPlugin.version(plugin.version)
     tempSrcDirPath = aucContainerPlugins.tempSrcDirPath
     assetId = specifiedPluginVersion.githubAssetId.get(-1)
-  if useBrowser or assetId == -1:
-    if not useBrowser:
-      occurNonfatalError "このプラグインをGitHub API経由でダウンロードできません"
-      showInfo "代わりにデフォルトブラウザを使用します"
-    # プラグインの配布ページをデフォルトブラウザで開く
-    showInfo "プラグインの配布ページをデフォルトブラウザで開いています..."
-    openDefaultBrowser(specifiedPluginVersion.url)
-    # tempSrcディレクトリをエクスプローラーで開く
-    showInfo "一時ディレクトリをエクスプローラーで開いています..."
-    revealDirInExplorer(tempSrcDirPath)
-    return
-  # GitHub APIを使ってZIPファイルをダウンロードする
-  let
-    ghApi = newGitHubApi()
-    destPath = tempSrcDirPath / "asset.zip"
-    githubRepository = targetPlugin.githubRepository
-  showInfo "ZIPファイルをGitHub API経由でダウンロードしています..."
-  ghApi
-    .repository(githubRepository)
-    .asset(assetId)
-    .download(destPath)
-  # プラグインがキャッシュされていない場合はキャッシュする
-  let cache = aucContainerPlugins.aucContainer.azanaUtlCli.cache
-  if not cache.plugin(plugin).exists:
-    showinfo "プラグインをキャッシュしています..."
-    result = cache.plugins.cache(plugin, destPath).err.map(
-      func(err: Error): Result[void] =
-        result.err = option(err)
-        return
-    ).get(result.typeof()())
-    if result.err.isSome: return
+  # キャッシュが存在する場合はせずキャッシュを適用する
+  if cache.plugin(plugin).exists:
+    let res = result
+    cache.plugin(plugin).apply(tempSrcDirPath / "asset.zip").err.map(
+      func(err: Error): void = res.err = option(err)
+    )
+    if res.err.isSome: return
+    showInfo "キャッシュを適用しました"
+  else:
+    if useBrowser or assetId == -1:
+      if not useBrowser:
+        occurNonfatalError "このプラグインをGitHub API経由でダウンロードできません"
+        showInfo "代わりにデフォルトブラウザを使用します"
+      # プラグインの配布ページをデフォルトブラウザで開く
+      showInfo "プラグインの配布ページをデフォルトブラウザで開いています..."
+      openDefaultBrowser(specifiedPluginVersion.url)
+      # tempSrcディレクトリをエクスプローラーで開く
+      showInfo "一時ディレクトリをエクスプローラーで開いています..."
+      revealDirInExplorer(tempSrcDirPath)
+      return
+    # GitHub APIを使ってZIPファイルをダウンロードする
+    let
+      ghApi = newGitHubApi()
+      destPath = tempSrcDirPath / "asset.zip"
+      githubRepository = targetPlugin.githubRepository
+    showInfo "ZIPファイルをGitHub API経由でダウンロードしています..."
+    ghApi
+      .repository(githubRepository)
+      .asset(assetId)
+      .download(destPath)
+    # プラグインがキャッシュされていない場合はキャッシュする
+    if not cache.plugin(plugin).exists:
+      showinfo "プラグインをキャッシュしています..."
+      result = cache.plugins.cache(plugin, destPath).err.map(
+        func(err: Error): Result[void] =
+          result.err = option(err)
+          return
+      ).get(result.typeof()())
+      if result.err.isSome: return
   showInfo fmt"プラグインが正常にダウンロードされました: {plugin.id}:{plugin.version}"
 
 proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
