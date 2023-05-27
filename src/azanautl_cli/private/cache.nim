@@ -50,11 +50,13 @@ proc newCache*(packagesFilePath, dirPath: string): ref Cache =
 
 
 func plugins*(cache: ref Cache): CachePlugins =
+  ## cache.pluginsコマンド
   result.cache = cache
   result.dirPath = cache.dirPath / "plugins"
 
 
 func plugin*(cache: ref Cache, plugin: Plugin): CachePlugin =
+  ## cache.pluginコマンド
   result.cache = cache
   result.plugin = plugin
   result.dirPath = cache.plugins.dirPath / plugin.id / plugin.version
@@ -65,6 +67,7 @@ proc cache*(
     plugin: Plugin,
     zipFilePath: string
 ): Result[void] =
+  ## プラグインをキャッシュする
   result = result.typeof()()
   let
     packages = cachePlugins.cache.packages
@@ -96,6 +99,7 @@ proc cache*(
 
 
 func exists*(cachePlugin: CachePlugin): bool =
+  ## プラグインのキャッシュが存在するかどうかを返す
   dirExists(cachePlugin.dirPath)
 
 
@@ -129,11 +133,13 @@ proc apply*(cachePlugin: CachePlugin, destFilePath: string): Result[void] =
 
 
 func bases*(cache: ref Cache): CacheBases =
+  ## cache.basesコマンド
   result.cache = cache
   result.dirPath = cache.dirPath / "bases"
 
 
 func basis*(cache: ref Cache, basis: Basis): CacheBasis =
+  ## cache.basisコマンド
   result.cache = cache
   result.basis = basis
   result.dirPath = cache.bases.dirPath / basis.id / basis.version
@@ -177,6 +183,7 @@ proc cache*(
 
 
 func exists*(cacheBasis: CacheBasis): bool =
+  ## 基盤のキャッシュが存在するかどうかを返す
   dirExists(cacheBasis.dirPath)
 
 
