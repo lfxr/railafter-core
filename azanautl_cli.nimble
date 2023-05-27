@@ -38,3 +38,4 @@ task apidocs, "Generate API documentation":
 
 task typos, "Check for typos":
   exec "typos"
+

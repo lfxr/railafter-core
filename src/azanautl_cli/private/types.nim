@@ -11,6 +11,7 @@ type ErrorKind* = enum
   invalidZipFileHashValueError,
   dependencyNotSatisfiedError
 
+
 type Error* = object of CatchableError
   case kind*: ErrorKind
     of imageAlreadyExistsError, imageDoesNotExistError:
@@ -26,24 +27,30 @@ type Error* = object of CatchableError
       expectedVersions*: seq[string]
       actualVersion*: string
 
+
 type Result*[S] = ref object
   res*: S
   err*: Option[Error]
 
+
 type Basis* = object
   id*, version*: string
+
 
 type Bases* = object
   aviutl_version*: string
   exedit_version*: string
 
+
 type Plugin* = object
   id*: string
   version*: string
 
+
 type Script = object
   id*: string
   version*: string
+
 
 type ImageYaml* = object
   image_id*, image_name*: string
@@ -55,11 +62,13 @@ type ImageYaml* = object
 type ContainerBases* = object
   aviutl*, exedit*: tuple[version: string, is_installed: bool]
 
+
 type ContainerPlugin* = object
   id*: string
   version*: string
   is_installed*, is_enabled*: bool
   previously_installed_versions*: seq[string]
+
 
 type ContainerYaml* = object
   container_id*, container_name*: string
@@ -70,6 +79,7 @@ type ContainerYaml* = object
 type GitHubRepository* = tuple
   owner: string
   repo: string
+
 
 type
   DependenciesBases* = object
@@ -86,6 +96,7 @@ type
   PackagesYamlPluginDependencies * = object
     conforming_versions*: seq[string]
     body*: Dependencies
+
 
 type
   FdType* = enum
@@ -105,6 +116,7 @@ type
   PackagesYamlPluginTrackedFilesAndDirs * = object
     conforming_versions*: seq[string]
     body*: seq[TrackedFilesAndDirs]
+
 
 type
   JobType* = enum
@@ -133,6 +145,7 @@ type
     conforming_versions*: seq[string]
     body*: seq[Job]
 
+
 type PackagesYamlPluginVersion* = object
   version*: string
   is_latest*: bool
@@ -142,6 +155,7 @@ type PackagesYamlPluginVersion* = object
   sha3_512_hash*: string
   released_on*: string
   tracked_file_or_dir_hashes*: Table[string, string]
+
 
 type PackagesYamlPlugin* = object
   id*: string
@@ -158,10 +172,12 @@ type PackagesYamlPlugin* = object
   jobs*: Option[seq[PackagesYamlPluginJobs]]
   versions*: seq[PackagesYamlPluginVersion]
 
+
 type PackagesYamlBasisVersion* = object
   version*: string
   url*: string
   sha3_512_hash*: string
+
 
 type PackagesYamlBasis* = object
   id*: string
@@ -170,6 +186,8 @@ type PackagesYamlBasis* = object
   website*: string
   versions*: seq[PackagesYamlBasisVersion]
 
+
 type PackagesYaml* = object
   bases*: seq[PackagesYamlBasis]
   plugins*: seq[PackagesYamlPlugin]
+

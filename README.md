@@ -94,3 +94,4 @@ nimble install -dy
 Copyright (c) 2023 Lafixier Furude
 
 [MITライセンス](LICENSE.txt)でライセンスされています。
+

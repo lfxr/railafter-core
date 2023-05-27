@@ -59,6 +59,7 @@ proc images(args: seq[string]) =
     else:
       occurFatalError(unknownCommandError("images " & subcommand))
 
+
 proc image(args: seq[string]) =
   ## imageコマンド
   echo "image command"
@@ -109,6 +110,7 @@ proc image(args: seq[string]) =
     else:
       occurFatalError(unknownCommandError("image " & subcommand))
 
+
 proc containers(args: seq[string]) =
   ## containersコマンド
   echo "containers command"
@@ -154,6 +156,7 @@ proc containers(args: seq[string]) =
       )
     else:
       occurFatalError(unknownCommandError("containers " & subcommand))
+
 
 proc container(useBrowser: bool = false, args: seq[string]) =
   ## containerコマンド
@@ -240,6 +243,7 @@ proc container(useBrowser: bool = false, args: seq[string]) =
     else:
       occurFatalError(unknownCommandError("container " & subcommand))
 
+
 proc packages(args: seq[string]) =
   ## packagesコマンド
   echo "packages command"
@@ -302,3 +306,4 @@ when isMainModule:
     [azanautl_cli.container, short = {"useBrowser": 'b'}],
     [azanautl_cli.packages]
   )
+

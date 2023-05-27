@@ -25,9 +25,11 @@ type AzanaUtlCli = object
   cache: ref Cache
   packages: ref Packages
 
+
 type AucImages = object
   azanaUtlCli: ref AzanaUtlCli
   imagesDirPath: string
+
 
 type AucImage = object
   azanaUtlCli: ref AzanaUtlCli
@@ -35,12 +37,15 @@ type AucImage = object
   imageFileName: string
   imageFilePath: string
 
+
 type AucContainers = object
   azanaUtlCli: ref AzanaUtlCli
   containersDirPath: string
 
+
 type AucImagePlugins = object
   aucImage: AucImage
+
 
 type AucContainer = object
   azanaUtlCli: ref AzanaUtlCli
@@ -52,12 +57,14 @@ type AucContainer = object
   isolatedDirPath: string
   isolatedPluginsDirPath: string
 
+
 type AucContainerPlugins = object
   aucContainer: AucContainer
   dirPath: string
   tempDirPath: string
   tempSrcDirPath: string
   tempDestDirPath: string
+
 
 type AucContainerBases = object
   aucContainer: AucContainer
@@ -66,11 +73,14 @@ type AucContainerBases = object
   tempSrcDirPath: string
   tempDestDirPath: string
 
+
 type AucPackages = object
   azanaUtlCli: ref AzanaUtlCli
 
+
 type AucPackagesBases = object
   aucPackages: AucPackages
+
 
 type AucPackagesPlugins = object
   aucPackages: AucPackages
@@ -84,20 +94,24 @@ proc newAzanaUtlCli*(appDirPath: string): ref AzanaUtlCli =
   result.cache = newCache(packagesFilePath, appDirPath / "cache")
   result.packages = newPackages(packagesFilePath)
 
+
 proc listDirs(dirPath: string): seq[string] =
   ## 指定されたディレクトリ下のサブディレクトリのパスを返す
   for fileOrDir in walkDir(dirPath):
     result.add(fileOrDir.path)
+
 
 func images*(auc: ref AzanaUtlCli): AucImages =
   ## imagesコマンド
   result.azanaUtlCli = auc
   result.imagesDirPath = auc.appDirPath / "images"
 
+
 proc list*(aucImages: AucImages): seq[string] =
   ## イメージ一覧を返す
   for fileOrDir in aucImages.imagesDirPath.listDirs:
     result.add(fileOrDir.splitPath.tail)
+
 
 proc create*(aucImages: AucImages, unsafeImageId, imageName: string): Result[void] =
   ## イメージを作成する
@@ -113,6 +127,7 @@ proc create*(aucImages: AucImages, unsafeImageId, imageName: string): Result[voi
   createDir newImageDirPath
   openImageYamlFile(newImageDirPath / "image.aviutliem.yaml", fmWrite):
     imageYaml = ImageYaml(imageId: sanitizedImageId, imageName: imageName)
+
 
 proc delete*(aucImages: AucImages, unsafeImageId: string): Result[void] =
   ## イメージを削除する
@@ -137,23 +152,28 @@ func image*(auc: ref AzanaUtlCli, unsafeImageId: string): AucImage =
   result.imageFileName = "image.aviutliem.yaml"
   result.imageFilePath = result.imageDirPath / result.imageFileName
 
+
 func exists(aucImage: AucImage): bool =
   ## イメージが存在するかどうかを返す
   aucImage.imageFilePath.fileExists
 
+
 func plugins*(aucImage: AucImage): AucImagePlugins =
   ## image.pluginsコマンド
   result.aucImage = aucImage
+
 
 proc list*(aucImagePlugins: AucImagePlugins): seq[Plugin] =
   ## イメージ内のプラグイン一覧を返す
   openImageYamlFile(aucImagePlugins.aucImage.imageFilePath, fmRead):
     return imageYaml.plugins
 
+
 proc add*(aucImagePlugins: AucImagePlugins, plugin: Plugin) =
   ## プラグインを追加する
   openImageYamlFile(aucImagePlugins.aucImage.imageFilePath, fmWrite):
     imageYaml.plugins.add(plugin)
+
 
 proc delete*(aucImagePlugins: AucImagePlugins, pluginId: string) =
   ## プラグインを削除する
@@ -166,10 +186,12 @@ func containers*(auc: ref AzanaUtlCli): AucContainers =
   result.azanaUtlCli = auc
   result.containersDirPath = auc.appDirPath / "containers"
 
+
 proc list*(aucContainers: AucContainers): seq[string] =
   ## コンテナ一覧を返す
   for fileOrDir in aucContainers.containersDirPath.listDirs:
     result.add(fileOrDir.splitPath.tail)
+
 
 proc create*(aucContainers: AucContainers,
     unsafeContainerId, containerName, unsafeImageId: string): Result[void] =
@@ -188,6 +210,7 @@ proc create*(aucContainers: AucContainers,
   let
     sanitizedImageId = unsafeImageId.sanitizeFileOrDirName
     image = aucContainers.azanaUtlCli.image(sanitizedImageId)
+
   # 対象イメージが存在しない場合はエラーを返す
   if not image.exists:
     result.err = option(
@@ -216,6 +239,7 @@ proc create*(aucContainers: AucContainers,
     openContainerYamlFile(newContainerDirPath / "container.aviutliem.yaml", fmWrite):
       containerYaml = generatedContainerYaml
 
+
 proc delete*(aucContainers: AucContainers, unsafeContainerId: string): Result[void] =
   ## コンテナを削除する
   result = result.typeof()()
@@ -230,6 +254,7 @@ proc delete*(aucContainers: AucContainers, unsafeContainerId: string): Result[vo
     )
     return
 
+
 func container*(auc: ref AzanaUtlCli, unsafeContainerId: string): AucContainer =
   ## containerコマンド
   let sanitizedContainerId = unsafeContainerId.sanitizeFileOrDirName
@@ -242,6 +267,7 @@ func container*(auc: ref AzanaUtlCli, unsafeContainerId: string): AucContainer =
   result.isolatedDirPath = result.containerDirPath / "isolated"
   result.isolatedPluginsDirPath = result.isolatedDirPath / "plugins"
 
+
 func bases*(aucContainer: AucContainer): AucContainerBases =
   ## container.baseコマンド
   result.aucContainer = aucContainer
@@ -250,10 +276,12 @@ func bases*(aucContainer: AucContainer): AucContainerBases =
   result.tempSrcDirPath = result.tempDirPath / "src"
   result.tempDestDirPath = result.tempDirPath / "dest"
 
+
 proc list*(aucContainerBases: AucContainerBases): ContainerBases =
   ## コンテナ内の基盤を返す
   openContainerYamlFile(aucContainerBases.aucContainer.containerFilePath, fmRead):
     return containerYaml.bases
+
 
 proc get*(aucContainerBases: AucContainerBases): Result[void] =
   ## AviUtl本体と拡張編集を入手 (ダウンロード・インストール) する
@@ -266,6 +294,7 @@ proc get*(aucContainerBases: AucContainerBases): Result[void] =
       tempDestDirPath = aucContainerBases.tempDestDirPath
       dirPath = aucContainerBases.dirPath
       downloadedFilePath = tempSrcDirPath / id & ".zip"
+
     # キャッシュが存在する場合はインターネットからダウンロードせずキャッシュを適用する
     let
       res = result
@@ -277,6 +306,7 @@ proc get*(aucContainerBases: AucContainerBases): Result[void] =
       if res.err.isSome: return
     else:
       newHttpClient().downloadFile(targetBasisPackage.url, downloadedFilePath)
+
     # ダウンロードされたファイルのハッシュ値を検証
     let
       downloadedFileSha3_512Hash = sha3_512File(downloadedFilePath)
@@ -291,6 +321,7 @@ proc get*(aucContainerBases: AucContainerBases): Result[void] =
         )
       )
       return
+
     # 基盤がキャッシュされていない場合はキャッシュする
     let basis = Basis(id: id, version: version)
     if not cache.basis(basis).exists:
@@ -300,20 +331,25 @@ proc get*(aucContainerBases: AucContainerBases): Result[void] =
           return
       ).get(result.typeof()())
       if result.err.isSome: return
+
     # ダウンロードされたファイルを解凍
     extractAll(downloadedFilePath, tempDestDirPath)
+
     # コンテナのaviutlディレクトリに解凍されたファイルを移動
     for file in walkDirRec(tempDestDirPath):
       moveFile(file, dirPath / file.splitPath.tail)
+
     # 解凍されたファイルが存在していたディレクトリとダウンロードされたファイルを削除
     removeDir(tempDestDirPath, checkDir = true)
     removeFile downloadedFilePath
+
     # インストールした基盤の情報をコンテナファイルに書き込む
     openContainerYamlFile(aucContainerBases.aucContainer.containerFilePath, fmWrite):
       if id == "aviutl":
         containerYaml.bases.aviutl.isInstalled = true
       elif id == "exedit":
         containerYaml.bases.exedit.isInstalled = true
+
   result = result.typeof()()
   let
     res = result
@@ -329,7 +365,9 @@ proc get*(aucContainerBases: AucContainerBases): Result[void] =
       proc(err: Error) = res.err = option(err)
     )
     if res.err.isSome: return
+
   createDir(aucContainerBases.dirPath / "plugins")
+
 
 func plugins*(aucContainer: AucContainer): AucContainerPlugins =
   ## container.pluginsコマンド
@@ -339,10 +377,12 @@ func plugins*(aucContainer: AucContainer): AucContainerPlugins =
   result.tempSrcDirPath = result.tempDirPath / "src"
   result.tempDestDirPath = result.tempDirPath / "dest"
 
+
 proc list*(aucContainerPlugins: AucContainerPlugins): seq[ContainerPlugin] =
   ## コンテナ内のプラグイン一覧を返す
   openContainerYamlFile(aucContainerPlugins.aucContainer.containerFilePath, fmRead):
     return containerYaml.plugins
+
 
 proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin,
     useBrowser: bool = false): Result[void] =
@@ -355,6 +395,7 @@ proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin,
     specifiedPluginVersion = targetPlugin.version(plugin.version)
     tempSrcDirPath = aucContainerPlugins.tempSrcDirPath
     assetId = specifiedPluginVersion.githubAssetId.get(-1)
+
   # キャッシュが存在する場合はせずキャッシュを適用する
   if cache.plugin(plugin).exists:
     let res = result
@@ -368,13 +409,16 @@ proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin,
       if not useBrowser:
         occurNonfatalError "このプラグインをGitHub API経由でダウンロードできません"
         showInfo "代わりにデフォルトブラウザを使用します"
+
       # プラグインの配布ページをデフォルトブラウザで開く
       showInfo "プラグインの配布ページをデフォルトブラウザで開いています..."
       openDefaultBrowser(specifiedPluginVersion.url)
+
       # tempSrcディレクトリをエクスプローラーで開く
       showInfo "一時ディレクトリをエクスプローラーで開いています..."
       revealDirInExplorer(tempSrcDirPath)
       return
+
     # GitHub APIを使ってZIPファイルをダウンロードする
     let
       ghApi = newGitHubApi()
@@ -385,6 +429,7 @@ proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin,
       .repository(githubRepository)
       .asset(assetId)
       .download(destPath)
+
     # プラグインがキャッシュされていない場合はキャッシュする
     if not cache.plugin(plugin).exists:
       showinfo "プラグインをキャッシュしています..."
@@ -394,7 +439,9 @@ proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin,
           return
       ).get(result.typeof()())
       if result.err.isSome: return
+
   showInfo fmt"プラグインが正常にダウンロードされました: {plugin.id}:{plugin.version}"
+
 
 proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
     Result[void] =
@@ -414,6 +461,7 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
     trackedFilesAndDirs =
       packagePlugin.trackedFilesAndDirs(targetPlugin.version)
     jobs = packagePlugin.jobs(targetPlugin.version)
+
   # プラグインがキャッシュされていない場合はキャッシュ
   let cache = aucContainerPlugins.aucContainer.azanautlCli.cache
   if not cache.plugin(targetPlugin).exists:
@@ -425,6 +473,7 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
         return
     ).get(result.typeof()())
     if result.err.isSome: return
+
   # 依存関係を満たしているか確認
   showInfo "依存関係を確認しています..."
   let
@@ -446,6 +495,7 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
       ),
       plugins: containerPlugins,
     )
+
   # 依存関係の基盤がインストールされているか確認
   # AviUtl
   if not installedPackagesTuple.bases.aviutl.isInstalled:
@@ -474,6 +524,7 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
         )
       )
       return
+
   # 拡張編集
   if not installedPackagesTuple.bases.exedit.isInstalled:
     result.err = option(
@@ -501,6 +552,7 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
         )
       )
       return
+
   # 依存関係のプラグインがインストールされているか確認
   for dependencyPlugin in dependenciesTuple.plugins:
     var isDependencyPluginInstalledAndEnabled = false
@@ -534,6 +586,7 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
         )
       )
       return
+
   # ダウンロードしたzipファイルのハッシュ値を検証
   showInfo "ZIPファイルのハッシュ値を検証しています..."
   if pluginZipSha3_512Hash != correctPluginZipSha3_512Hash:
@@ -546,9 +599,11 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
       )
     )
     return
+
   # プラグインのzipファイルを解凍
   showInfo "ZIPファイルを解凍しています..."
   extractAll(pluginZipFilePath, tempDestDirPath)
+
   # 解凍されたファイルをコンテナの指定されたディレクトリに移動
   showInfo "ファイルを移動しています..."
   for trackedFileOrDir in trackedFilesAndDirs:
@@ -568,6 +623,7 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
     of FdType.Dir:
       if trackedFileOrDir.isProtected and destFileOrDirPath.dirExists: break
       moveDir(srcFilePath, destFileOrDirPath)
+
   # タイプがAfterInstallationであるJobを実行
   showInfo "タスクを実行しています..."
   for job in jobs.filterIt(it.id == AfterInstallation):
@@ -587,10 +643,12 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
         of Run:
           discard task.paths.mapIt(
             execProcess(workingDir / sanitizeFileOrDirName(it)))
+
   # 解凍されたファイルが存在していたディレクトリを削除
   showInfo "一時ディレクトリを削除しています..."
   removeDir(tempDestDirPath, checkDir = true)
   removeFile pluginZipFilePath
+
   # インストールしたプラグインの情報をコンテナファイルに書き込む
   var isPluginInContainerFile = false
   let filePath = aucContainerPlugins.aucContainer.containerFilePath
@@ -618,6 +676,7 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
     )
   showInfo fmt"プラグインが正常にインストールされました: {targetPlugin.id}:{targetPlugin.version}"
 
+
 proc enable*(aucContainerPlugins: AucContainerPlugins, pluginId: string) =
   ## プラグインを有効化する
   var
@@ -642,6 +701,7 @@ proc enable*(aucContainerPlugins: AucContainerPlugins, pluginId: string) =
     (src: false, dest: true),
     (src: isolatedPluginsDirPath / pluginId, dest: "")
   )
+
 
 proc disable*(aucContainerPlugins: AucContainerPlugins, pluginId: string) =
   ## プラグインを無効化する
@@ -673,23 +733,29 @@ func packages*(auc: ref AzanaUtlCli): AucPackages =
   ## packagesコマンド
   result.azanaUtlCli = auc
 
+
 func bases*(aucPackages: AucPackages): AucPackagesBases =
   ## packages.baseコマンド
   result.aucPackages = aucPackages
+
 
 func list*(aucPackagesBases: AucPackagesBases): seq[PackagesYamlBasis] =
   ## 入手可能な基盤一覧を返す
   aucPackagesBases.aucPackages.azanaUtlCli.packages.bases.list
 
+
 func plugins*(aucPackages: AucPackages): AucPackagesPlugins =
   ## packages.pluginsコマンド
   result.aucPackages = aucPackages
+
 
 func list*(aucPackagesPlugins: AucPackagesPlugins): seq[PackagesYamlPlugin] =
   ## 入手可能なパッケージ一覧を返す
   aucPackagesPlugins.aucPackages.azanaUtlCli.packages.plugins.list
 
+
 func find*(aucPackagesPlugins: AucPackagesPlugins, query: string): seq[
     PackagesYamlPlugin] =
   ## 入手可能なパッケージを検索する
   aucPackagesPlugins.aucPackages.azanaUtlCli.packages.plugins.find(query)
+
