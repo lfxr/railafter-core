@@ -1,7 +1,9 @@
 import
   httpclient,
   json,
+  options,
   strformat,
+  strutils,
   tables
 
 import
@@ -45,8 +47,9 @@ func asset*(repository: Repository, id: int): Asset =
   result.url = fmt"{repository.url}/releases/assets/{id}"
 
 
-proc download*(asset: Asset, filename: string) =
+proc download*(asset: Asset, filename: string): Result[void] =
   ## 指定したファイル名でアセットをダウンロード
+  result = result.typeof()()
   let
     apiVersion = asset.repository.api.version
     headers = HttpHeaders(
@@ -57,5 +60,14 @@ proc download*(asset: Asset, filename: string) =
         }
       )
     )
-  newHttpClient(headers = headers).downloadFile(asset.url, filename)
-
+  try:
+    newHttpClient(headers = headers).downloadFile(asset.url, filename)
+  except HttpRequestError as e:
+    result.err = option(
+      Error(
+        kind: httpRequestError,
+        url: asset.url,
+        statusMessage: e.msg
+      )
+    )
+    return

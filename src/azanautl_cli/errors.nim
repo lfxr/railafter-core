@@ -22,6 +22,9 @@ func message*(err: Error): string =
     fmt"実際のハッシュ値: '{err.actualHashValue}'"
   of dependencyNotSatisfiedError:
     fmt"依存関係'{err.dependencyName}'が満たされていません;" & '\n' &
-    &"予期されているバージョン: '{err.expectedVersions.join(\",\")}'" &
+    & "予期されているバージョン: '{err.expectedVersions.join(\",\")}'" &
     '\n' & fmt"実際のバージョン: '{err.actualVersion}'"
-
+  of httpRequestError:
+    "HTTPリクエストエラー:\n" &
+    fmt"URL: {err.url}" & '\n' &
+    fmt"ステータスメッセージ: {err.statusMessage}"

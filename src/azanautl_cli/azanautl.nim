@@ -421,6 +421,7 @@ proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin,
 
     # GitHub APIを使ってZIPファイルをダウンロードする
     let
+      res = result
       ghApi = newGitHubApi()
       destPath = tempSrcDirPath / "asset.zip"
       githubRepository = targetPlugin.githubRepository
@@ -428,7 +429,10 @@ proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin,
     ghApi
       .repository(githubRepository)
       .asset(assetId)
-      .download(destPath)
+      .download(destPath).err.map(
+        func(err: Error) = res.err = option(err)
+      )
+    if res.err.isSome: return
 
     # プラグインがキャッシュされていない場合はキャッシュする
     if not cache.plugin(plugin).exists:
@@ -758,4 +762,3 @@ func find*(aucPackagesPlugins: AucPackagesPlugins, query: string): seq[
     PackagesYamlPlugin] =
   ## 入手可能なパッケージを検索する
   aucPackagesPlugins.aucPackages.azanaUtlCli.packages.plugins.find(query)
-

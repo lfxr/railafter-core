@@ -9,7 +9,8 @@ type ErrorKind* = enum
   containerAlreadyExistsError,
   containerDoesNotExistError,
   invalidZipFileHashValueError,
-  dependencyNotSatisfiedError
+  dependencyNotSatisfiedError,
+  httpRequestError,
 
 
 type Error* = object of CatchableError
@@ -26,6 +27,8 @@ type Error* = object of CatchableError
       dependencyName*: string
       expectedVersions*: seq[string]
       actualVersion*: string
+    of httpRequestError:
+      url*, statusMessage*: string
 
 
 type Result*[S] = ref object
@@ -190,4 +193,3 @@ type PackagesYamlBasis* = object
 type PackagesYaml* = object
   bases*: seq[PackagesYamlBasis]
   plugins*: seq[PackagesYamlPlugin]
-
