@@ -11,6 +11,7 @@ type ErrorKind* = enum
   invalidZipFileHashValueError,
   dependencyNotSatisfiedError,
   httpRequestError,
+  fileWritingError,
 
 
 type Error* = object of CatchableError
@@ -29,6 +30,8 @@ type Error* = object of CatchableError
       actualVersion*: string
     of httpRequestError:
       url*, statusMessage*: string
+    of fileWritingError:
+      filePath*: string
 
 
 type Result*[S] = ref object

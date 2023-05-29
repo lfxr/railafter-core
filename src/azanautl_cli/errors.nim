@@ -28,3 +28,5 @@ func message*(err: Error): string =
     "HTTPリクエストエラー:\n" &
     fmt"URL: {err.url}" & '\n' &
     fmt"ステータスメッセージ: {err.statusMessage}"
+  of fileWritingError:
+    fmt"ファイル'{err.filePath}'の書き込みに失敗しました"

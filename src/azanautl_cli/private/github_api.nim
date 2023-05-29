@@ -71,3 +71,6 @@ proc download*(asset: Asset, filename: string): Result[void] =
       )
     )
     return
+  except IOError:
+    result.err = option(Error(kind: fileWritingError, filePath: filename))
+    return
