@@ -12,6 +12,7 @@ type ErrorKind* = enum
   dependencyNotSatisfiedError,
   httpRequestError,
   fileWritingError,
+  connectionTimedOutError,
 
 
 type Error* = object of CatchableError
@@ -28,7 +29,7 @@ type Error* = object of CatchableError
       dependencyName*: string
       expectedVersions*: seq[string]
       actualVersion*: string
-    of httpRequestError:
+    of httpRequestError, connectionTimedOutError:
       url*, statusMessage*: string
     of fileWritingError:
       filePath*: string

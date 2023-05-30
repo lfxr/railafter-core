@@ -74,3 +74,12 @@ proc download*(asset: Asset, filename: string): Result[void] =
   except IOError:
     result.err = option(Error(kind: fileWritingError, filePath: filename))
     return
+  except OSError as e:
+    result.err = option(
+      Error(
+        kind: connectionTimedOutError,
+        url: asset.url,
+        statusMessage: e.msg
+      )
+    )
+    return
