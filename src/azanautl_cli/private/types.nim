@@ -10,6 +10,7 @@ type ErrorKind* = enum
   containerDoesNotExistError,
   invalidZipFileHashValueError,
   dependencyNotSatisfiedError,
+  githubApiRateLimitExceededError,
   httpRequestError,
   fileWritingError,
   connectionTimedOutError,
@@ -29,6 +30,8 @@ type Error* = object of CatchableError
       dependencyName*: string
       expectedVersions*: seq[string]
       actualVersion*: string
+    of githubApiRateLimitExceededError:
+      rateLimitResetDateTime*: string
     of httpRequestError, connectionTimedOutError:
       url*, statusMessage*: string
     of fileWritingError:

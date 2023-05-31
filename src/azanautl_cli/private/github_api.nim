@@ -4,7 +4,9 @@ import
   options,
   strformat,
   strutils,
-  tables
+  tables,
+  times
+
 
 import
   types
@@ -12,6 +14,12 @@ import
 
 type GitHubApi* = object
   version: string
+  responseHeaders: tuple[
+    rateLimitReset: string
+  ]
+  urls: tuple[
+    rateLimit: string
+  ]
 
 
 type Repository* = object
@@ -29,6 +37,35 @@ type Asset* = object
 func newGitHubApi*(): ref GitHubApi =
   result = new GitHubApi
   result.version = "2022-11-28"
+  result.responseHeaders = (
+    rateLimitReset: "x-ratelimit-reset"
+  )
+  result.urls = (
+    rateLimit: "https://api.github.com/rate_limit"
+  )
+
+
+proc rateLimitResetDateTime(api: ref GitHubApi): Result[string] =
+  ## レート制限のリセット日時を取得
+  result = result.typeof()()
+  var requestResult: Response
+
+  try:
+    requestResult = newHttpClient().get(api.urls.rateLimit)
+  except OSError as e:
+    result.err = option(
+      Error(
+        kind: connectionTimedOutError,
+        url: api.urls.rateLimit,
+        statusMessage: e.msg
+      )
+    )
+    return
+
+  let unixTime = (
+    $requestResult.headers[api.responseHeaders.rateLimitReset]
+  ).parseInt
+  result.res = $unixTime.fromUnix
 
 
 func repository*(api: ref GitHubApi, githubRepository: GitHubRepository): Repository =
@@ -63,13 +100,24 @@ proc download*(asset: Asset, filename: string): Result[void] =
   try:
     newHttpClient(headers = headers).downloadFile(asset.url, filename)
   except HttpRequestError as e:
-    result.err = option(
-      Error(
+    if "rate limit exceeded" in e.msg:
+      let
+        res = result
+        rateLimitResetDateTime = asset.repository.api.rateLimitResetDateTime
+      rateLimitResetDateTime.err.map(
+        func(err: Error) = res.err = option(err)
+      )
+      if res.err.isSome: return
+      result.err = option(Error(
+        kind: githubApiRateLimitExceededError,
+        rateLimitResetDateTime: rateLimitResetDateTime.res
+      ))
+    else:
+      result.err = option(Error(
         kind: httpRequestError,
         url: asset.url,
         statusMessage: e.msg
-      )
-    )
+      ))
     return
   except IOError:
     result.err = option(Error(kind: fileWritingError, filePath: filename))
