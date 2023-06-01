@@ -26,6 +26,7 @@ task precommit, "Pre-commit runs this":
   exec "nimble format"
   exec "nimble lint"
   exec "nimble typos"
+  exec "nimble lslint"
 
 task format, "Format Nim files":
   exec "nim c --hints:off -r tasks/format.nim"
@@ -39,3 +40,5 @@ task apidocs, "Generate API documentation":
 task typos, "Check for typos":
   exec "typos"
 
+task lslint, "Run ls-lint":
+  exec "ls-lint"
