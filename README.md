@@ -57,6 +57,7 @@ nimble install azanautl-cli
 - Git
 - [Nim](https://nim-lang.org/) (1.6.10 or higher), [Nimble](https://github.com/nim-lang/nimble)
 - [typos](https://github.com/crate-ci/typos)
+- [ls-lint](https://github.com/loeffel-io/ls-lint)
 
 ### 環境構築
 
@@ -94,4 +95,3 @@ nimble install -dy
 Copyright (c) 2023 Lafixier Furude
 
 [MITライセンス](LICENSE.txt)でライセンスされています。
-
