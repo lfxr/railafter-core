@@ -37,3 +37,5 @@ func message*(err: Error): string =
     fmt"ステータスメッセージ: {err.statusMessage}"
   of fileWritingError:
     fmt"ファイル'{err.filePath}'の書き込みに失敗しました"
+  of fileDoesNotExistError:
+    fmt"ファイル'{err.filePath}'は存在しません"

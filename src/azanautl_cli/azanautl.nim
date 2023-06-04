@@ -311,13 +311,18 @@ proc get*(aucContainerBases: AucContainerBases): Result[void] =
     let
       downloadedFileSha3_512Hash = sha3_512File(downloadedFilePath)
       correctDownloadedFileSha3_512Hash = targetBasisPackage.sha3_512_hash
-    if downloadedFileSha3_512Hash != correctDownloadedFileSha3_512Hash:
+
+    if downloadedFileSha3_512Hash.err.isSome:
+      res.err = downloadedFileSha3_512Hash.err
+      return
+
+    if downloadedFileSha3_512Hash.res != correctDownloadedFileSha3_512Hash:
       result.err = option(
         Error(
           kind: invalidZipFileHashValueError,
           zipFilePath: downloadedFilePath.absolutePath,
           expectedHashValue: correctDownloadedFileSha3_512Hash,
-          actualHashValue: downloadedFileSha3_512Hash
+          actualHashValue: downloadedFileSha3_512Hash.res
         )
       )
       return
@@ -466,6 +471,10 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
       packagePlugin.trackedFilesAndDirs(targetPlugin.version)
     jobs = packagePlugin.jobs(targetPlugin.version)
 
+  if pluginZipSha3_512Hash.err.isSome:
+    result.err = pluginZipSha3_512Hash.err
+    return
+
   # プラグインがキャッシュされていない場合はキャッシュ
   let cache = aucContainerPlugins.aucContainer.azanautlCli.cache
   if not cache.plugin(targetPlugin).exists:
@@ -593,13 +602,13 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
 
   # ダウンロードしたzipファイルのハッシュ値を検証
   showInfo "ZIPファイルのハッシュ値を検証しています..."
-  if pluginZipSha3_512Hash != correctPluginZipSha3_512Hash:
+  if pluginZipSha3_512Hash.res != correctPluginZipSha3_512Hash:
     result.err = option(
       Error(
         kind: invalidZipFileHashValueError,
         zipFilePath: pluginZipFilePath.absolutePath,
         expectedHashValue: correctPluginZipSha3_512Hash,
-        actualHashValue: pluginZipSha3_512Hash,
+        actualHashValue: pluginZipSha3_512Hash.res,
       )
     )
     return

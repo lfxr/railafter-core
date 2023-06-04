@@ -14,6 +14,7 @@ type ErrorKind* = enum
   httpRequestError,
   fileWritingError,
   connectionTimedOutError,
+  fileDoesNotExistError,
 
 
 type Error* = object of CatchableError
@@ -34,7 +35,7 @@ type Error* = object of CatchableError
       rateLimitResetDateTime*: string
     of httpRequestError, connectionTimedOutError:
       url*, statusMessage*: string
-    of fileWritingError:
+    of fileWritingError, fileDoesNotExistError:
       filePath*: string
 
 

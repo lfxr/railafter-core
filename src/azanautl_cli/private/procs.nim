@@ -1,4 +1,5 @@
 import
+  options,
   os,
   osproc,
   strutils,
@@ -62,13 +63,23 @@ func deserializePlugin*(raw: string): Plugin =
   )
 
 
-proc sha3_512File*(filePath: string): string =
+proc sha3_512File*(filePath: string): Result[string] =
   ## ファイルのSHA3-512ハッシュ値を計算して返す
+  result = result.typeof()()
+
+  if not fileExists(filePath):
+    result.err = option(Error(
+      kind: ErrorKind.fileDoesNotExistError,
+      filePath: filePath
+    ))
+    return
+
   let
     file = open(filePath, fmRead)
     fileContent = file.readAll()
   defer: file.close()
-  $sha3_512.digest(fileContent)
+
+  result.res = $sha3_512.digest(fileContent)
 
 
 proc revealDirInExplorer*(dirPath: string) =
