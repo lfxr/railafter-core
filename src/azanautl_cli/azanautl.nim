@@ -444,9 +444,10 @@ proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin,
       showinfo "プラグインをキャッシュしています..."
       result = cache.plugins.cache(plugin, destPath).err.map(
         func(err: Error): Result[void] =
+          result = result.typeof()()
           result.err = option(err)
           return
-      ).get(result.typeof()())
+      ).get(Result[void]())
       if result.err.isSome: return
 
   showInfo fmt"プラグインが正常にダウンロードされました: {plugin.id}:{plugin.version}"
