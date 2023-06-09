@@ -69,7 +69,7 @@ proc sha3_512File*(filePath: string): Result[string] =
 
   if not fileExists(filePath):
     result.err = option(Error(
-      kind: ErrorKind.fileDoesNotExistError,
+      kind: fileDoesNotExistError,
       filePath: filePath
     ))
     return
