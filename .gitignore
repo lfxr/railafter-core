@@ -8,4 +8,6 @@
 app/
 bin/
 nimbledeps/
-
+testresults/
+nimcache/
+testdata/ignored

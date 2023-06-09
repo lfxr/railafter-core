@@ -9,7 +9,12 @@ type ErrorKind* = enum
   containerAlreadyExistsError,
   containerDoesNotExistError,
   invalidZipFileHashValueError,
-  dependencyNotSatisfiedError
+  dependencyNotSatisfiedError,
+  githubApiRateLimitExceededError,
+  httpRequestError,
+  fileWritingError,
+  connectionTimedOutError,
+  fileDoesNotExistError,
 
 
 type Error* = object of CatchableError
@@ -26,6 +31,12 @@ type Error* = object of CatchableError
       dependencyName*: string
       expectedVersions*: seq[string]
       actualVersion*: string
+    of githubApiRateLimitExceededError:
+      rateLimitResetDateTime*: string
+    of httpRequestError, connectionTimedOutError:
+      url*, statusMessage*: string
+    of fileWritingError, fileDoesNotExistError:
+      filePath*: string
 
 
 type Result*[S] = ref object
@@ -190,4 +201,3 @@ type PackagesYamlBasis* = object
 type PackagesYaml* = object
   bases*: seq[PackagesYamlBasis]
   plugins*: seq[PackagesYamlPlugin]
-

@@ -22,6 +22,20 @@ func message*(err: Error): string =
     fmt"実際のハッシュ値: '{err.actualHashValue}'"
   of dependencyNotSatisfiedError:
     fmt"依存関係'{err.dependencyName}'が満たされていません;" & '\n' &
-    &"予期されているバージョン: '{err.expectedVersions.join(\",\")}'" &
+    & "予期されているバージョン: '{err.expectedVersions.join(\",\")}'" &
     '\n' & fmt"実際のバージョン: '{err.actualVersion}'"
-
+  of githubApiRateLimitExceededError:
+    "GitHub APIのレート制限に達しました:\n" &
+    fmt"制限リセット日時: {err.rateLimitResetDateTime}"
+  of httpRequestError:
+    "HTTPリクエストエラー:\n" &
+    fmt"URL: {err.url}" & '\n' &
+    fmt"ステータスメッセージ: {err.statusMessage}"
+  of connectionTimedOutError:
+    "接続がタイムアウトしました:\n" &
+    fmt"URL: {err.url}" & '\n' &
+    fmt"ステータスメッセージ: {err.statusMessage}"
+  of fileWritingError:
+    fmt"ファイル'{err.filePath}'の書き込みに失敗しました"
+  of fileDoesNotExistError:
+    fmt"ファイル'{err.filePath}'は存在しません"

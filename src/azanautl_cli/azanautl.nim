@@ -311,13 +311,18 @@ proc get*(aucContainerBases: AucContainerBases): Result[void] =
     let
       downloadedFileSha3_512Hash = sha3_512File(downloadedFilePath)
       correctDownloadedFileSha3_512Hash = targetBasisPackage.sha3_512_hash
-    if downloadedFileSha3_512Hash != correctDownloadedFileSha3_512Hash:
+
+    if downloadedFileSha3_512Hash.err.isSome:
+      res.err = downloadedFileSha3_512Hash.err
+      return
+
+    if downloadedFileSha3_512Hash.res != correctDownloadedFileSha3_512Hash:
       result.err = option(
         Error(
           kind: invalidZipFileHashValueError,
           zipFilePath: downloadedFilePath.absolutePath,
           expectedHashValue: correctDownloadedFileSha3_512Hash,
-          actualHashValue: downloadedFileSha3_512Hash
+          actualHashValue: downloadedFileSha3_512Hash.res
         )
       )
       return
@@ -421,6 +426,7 @@ proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin,
 
     # GitHub APIを使ってZIPファイルをダウンロードする
     let
+      res = result
       ghApi = newGitHubApi()
       destPath = tempSrcDirPath / "asset.zip"
       githubRepository = targetPlugin.githubRepository
@@ -428,16 +434,20 @@ proc download*(aucContainerPlugins: AucContainerPlugins, plugin: Plugin,
     ghApi
       .repository(githubRepository)
       .asset(assetId)
-      .download(destPath)
+      .download(destPath).err.map(
+        func(err: Error) = res.err = option(err)
+      )
+    if res.err.isSome: return
 
     # プラグインがキャッシュされていない場合はキャッシュする
     if not cache.plugin(plugin).exists:
       showinfo "プラグインをキャッシュしています..."
       result = cache.plugins.cache(plugin, destPath).err.map(
         func(err: Error): Result[void] =
+          result = result.typeof()()
           result.err = option(err)
           return
-      ).get(result.typeof()())
+      ).get(Result[void]())
       if result.err.isSome: return
 
   showInfo fmt"プラグインが正常にダウンロードされました: {plugin.id}:{plugin.version}"
@@ -461,6 +471,10 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
     trackedFilesAndDirs =
       packagePlugin.trackedFilesAndDirs(targetPlugin.version)
     jobs = packagePlugin.jobs(targetPlugin.version)
+
+  if pluginZipSha3_512Hash.err.isSome:
+    result.err = pluginZipSha3_512Hash.err
+    return
 
   # プラグインがキャッシュされていない場合はキャッシュ
   let cache = aucContainerPlugins.aucContainer.azanautlCli.cache
@@ -589,13 +603,13 @@ proc install*(aucContainerPlugins: AucContainerPlugins, targetPlugin: Plugin):
 
   # ダウンロードしたzipファイルのハッシュ値を検証
   showInfo "ZIPファイルのハッシュ値を検証しています..."
-  if pluginZipSha3_512Hash != correctPluginZipSha3_512Hash:
+  if pluginZipSha3_512Hash.res != correctPluginZipSha3_512Hash:
     result.err = option(
       Error(
         kind: invalidZipFileHashValueError,
         zipFilePath: pluginZipFilePath.absolutePath,
         expectedHashValue: correctPluginZipSha3_512Hash,
-        actualHashValue: pluginZipSha3_512Hash,
+        actualHashValue: pluginZipSha3_512Hash.res,
       )
     )
     return
@@ -758,4 +772,3 @@ func find*(aucPackagesPlugins: AucPackagesPlugins, query: string): seq[
     PackagesYamlPlugin] =
   ## 入手可能なパッケージを検索する
   aucPackagesPlugins.aucPackages.azanaUtlCli.packages.plugins.find(query)
-

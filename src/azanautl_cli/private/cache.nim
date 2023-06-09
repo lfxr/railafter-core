@@ -77,14 +77,18 @@ proc cache*(
       packages.plugin(plugin.id).version(plugin.version).sha3_512_hash
     actualHashValue = sha3_512File(zipFilePath)
 
+  if actualHashValue.err.isSome:
+    result.err = actualHashValue.err
+    return
+
   # ZIPファイルのハッシュ値を検証
-  if expectedHashValue != actualHashValue:
+  if expectedHashValue != actualHashValue.res:
     result.err = option(
        Error(
          kind: invalidZipFileHashValueError,
          zipFilePath: zipFilepath,
          expectedHashValue: expectedHashValue,
-         actualHashValue: actualHashValue
+         actualHashValue: actualHashValue.res
        )
     )
     return
@@ -113,14 +117,18 @@ proc apply*(cachePlugin: CachePlugin, destFilePath: string): Result[void] =
       packages.plugin(plugin.id).version(plugin.version).sha3_512_hash
     actualHashValue = sha3_512File(cachePlugin.dirPath / UnextracedZipFileName)
 
+  if actualHashValue.err.isSome:
+    result.err = actualHashValue.err
+    return
+
   # ZIPファイルのハッシュ値を検証
-  if expectedHashValue != actualHashValue:
+  if expectedHashValue != actualHashValue.res:
     result.err = option(
        Error(
          kind: invalidZipFileHashValueError,
          zipFilePath: cachePlugin.dirPath,
          expectedHashValue: expectedHashValue,
-         actualHashValue: actualHashValue
+         actualHashValue: actualHashValue.res
        )
     )
     return
@@ -160,14 +168,18 @@ proc cache*(
       packages.basis(basis.id).version(basis.version).sha3_512_hash
     actualHashValue = sha3_512File(zipFilePath)
 
+  if actualHashValue.err.isSome:
+    result.err = actualHashValue.err
+    return
+
   # ZIPファイルのハッシュ値を検証
-  if expectedHashValue != actualHashValue:
+  if expectedHashValue != actualHashValue.res:
     result.err = option(
        Error(
          kind: invalidZipFileHashValueError,
          zipFilePath: zipFilepath,
          expectedHashValue: expectedHashValue,
-         actualHashValue: actualHashValue
+         actualHashValue: actualHashValue.res
        )
     )
     return
@@ -197,14 +209,18 @@ proc apply*(cacheBasis: CacheBasis, destFilePath: string): Result[void] =
       packages.basis(basis.id).version(basis.version).sha3_512_hash
     actualHashValue = sha3_512File(cacheBasis.dirPath / UnextracedZipFileName)
 
+  if actualHashValue.err.isSome:
+    result.err = actualHashValue.err
+    return
+
   # ZIPファイルのハッシュ値を検証
-  if expectedHashValue != actualHashValue:
+  if expectedHashValue != actualHashValue.res:
     result.err = option(
        Error(
          kind: invalidZipFileHashValueError,
          zipFilePath: cacheBasis.dirPath,
          expectedHashValue: expectedHashValue,
-         actualHashValue: actualHashValue
+         actualHashValue: actualHashValue.res
        )
     )
     return
