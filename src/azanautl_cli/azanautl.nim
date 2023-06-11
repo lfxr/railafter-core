@@ -11,12 +11,34 @@ import
   zippy/ziparchives
 
 import
+  private/image,
   private/cache,
   private/github_api,
   private/packages,
   private/procs,
   private/templates,
   private/types
+
+export
+  image.create,
+  image.delete
+
+
+type App = object
+  dirPath: string
+
+
+func newApp*(dirPath: string): ref App =
+  result = new App
+  result.dirPath = dirPath
+
+
+func newImage*(app: ref App, imageId: string, imageName: string = ""): ref Image =
+  result = newImage(
+    imagesDirPath = app.dirPath / "images",
+    id = imageId,
+    name = imageName
+  )
 
 
 type AzanaUtlCli = object
