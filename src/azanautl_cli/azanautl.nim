@@ -12,6 +12,8 @@ import
 
 import
   private/image,
+  private/plugin,
+
   private/cache,
   private/github_api,
   private/packages,
@@ -21,7 +23,8 @@ import
 
 export
   image.create,
-  image.delete
+  image.delete,
+  image.addPlugin
 
 
 type App = object
@@ -38,6 +41,16 @@ func newImage*(app: ref App, imageId: string, imageName: string = ""): ref Image
     imagesDirPath = app.dirPath / "images",
     id = imageId,
     name = imageName
+  )
+
+func newPlugin*(
+    app: ref App,
+    pluginId: string,
+    pluginVersion: string = ""
+): ref Plugin =
+  result = newPlugin(
+    id = pluginId,
+    version = pluginVersion
   )
 
 

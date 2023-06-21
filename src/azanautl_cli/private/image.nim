@@ -52,6 +52,7 @@ proc create*(image: ref Image): Result[void] =
       imageName: image.name,
     )
   
+
 proc delete*(image: ref Image): Result[void] =
   ## イメージを削除する
   result = result.typeof()()
@@ -64,3 +65,20 @@ proc delete*(image: ref Image): Result[void] =
     return
 
   removeDir(image.dirPath)
+
+
+proc addPlugin*(image: ref Image, plugin: ref Plugin): Result[void] =
+  ## プラグインをイメージに追加する
+  result = result.typeof()()
+
+  if not image.doesExist:
+    result.err = option(Error(
+      kind: imageDoesNotExistError,
+      imageId: image.id,
+    ))
+    return
+
+  openImageYamlFile(image.path, fmWrite):
+    imageYaml.plugins.add(
+      Plugin(id: plugin.id, version: plugin.version)
+    )
