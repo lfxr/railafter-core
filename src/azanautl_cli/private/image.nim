@@ -1,6 +1,7 @@
 import
   options,
-  os
+  os,
+  sequtils
 
 import
   templates,
@@ -82,3 +83,26 @@ proc addPlugin*(image: ref Image, plugin: ref Plugin): Result[void] =
     imageYaml.plugins.add(
       Plugin(id: plugin.id, version: plugin.version)
     )
+
+
+proc removePlugin*(image: ref Image, plugin: ref Plugin): Result[void] =
+  ## プラグインをイメージから削除する
+  result = result.typeof()()
+
+  if not image.doesExist:
+    result.err = option(Error(
+      kind: imageDoesNotExistError,
+      imageId: image.id,
+    ))
+    return
+
+  openImageYamlFile(image.path, fmWrite):
+    if not imageYaml.plugins.contains(plugin[]):
+      result.err = option(Error(
+        kind: pluginDoesNotExistInImageError,
+        pluginId: plugin.id,
+        pImageId: image.id,
+      ))
+      return
+
+    imageYaml.plugins.keepItIf(it.id != plugin.id)

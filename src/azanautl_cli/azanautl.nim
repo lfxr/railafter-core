@@ -24,7 +24,8 @@ import
 export
   image.create,
   image.delete,
-  image.addPlugin
+  image.addPlugin,
+  image.removePlugin
 
 
 type App = object

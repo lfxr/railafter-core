@@ -15,6 +15,7 @@ type ErrorKind* = enum
   fileWritingError,
   connectionTimedOutError,
   fileDoesNotExistError,
+  pluginDoesNotExistInImageError,
 
 
 type Error* = object of CatchableError
@@ -37,6 +38,9 @@ type Error* = object of CatchableError
       url*, statusMessage*: string
     of fileWritingError, fileDoesNotExistError:
       filePath*: string
+    of pluginDoesNotExistInImageError:
+      pluginId*: string
+      pImageId*: string
 
 
 type Result*[S] = ref object
