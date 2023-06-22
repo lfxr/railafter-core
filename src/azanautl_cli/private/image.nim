@@ -68,6 +68,20 @@ proc delete*(image: ref Image): Result[void] =
   removeDir(image.dirPath)
 
 
+proc listPlugins*(image: ref Image): Result[seq[Plugin]] =
+  ## イメージに含まれるプラグインの一覧を返す
+  result = result.typeof()()
+
+  if not image.doesExist:
+    result.err = option(Error(
+      kind: imageDoesNotExistError,
+      imageId: image.id,
+    ))
+    return
+
+  openImageYamlFile(image.path, fmRead): result.res = imageYaml.plugins
+
+
 proc addPlugin*(image: ref Image, plugin: ref Plugin): Result[void] =
   ## プラグインをイメージに追加する
   result = result.typeof()()

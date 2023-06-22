@@ -25,7 +25,8 @@ export
   image.create,
   image.delete,
   image.addPlugin,
-  image.removePlugin
+  image.removePlugin,
+  image.listPlugins
 
 
 type App = object
