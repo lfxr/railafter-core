@@ -47,7 +47,7 @@ proc create*(image: ref Image): Result[void] =
 
   createDir image.dirPath
 
-  openImageYamlFile(image.path, fmWrite):
+  openImageYamlFile(image.path, saveChanges = true):
     imageYaml = ImageYaml(
       imageId: image.id,
       imageName: image.name,
@@ -79,7 +79,8 @@ proc listPlugins*(image: ref Image): Result[seq[Plugin]] =
     ))
     return
 
-  openImageYamlFile(image.path, fmRead): result.res = imageYaml.plugins
+  openImageYamlFile(image.path, saveChanges = false):
+    result.res = imageYaml.plugins
 
 
 proc doesPluginExistInImage*(
@@ -110,7 +111,7 @@ proc addPlugin*(image: ref Image, plugin: ref Plugin): Result[void] =
     ))
     return
 
-  openImageYamlFile(image.path, fmWrite):
+  openImageYamlFile(image.path, saveChanges = true):
     imageYaml.plugins.add(
       Plugin(id: plugin.id, version: plugin.version)
     )
@@ -135,5 +136,5 @@ proc removePlugin*(image: ref Image, plugin: ref Plugin): Result[void] =
     ))
     return
 
-  openImageYamlFile(image.path, fmWrite):
+  openImageYamlFile(image.path, saveChanges = true):
     imageYaml.plugins.keepItIf(it.id != plugin.id)
