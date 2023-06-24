@@ -4,6 +4,7 @@ import
   sequtils
 
 import
+  plugin,
   templates,
   types
 
@@ -80,7 +81,9 @@ proc listPlugins*(image: ref Image): Result[seq[Plugin]] =
     return
 
   openImageYamlFile(image.path, saveChanges = false):
-    result.res = imageYaml.plugins
+    result.res = imageYaml.plugins.mapIt(
+      Plugin(id: it.id, version: it.version)
+    )
 
 
 proc doesPluginExistInImage*(
@@ -113,7 +116,7 @@ proc addPlugin*(image: ref Image, plugin: ref Plugin): Result[void] =
 
   openImageYamlFile(image.path, saveChanges = true):
     imageYaml.plugins.add(
-      Plugin(id: plugin.id, version: plugin.version)
+      ImagePlugin(id: plugin.id, version: plugin.version)
     )
 
 

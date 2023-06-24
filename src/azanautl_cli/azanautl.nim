@@ -2,6 +2,7 @@ import
   os
 
 import
+  private/container,
   private/types,
   private/image,
   private/plugin
@@ -11,7 +12,10 @@ export
   image.delete,
   image.addPlugin,
   image.removePlugin,
-  image.listPlugins
+  image.listPlugins,
+  container.listPlugins,
+  container.downloadPlugin,
+  plugin.versionData
 
 
 type App = object
@@ -30,12 +34,27 @@ func newImage*(app: ref App, imageId: string, imageName: string = ""): ref Image
     name = imageName
   )
 
+
+func newContainer*(
+    app: ref App,
+    containerId: string,
+    containerName: string = ""
+): ref Container =
+  result = newContainer(
+    containersDirPath = app.dirPath / "containers",
+    id = containerId,
+    name = containerName
+  )
+
+
 func newPlugin*(
     app: ref App,
     pluginId: string,
-    pluginVersion: string = ""
+    pluginVersion: string = "",
+    packagesYamlFilePath: string = ""
 ): ref Plugin =
   result = newPlugin(
     id = pluginId,
-    version = pluginVersion
+    version = pluginVersion,
+    packagesYamlFilePath = packagesYamlFilePath
   )
