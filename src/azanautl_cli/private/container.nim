@@ -1,12 +1,13 @@
 import
+  browsers,
   options,
-  os,
-  sequtils
+  os
 
 import
   plugin,
   templates,
-  types
+  types,
+  utils
 
 
 const ContainerYamlFileName = "container.yaml"
@@ -14,6 +15,7 @@ const ContainerYamlFileName = "container.yaml"
 
 type Container* = object
   containersDirPath, dirPath, path: string
+  tempDirPath, tempSrcDirPath: string
   id, name: string
 
 
@@ -26,6 +28,8 @@ func newContainer*(
   result.containersDirPath = containersDirPath
   result.dirPath = containersDirPath / id
   result.path = containersDirPath / id / ContainerYamlFileName
+  result.tempDirPath = result.dirPath / "temp"
+  result.tempSrcDirPath = result.tempDirPath / "src"
   result.id = id
   result.name = name
 
@@ -98,3 +102,18 @@ proc downloadPlugin*(
     ))
     return
 
+  block:
+    let
+      pluginVersionData = plugin.versionData
+
+    if pluginVersionData.err.isSome:
+      result.err = pluginVersionData.err
+      return
+    
+    # プラグインの配布ページをデフォルトブラウザで開く
+    showInfo "プラグインの配布ページをデフォルトブラウザで開いています..."
+    openDefaultBrowser(pluginVersionData.res.url)
+
+    # tempSrcディレクトリをエクスプローラーで開く
+    showInfo "一時ディレクトリをエクスプローラーで開いています..."
+    revealDirInExplorer(container.tempSrcDirPath) 

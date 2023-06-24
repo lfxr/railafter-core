@@ -20,11 +20,13 @@ export
 
 type App = object
   dirPath: string
+  packagesYamlFilePath: string
 
 
-func newApp*(dirPath: string): ref App =
+func newApp*(dirPath: string, packagesYamlFilePath: string): ref App =
   result = new App
   result.dirPath = dirPath
+  result.packagesYamlFilePath = packagesYamlFilePath
 
 
 func newImage*(app: ref App, imageId: string, imageName: string = ""): ref Image =
@@ -50,11 +52,10 @@ func newContainer*(
 func newPlugin*(
     app: ref App,
     pluginId: string,
-    pluginVersion: string = "",
-    packagesYamlFilePath: string = ""
+    pluginVersion: string = ""
 ): ref Plugin =
   result = newPlugin(
     id = pluginId,
     version = pluginVersion,
-    packagesYamlFilePath = packagesYamlFilePath
+    packagesYamlFilePath = app.packagesYamlFilePath
   )

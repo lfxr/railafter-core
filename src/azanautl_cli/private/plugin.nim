@@ -52,7 +52,6 @@ proc packageInfo(plugin: ref Plugin): Result[PackagesYamlPlugin] =
     result.res = packagesYamlPlugins.filterIt(it.id == plugin.id)[0]
 
 
-
 proc versionData*(plugin: ref Plugin): Result[PackagesYamlPluginVersion] =
   ## プラグインのバージョン情報を返す
   result = result.typeof()()
