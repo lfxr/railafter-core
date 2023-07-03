@@ -30,7 +30,7 @@ func newImage*(
   result.name = name
 
 
-func doesExist(image: ref Image): bool =
+func doesExist*(image: ref Image): bool =
   ## イメージが存在するかどうかを返す
   result = fileExists(image.path)
 
