@@ -15,6 +15,9 @@ type ErrorKind* = enum
   fileWritingError,
   connectionTimedOutError,
   fileDoesNotExistError,
+  pluginDoesNotExistInImageError,
+  pluginDoesNotExistError,
+  packagesYamlFileDoesNotExistError,
 
 
 type Error* = object of CatchableError
@@ -37,6 +40,13 @@ type Error* = object of CatchableError
       url*, statusMessage*: string
     of fileWritingError, fileDoesNotExistError:
       filePath*: string
+    of pluginDoesNotExistInImageError:
+      pluginId*: string
+      pImageId*: string
+    of pluginDoesNotExistError:
+      pPluginId*: string
+    of packagesYamlFileDoesNotExistError:
+      packagesYamlFilePath*: string
 
 
 type Result*[S] = ref object
@@ -53,12 +63,7 @@ type Bases* = object
   exedit_version*: string
 
 
-type Plugin* = object
-  id*: string
-  version*: string
-
-
-type Script = object
+type ImagePlugin* = object
   id*: string
   version*: string
 
@@ -66,8 +71,7 @@ type Script = object
 type ImageYaml* = object
   image_id*, image_name*: string
   bases*: Bases
-  plugins*: seq[Plugin]
-  scripts*: seq[Script]
+  plugins*: seq[ImagePlugin]
 
 
 type ContainerBases* = object

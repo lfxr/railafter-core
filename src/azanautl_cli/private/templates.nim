@@ -12,7 +12,11 @@ let yamlTemplates* = YamlTemplates()
   ## YAMLのテンプレート
 
 
-template openImageYamlFile*(path: string, mode: FileMode, body: untyped) =
+template openImageYamlFile*(
+    path: string,
+    saveChanges: bool = false,
+    body: untyped
+) =
   let imageYamlFile = ImageYamlFile(filePath: path)
   try:
     discard imageYamlFile.load()
@@ -22,10 +26,14 @@ template openImageYamlFile*(path: string, mode: FileMode, body: untyped) =
   var imageYaml {.inject.} = imageYamlFile.load()
   try: body
   finally:
-    if mode == fmWrite: discard imageYamlFile.update(imageYaml)
+    if saveChanges: discard imageYamlFile.update(imageYaml)
 
 
-template openContainerYamlFile*(path: string, mode: FileMode, body: untyped) =
+template openContainerYamlFile*(
+    path: string,
+    saveChanges: bool = false,
+    body: untyped
+) =
   let containerYamlFile = ContainerYamlFile(filePath: path)
   try:
     discard containerYamlFile.load()
@@ -35,5 +43,5 @@ template openContainerYamlFile*(path: string, mode: FileMode, body: untyped) =
   var containerYaml {.inject.} = containerYamlFile.load()
   try: body
   finally:
-    if mode == fmWrite: discard containerYamlFile.update(containerYaml)
+    if saveChanges: discard containerYamlFile.update(containerYaml)
 

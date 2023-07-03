@@ -1,0 +1,119 @@
+import
+  browsers,
+  options,
+  os
+
+import
+  plugin,
+  templates,
+  types,
+  utils
+
+
+const ContainerYamlFileName = "container.yaml"
+
+
+type Container* = object
+  containersDirPath, dirPath, path: string
+  tempDirPath, tempSrcDirPath: string
+  id, name: string
+
+
+func newContainer*(
+    containersDirPath: string,
+    id: string,
+    name: string = ""
+ ): ref Container =
+  result = new Container
+  result.containersDirPath = containersDirPath
+  result.dirPath = containersDirPath / id
+  result.path = containersDirPath / id / ContainerYamlFileName
+  result.tempDirPath = result.dirPath / "temp"
+  result.tempSrcDirPath = result.tempDirPath / "src"
+  result.id = id
+  result.name = name
+
+
+func doesExist(container: ref Container): bool =
+  ## コンテナが存在するかどうかを返す
+  result = fileExists(container.path)
+
+
+proc create*(container: ref Container): Result[void] =
+  ## コンテナを作成する
+  result = result.typeof()()
+
+  if container.doesExist:
+    result.err = option(Error(
+      kind: containerAlreadyExistsError,
+      containerId: container.id,
+    ))
+    return
+
+  createDir container.dirPath
+
+  openContainerYamlFile(container.path, saveChanges = true):
+    containerYaml = ContainerYaml(
+      containerId: container.id,
+      containerName: container.name,
+    )
+  
+
+proc delete*(container: ref Container): Result[void] =
+  ## コンテナを削除する
+  result = result.typeof()()
+
+  if not container.doesExist:
+    result.err = option(Error(
+      kind: containerDoesNotExistError,
+      containerId: container.id,
+    ))
+    return
+
+  removeDir(container.dirPath)
+
+
+proc listPlugins*(container: ref Container): Result[seq[ContainerPlugin]] =
+  ## コンテナに含まれるプラグインの一覧を返す
+  result = result.typeof()()
+
+  if not container.doesExist:
+    result.err = option(Error(
+      kind: containerDoesNotExistError,
+      containerId: container.id,
+    ))
+    return
+
+  openContainerYamlFile(container.path, saveChanges = false):
+    result.res = containerYaml.plugins
+
+
+proc downloadPlugin*(
+    container: ref Container,
+    plugin: ref Plugin
+): Result[void] =
+  ## コンテナにプラグインをダウンロードする
+  result = result.typeof()()
+
+  if not container.doesExist:
+    result.err = option(Error(
+      kind: containerDoesNotExistError,
+      containerId: container.id,
+    ))
+    return
+
+  block:
+    let
+      pluginVersionData = plugin.versionData
+
+    if pluginVersionData.err.isSome:
+      result.err = pluginVersionData.err
+      return
+    
+    # プラグインの配布ページをデフォルトブラウザで開く
+    showInfo "プラグインの配布ページをデフォルトブラウザで開いています..."
+    openDefaultBrowser(pluginVersionData.res.url)
+
+    # tempSrcディレクトリをエクスプローラーで開く
+    showInfo "一時ディレクトリをエクスプローラーで開いています..."
+    revealDirInExplorer(container.tempSrcDirPath) 

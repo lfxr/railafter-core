@@ -9,6 +9,7 @@ import
   nimcrypto
 
 import
+  plugin,
   types
 
 
