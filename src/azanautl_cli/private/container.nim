@@ -18,9 +18,22 @@ type Container* = object
   containersDirPath, dirPath, path: string
   tempDirPath, tempSrcDirPath*: string
   id, name: string
+  containerYaml: ContainerYaml
 
 
-func newContainer*(
+# プロトタイプ宣言
+proc loadContainerYaml(container: ref Container): Result[void]
+func doesExist*(container: ref Container): bool
+
+
+proc init(container: ref Container) =
+  ## Containerオブジェクトのコンストラクタ
+  if not container.doesExist: return
+
+  discard container.loadContainerYaml()
+
+
+proc newContainer*(
     containersDirPath: string,
     id: string,
     name: string = ""
@@ -33,6 +46,22 @@ func newContainer*(
   result.tempSrcDirPath = result.tempDirPath / "src"
   result.id = id
   result.name = name
+  result.init()
+
+
+proc loadContainerYaml(container: ref Container): Result[void] =
+  ## コンテナのYAMLファイルを読み込む
+  result = result.typeof()()
+
+  if not fileExists(container.path):
+    result.err = option(Error(
+      kind: containerDoesNotExistError,
+      containerId: container.id,
+    ))
+    return
+
+  openContainerYamlFile(container.path, saveChanges = false):
+    container.containerYaml = containerYaml
 
 
 func doesExist*(container: ref Container): bool =
@@ -58,6 +87,8 @@ proc create*(container: ref Container): Result[void] =
       containerId: container.id,
       containerName: container.name,
     )
+
+  discard container.loadContainerYaml()
   
 
 proc delete*(container: ref Container): Result[void] =
@@ -72,6 +103,7 @@ proc delete*(container: ref Container): Result[void] =
     return
 
   removeDir(container.dirPath)
+  container.containerYaml = ContainerYaml()
 
 
 proc listPlugins*(container: ref Container): Result[seq[ContainerPlugin]] =
@@ -85,8 +117,7 @@ proc listPlugins*(container: ref Container): Result[seq[ContainerPlugin]] =
     ))
     return
 
-  openContainerYamlFile(container.path, saveChanges = false):
-    result.res = containerYaml.plugins
+  result.res = container.containerYaml.plugins
 
 
 proc downloadPlugin*(
