@@ -1,0 +1,8 @@
+image_id: "exist-image-2"
+image_name: "Exist Image 2"
+
+bases:
+  aviutl_version: ""
+  exedit_version: ""
+
+plugins: []

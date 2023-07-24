@@ -10,4 +10,4 @@ bin/
 nimbledeps/
 testresults/
 nimcache/
-testdata/ignored
+testdata/

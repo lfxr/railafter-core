@@ -42,3 +42,14 @@ task typos, "Check for typos":
 
 task lslint, "Run ls-lint":
   exec "ls-lint"
+
+task preparetestdata, "Prepare test data":
+  exec "nim c --hints:off -r tasks/prepare_testdata.nim"
+
+task removetestdata, "Remove test data":
+  exec "nim c --hints:off -r tasks/remove_testdata.nim"
+
+task test, "Run tests":
+  exec "nimble preparetestdata"
+  exec "testament p 'tests/*/*.nim'"
+  exec "nimble removetestdata"

@@ -15,9 +15,22 @@ const ImageYamlFileName = "image.yaml"
 type Image* = object
   imagesDirPath, dirPath, path: string
   id, name: string
+  imageYaml: ImageYaml
 
 
-func newImage*(
+# プロトタイプ宣言
+proc loadImageYaml(image: ref Image): Result[void]
+func doesExist*(image: ref Image): bool
+
+
+proc init(image: ref Image) =
+  ## Imageオブジェクトのコンストラクタ
+  if not image.doesExist: return
+
+  discard image.loadImageYaml()
+
+
+proc newImage*(
     imagesDirPath: string,
     id: string,
     name: string = ""
@@ -28,6 +41,22 @@ func newImage*(
   result.path = imagesDirPath / id / ImageYamlFileName
   result.id = id
   result.name = name
+  result.init()
+
+
+proc loadImageYaml(image: ref Image): Result[void] =
+  ## イメージのYAMLファイルを読み込む
+  result = result.typeof()()
+
+  if not fileExists(image.path):
+    result.err = option(Error(
+      kind: imageDoesNotExistError,
+      imageId: image.id,
+    ))
+    return
+
+  openImageYamlFile(image.path, saveChanges = false):
+    image.imageYaml = imageYaml
 
 
 func doesExist*(image: ref Image): bool =
@@ -53,6 +82,8 @@ proc create*(image: ref Image): Result[void] =
       imageId: image.id,
       imageName: image.name,
     )
+
+  discard image.loadImageYaml()
   
 
 proc delete*(image: ref Image): Result[void] =
@@ -67,6 +98,7 @@ proc delete*(image: ref Image): Result[void] =
     return
 
   removeDir(image.dirPath)
+  image.imageYaml = ImageYaml()
 
 
 proc listPlugins*(image: ref Image): Result[seq[Plugin]] =
@@ -80,10 +112,9 @@ proc listPlugins*(image: ref Image): Result[seq[Plugin]] =
     ))
     return
 
-  openImageYamlFile(image.path, saveChanges = false):
-    result.res = imageYaml.plugins.mapIt(
-      Plugin(id: it.id, version: it.version)
-    )
+  result.res = image.imageYaml.plugins.mapIt(
+    Plugin(id: it.id, version: it.version)
+  )
 
 
 proc doesPluginExistInImage*(
@@ -114,10 +145,20 @@ proc addPlugin*(image: ref Image, plugin: ref Plugin): Result[void] =
     ))
     return
 
+  if image.doesPluginExistInImage(plugin).res:
+    result.err = option(Error(
+      kind: pluginAlreadyExistsInImageError,
+      pluginId: plugin.id,
+      pImageId: image.id,
+    ))
+    return
+
   openImageYamlFile(image.path, saveChanges = true):
     imageYaml.plugins.add(
       ImagePlugin(id: plugin.id, version: plugin.version)
     )
+
+  discard image.loadImageYaml()
 
 
 proc removePlugin*(image: ref Image, plugin: ref Plugin): Result[void] =
@@ -141,3 +182,5 @@ proc removePlugin*(image: ref Image, plugin: ref Plugin): Result[void] =
 
   openImageYamlFile(image.path, saveChanges = true):
     imageYaml.plugins.keepItIf(it.id != plugin.id)
+
+  discard image.loadImageYaml()

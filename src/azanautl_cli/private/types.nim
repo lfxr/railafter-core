@@ -15,8 +15,10 @@ type ErrorKind* = enum
   fileWritingError,
   connectionTimedOutError,
   fileDoesNotExistError,
+  pluginAlreadyExistsInImageError,
   pluginDoesNotExistInImageError,
   pluginDoesNotExistError,
+  pluginSpecifiedVersionDoesNotExistError,
   packagesYamlFileDoesNotExistError,
 
 
@@ -24,27 +26,39 @@ type Error* = object of CatchableError
   case kind*: ErrorKind
     of imageAlreadyExistsError, imageDoesNotExistError:
       imageId*: string
+
     of containerAlreadyExistsError, containerDoesNotExistError:
       containerId*: string
+
     of invalidZipFileHashValueError:
       zipFilePath*: string
       expectedHashValue*: string
       actualHashValue*: string
+
     of dependencyNotSatisfiedError:
       dependencyName*: string
       expectedVersions*: seq[string]
       actualVersion*: string
+
     of githubApiRateLimitExceededError:
       rateLimitResetDateTime*: string
+
     of httpRequestError, connectionTimedOutError:
       url*, statusMessage*: string
+
     of fileWritingError, fileDoesNotExistError:
       filePath*: string
-    of pluginDoesNotExistInImageError:
+
+    of pluginAlreadyExistsInImageError, pluginDoesNotExistInImageError:
       pluginId*: string
       pImageId*: string
+
     of pluginDoesNotExistError:
       pPluginId*: string
+
+    of pluginSpecifiedVersionDoesNotExistError:
+      psPluginId*, pluginVersion*: string
+
     of packagesYamlFileDoesNotExistError:
       packagesYamlFilePath*: string
 
@@ -163,7 +177,7 @@ type
 
 type PackagesYamlPluginVersion* = object
   version*: string
-  is_latest*: bool
+  is_latest*, can_be_downloaded_via_github_api*: bool
   url*: string
   github_release_tag*: Option[string]
   github_asset_id*: Option[int]
