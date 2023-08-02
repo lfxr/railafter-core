@@ -2,10 +2,10 @@ import
   os
 
 import
-  private/container,
-  private/types,
-  private/image,
-  private/plugin
+  railafter/private/container,
+  railafter/private/types,
+  railafter/private/image,
+  railafter/private/plugin
 
 export
   image.create,
@@ -29,7 +29,7 @@ func newApp*(dirPath: string, packagesYamlFilePath: string): ref App =
   result.packagesYamlFilePath = packagesYamlFilePath
 
 
-func newImage*(app: ref App, imageId: string, imageName: string = ""): ref Image =
+proc newImage*(app: ref App, imageId: string, imageName: string = ""): ref Image =
   result = newImage(
     imagesDirPath = app.dirPath / "images",
     id = imageId,
@@ -37,7 +37,7 @@ func newImage*(app: ref App, imageId: string, imageName: string = ""): ref Image
   )
 
 
-func newContainer*(
+proc newContainer*(
     app: ref App,
     containerId: string,
     containerName: string = ""
@@ -49,11 +49,11 @@ func newContainer*(
   )
 
 
-func newPlugin*(
+proc newPlugin*(
     app: ref App,
     pluginId: string,
     pluginVersion: string = ""
-): ref Plugin =
+): Result[ref Plugin] =
   result = newPlugin(
     id = pluginId,
     version = pluginVersion,

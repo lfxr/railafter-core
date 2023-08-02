@@ -1,23 +1,18 @@
 # Package
 
-version       = "0.1.0"
-author        = "Lafixier Furude"
-description   = "A new awesome nimble package"
+version       = "0.2.0"
+author        = "Lafixier Rafinantoka"
+description   = "Core of Railafter, package manager for AviUtl"
 license       = "MIT"
 srcDir        = "src"
-installExt    = @["nim"]
-bin           = @["azanautl_cli"]
-binDir        = "bin"
-namedBin      = {"azanautl_cli": "azanac"}.toTable
 
 
 # Dependencies
 
 requires "nim >= 1.6.10"
-requires "cligen >= 1.5.39"
 requires "nimcrypto >= 0.5.4"
 requires "yaml >= 1.0.0"
-requires "zippy >= 0.10.7"
+requires "zippy >= 0.10.10"
 
 
 # Tasks

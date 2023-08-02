@@ -6,7 +6,6 @@
 *.exe
 *.out
 app/
-bin/
 nimbledeps/
 testresults/
 nimcache/

@@ -18,7 +18,7 @@ type PluginCache* = object
 func newPluginCache*(
     cachesDirPath: string,
     plugin: ref Plugin
- ): ref PluginCache =
+): ref PluginCache =
   result = new PluginCache
   result.cachesDirPath = cachesDirPath
   result.pluginCachesDirPath = cachesDirPath / "plugins"
