@@ -8,9 +8,14 @@ import
   ../../src/azanautl_cli/private/types
 
 
+proc sleepForCooldownTimeMilliseconds =
+  const CooldownTimeMilliseconds = 2 * 1000
+  sleep CooldownTimeMilliseconds
+
+
 proc main =
   const
-    CooldownTimeMilliseconds = 2 * 1000
+    AssetsZipFilePath = "testdata/github_api/assets.zip"
     GitHubApiTestRepoUrl =
       "https://api.github.com/repos/lafixier/release-test/"
     StatusMessages = (
@@ -24,57 +29,58 @@ proc main =
     let
       res = ghApi.repository(
         (owner: "lafixier", repo: "release-test")
-      ).asset(110174731).download("hoge.zip")
+      ).asset(110174731).download(AssetsZipFilePath)
     check res.err.isNone
 
-  sleep CooldownTimeMilliseconds
+  sleepForCooldownTimeMilliseconds()
 
   # httpRequestError
   block:
     let res = ghApi.repository(
       (owner: "lafixier", repo: "release-test")
-    ).asset(-1).download("hoge.zip")
+    ).asset(-1).download(AssetsZipFilePath)
     check res.err.isSome
     let err = res.err.get()
     check err.kind == httpRequestError
     check err.url == GitHubApiTestRepoUrl & "releases/assets/-1"
     check err.statusMessage == StatusMessages.notFound
 
-  sleep CooldownTimeMilliseconds
+  sleepForCooldownTimeMilliseconds()
 
   # httpRequestError
   block:
     let res = ghApi.repository(
       (owner: "lafixier", repo: "_")
-    ).asset(110174731).download("hoge.zip")
+    ).asset(110174731).download(AssetsZipFilePath)
     check res.err.isSome
     let err = res.err.get()
     check err.kind == httpRequestError
     check err.url == "https://api.github.com/repos/lafixier/_/releases/assets/110174731"
     check err.statusMessage == StatusMessages.notFound
 
-  sleep CooldownTimeMilliseconds
+  sleepForCooldownTimeMilliseconds()
 
   # httpRequestError
   block:
     let res = ghApi.repository(
       (owner: "lafixier", repo: "あ")
-    ).asset(110174731).download("hoge.zip")
+    ).asset(110174731).download(AssetsZipFilePath)
     check res.err.isSome
     let err = res.err.get()
     check err.kind == httpRequestError
-    check err.url == "https://api.github.com/repos/lafixier/あ/releases/assets/110174731"
+    check err.url ==
+      "https://api.github.com/repos/lafixier/あ/releases/assets/110174731"
     check err.statusMessage == StatusMessages.badRequest
 
-  sleep CooldownTimeMilliseconds
+  sleepForCooldownTimeMilliseconds()
 
   block:
     let res = ghApi.repository(
       (owner: "lafixier", repo: "release-test")
-    ).asset(110174731).download("hoge.zip")
+    ).asset(110174731).download(AssetsZipFilePath)
     check res.err.isNone
 
-  sleep CooldownTimeMilliseconds
+  sleepForCooldownTimeMilliseconds()
 
   # fileWritingError
   block:
@@ -85,6 +91,8 @@ proc main =
     let err = res.err.get()
     check err.kind == fileWritingError
     check err.filePath == ""
+
+  check tryRemoveFile(AssetsZipFilePath)
 
 
 when isMainModule: main()

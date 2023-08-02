@@ -1,0 +1,13 @@
+container_id: "exist-container-1"
+
+container_name: "Exist Container 1"
+
+bases:
+  aviutl:
+    version: ""
+    is_installed: false
+  exedit:
+    version: ""
+    is_installed: false
+
+plugins: []

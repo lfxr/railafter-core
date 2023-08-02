@@ -1,0 +1,12 @@
+image_id: "exist-image-2"
+image_name: "Exist Image 2"
+
+bases:
+  aviutl_version: ""
+  exedit_version: ""
+
+plugins:
+  - id: "lafixier/release-test"
+    version: "1.0"
+  - id: "lafixier/foo"
+    version: "2.1.0"

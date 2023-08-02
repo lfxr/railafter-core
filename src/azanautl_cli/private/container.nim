@@ -4,6 +4,7 @@ import
   os
 
 import
+  github_api,
   plugin,
   templates,
   types,
@@ -15,11 +16,24 @@ const ContainerYamlFileName = "container.yaml"
 
 type Container* = object
   containersDirPath, dirPath, path: string
-  tempDirPath, tempSrcDirPath: string
+  tempDirPath, tempSrcDirPath*: string
   id, name: string
+  containerYaml: ContainerYaml
 
 
-func newContainer*(
+# プロトタイプ宣言
+proc loadContainerYaml(container: ref Container): Result[void]
+func doesExist*(container: ref Container): bool
+
+
+proc init(container: ref Container) =
+  ## Containerオブジェクトのコンストラクタ
+  if not container.doesExist: return
+
+  discard container.loadContainerYaml()
+
+
+proc newContainer*(
     containersDirPath: string,
     id: string,
     name: string = ""
@@ -32,9 +46,25 @@ func newContainer*(
   result.tempSrcDirPath = result.tempDirPath / "src"
   result.id = id
   result.name = name
+  result.init()
 
 
-func doesExist(container: ref Container): bool =
+proc loadContainerYaml(container: ref Container): Result[void] =
+  ## コンテナのYAMLファイルを読み込む
+  result = result.typeof()()
+
+  if not fileExists(container.path):
+    result.err = option(Error(
+      kind: containerDoesNotExistError,
+      containerId: container.id,
+    ))
+    return
+
+  openContainerYamlFile(container.path, saveChanges = false):
+    container.containerYaml = containerYaml
+
+
+func doesExist*(container: ref Container): bool =
   ## コンテナが存在するかどうかを返す
   result = fileExists(container.path)
 
@@ -57,6 +87,8 @@ proc create*(container: ref Container): Result[void] =
       containerId: container.id,
       containerName: container.name,
     )
+
+  discard container.loadContainerYaml()
   
 
 proc delete*(container: ref Container): Result[void] =
@@ -71,6 +103,7 @@ proc delete*(container: ref Container): Result[void] =
     return
 
   removeDir(container.dirPath)
+  container.containerYaml = ContainerYaml()
 
 
 proc listPlugins*(container: ref Container): Result[seq[ContainerPlugin]] =
@@ -84,13 +117,13 @@ proc listPlugins*(container: ref Container): Result[seq[ContainerPlugin]] =
     ))
     return
 
-  openContainerYamlFile(container.path, saveChanges = false):
-    result.res = containerYaml.plugins
+  result.res = container.containerYaml.plugins
 
 
 proc downloadPlugin*(
     container: ref Container,
-    plugin: ref Plugin
+    plugin: ref Plugin,
+    options: tuple[useBrowser: bool] = (useBrowser: false)
 ): Result[void] =
   ## コンテナにプラグインをダウンロードする
   result = result.typeof()()
@@ -102,18 +135,65 @@ proc downloadPlugin*(
     ))
     return
 
+  if not plugin.doesExist:
+    result.err = option(Error(
+      kind: pluginDoesNotExistError,
+      pPluginId: plugin.id,
+    ))
+    return
+
   block:
-    let
-      pluginVersionData = plugin.versionData
+    # プラグインのバージョンデータを取得する
+    let pluginVersionData = plugin.versionData
 
     if pluginVersionData.err.isSome:
       result.err = pluginVersionData.err
       return
     
-    # プラグインの配布ページをデフォルトブラウザで開く
-    showInfo "プラグインの配布ページをデフォルトブラウザで開いています..."
-    openDefaultBrowser(pluginVersionData.res.url)
+    # プラグインのキャッシュが存在する場合は,
+    # プラグインをインターネットからダウンロードせずに, キャッシュを適用する
+    # TODO: キャッシュの処理を書く
 
-    # tempSrcディレクトリをエクスプローラーで開く
-    showInfo "一時ディレクトリをエクスプローラーで開いています..."
-    revealDirInExplorer(container.tempSrcDirPath) 
+    # プラグインのキャッシュが存在しない場合は,
+    # プラグインをインターネットからダウンロードする
+    block:
+      let
+        pluginCanBeDownloadedViaGitHubApi = plugin.canBeDownloadedViaGitHubApi.res
+      if not options.useBrowser and not pluginCanBeDownloadedViaGitHubApi:
+        occurNonfatalError(
+          "このプラグインをGitHub API経由でダウンロードできません。"
+        )
+        occurNonfatalError(
+          "代わりに, プラグインの配布ページをデフォルトブラウザで開きます。"
+        )
+
+      if options.useBrowser or not pluginCanBeDownloadedViaGitHubApi:
+        # プラグインの配布ページをデフォルトブラウザで開く
+        showInfo "プラグインの配布ページをデフォルトブラウザで開いています..."
+        openDefaultBrowser(pluginVersionData.res.url)
+
+        # tempSrcディレクトリをエクスプローラーで開く
+        showInfo "一時ディレクトリをエクスプローラーで開いています..."
+        revealDirInExplorer(container.tempSrcDirPath) 
+
+      else:
+        let packageInfo = plugin.packageInfo
+        if packageInfo.err.isSome:
+          result.err = packageInfo.err
+          return
+
+        let
+          githubRepository = packageInfo.res.githubRepository
+          owner = githubRepository.get.owner
+          repo = githubRepository.get.repo
+          assetId = pluginVersionData.res.githubAssetId
+
+        let res =
+          newGitHubApi()
+            .repository((owner: owner, repo: repo))
+            .asset(assetId.get)
+            .download(container.tempSrcDirPath / "assets.zip")
+
+        if res.err.isSome:
+          result.err = res.err
+          return
