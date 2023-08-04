@@ -135,13 +135,6 @@ proc downloadPlugin*(
     ))
     return
 
-  if not plugin.doesExist:
-    result.err = option(Error(
-      kind: pluginDoesNotExistError,
-      pPluginId: plugin.id,
-    ))
-    return
-
   block:
     # プラグインのバージョンデータを取得する
     let pluginVersionData = plugin.versionData
@@ -177,13 +170,8 @@ proc downloadPlugin*(
         revealDirInExplorer(container.tempSrcDirPath) 
 
       else:
-        let packageInfo = plugin.packageInfo
-        if packageInfo.err.isSome:
-          result.err = packageInfo.err
-          return
-
         let
-          githubRepository = packageInfo.res.githubRepository
+          githubRepository = plugin.packageInfo.githubRepository
           owner = githubRepository.get.owner
           repo = githubRepository.get.repo
           assetId = pluginVersionData.res.githubAssetId

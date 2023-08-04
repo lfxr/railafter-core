@@ -10,19 +10,19 @@ import
 type Plugin* = object
   packagesYamlFilePath*: string
   id*, version*: string
-  packagesYaml: PackagesYaml
+  packageInfo*: PackagesYamlPlugin
 
 
 # プロトタイプ宣言
-proc loadPackagesYaml(plugin: ref Plugin): Result[void]
-func versionData*(plugin: ref Plugin): Result[PackagesYamlPluginVersion]
+proc loadPackageInfo(plugin: ref Plugin): Result[void]
 
 
 proc init(plugin: ref Plugin): Result[void] =
   ## Pluginオブジェクトのコンストラクタ
   result = result.typeof()()
 
-  let res = plugin.loadPackagesYaml()
+  ## プラグインのパッケージ情報を読み込む
+  let res = plugin.loadPackageInfo()
   if res.err.isSome:
     result.err = res.err
     return
@@ -45,10 +45,11 @@ proc newPlugin*(
     return
 
 
-proc loadPackagesYaml(plugin: ref Plugin): Result[void] =
+proc loadPackageInfo(plugin: ref Plugin): Result[void] =
   ## プラグインのパッケージ情報を読み込む
   result = result.typeof()()
 
+  # Packages Yamlを読み込む
   let
     reader = newPackagesYamlFileReader(plugin.packagesYamlFilePath)
     packagesYaml = reader.read()
@@ -57,59 +58,23 @@ proc loadPackagesYaml(plugin: ref Plugin): Result[void] =
     result.err = packagesYaml.err
     return
 
-  plugin.packagesYaml = packagesYaml.res
-
-
-func doesExist*(plugin: ref Plugin): bool =
-  ## プラグインが存在するかどうかを返す
-  plugin.packagesYaml.plugins.filterIt(it.id == plugin.id).len != 0
-
-
-func canBeDownloadedViaGitHubApi*(plugin: ref Plugin): Result[bool] =
-  ## GitHub API 経由でプラグインをダウンロードできるかどうかを返す
-  result = result.typeof()()
-
-  if not plugin.doesExist:
+  # プラグインのパッケージ情報を取得する
+  let matchedPackageInfo = packagesYaml.res.plugins.filterIt(it.id == plugin.id)
+  if matchedPackageInfo.len == 0:
     result.err = option(Error(
       kind: pluginDoesNotExistError,
       pPluginId: plugin.id,
     ))
     return
 
-  let pluginVersionData = plugin.versionData()
-  if pluginVersionData.err.isSome:
-    result.err = pluginVersionData.err
-    return
-
-  result.res = pluginVersionData.res.canBeDownloadedViaGitHubApi
-
-
-func packageInfo*(plugin: ref Plugin): Result[PackagesYamlPlugin] =
-  ## プラグインのパッケージ情報を返す
-  result = result.typeof()()
-
-  if not plugin.doesExist:
-    result.err = option(Error(
-      kind: pluginDoesNotExistError,
-      pPluginId: plugin.id,
-    ))
-    return
-  
-  result.res = plugin.packagesYaml.plugins.filterIt(it.id == plugin.id)[0]
+  plugin.packageInfo = matchedPackageInfo[0]
 
 
 func versionData*(plugin: ref Plugin): Result[PackagesYamlPluginVersion] =
   ## プラグインのバージョン情報を返す
   result = result.typeof()()
 
-  if not plugin.doesExist:
-    result.err = option(Error(
-      kind: pluginDoesNotExistError,
-      pPluginId: plugin.id,
-    ))
-    return
-
-  let matchedPlugins = plugin.packageInfo.res.versions.filterIt(
+  let matchedPlugins = plugin.packageInfo.versions.filterIt(
     it.version == plugin.version
   )
 
@@ -122,3 +87,15 @@ func versionData*(plugin: ref Plugin): Result[PackagesYamlPluginVersion] =
     return
 
   result.res = matchedPlugins[0]
+
+
+func canBeDownloadedViaGitHubApi*(plugin: ref Plugin): Result[bool] =
+  ## GitHub API 経由でプラグインをダウンロードできるかどうかを返す
+  result = result.typeof()()
+
+  let pluginVersionData = plugin.versionData()
+  if pluginVersionData.err.isSome:
+    result.err = pluginVersionData.err
+    return
+
+  result.res = pluginVersionData.res.canBeDownloadedViaGitHubApi
