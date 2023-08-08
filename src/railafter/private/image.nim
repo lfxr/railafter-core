@@ -134,6 +134,23 @@ proc doesPluginExistInImage*(
   result.res = image.listPlugins.res.contains(plugin[])
 
 
+proc doesPluginExistInImage*(
+    image: ref Image,
+    pluginId: string
+): Result[bool] =
+  ## イメージにプラグインが含まれるかどうかを返す
+  result = result.typeof()()
+
+  if not image.doesExist:
+    result.err = option(Error(
+      kind: imageDoesNotExistError,
+      imageId: image.id,
+    ))
+    return
+
+  result.res = image.listPlugins.res.filterIt(it.id == pluginId).len != 0
+
+
 proc addPlugin*(image: ref Image, plugin: ref Plugin): Result[void] =
   ## プラグインをイメージに追加する
   result = result.typeof()()
@@ -145,7 +162,7 @@ proc addPlugin*(image: ref Image, plugin: ref Plugin): Result[void] =
     ))
     return
 
-  if image.doesPluginExistInImage(plugin).res:
+  if image.doesPluginExistInImage(plugin.id).res:
     result.err = option(Error(
       kind: pluginAlreadyExistsInImageError,
       pluginId: plugin.id,
@@ -161,7 +178,7 @@ proc addPlugin*(image: ref Image, plugin: ref Plugin): Result[void] =
   discard image.loadImageYaml()
 
 
-proc removePlugin*(image: ref Image, plugin: ref Plugin): Result[void] =
+proc removePlugin*(image: ref Image, pluginId: string): Result[void] =
   ## プラグインをイメージから削除する
   result = result.typeof()()
 
@@ -172,15 +189,15 @@ proc removePlugin*(image: ref Image, plugin: ref Plugin): Result[void] =
     ))
     return
 
-  if not image.doesPluginExistInImage(plugin).res:
+  if not image.doesPluginExistInImage(pluginId).res:
     result.err = option(Error(
       kind: pluginDoesNotExistInImageError,
-      pluginId: plugin.id,
+      pluginId: pluginId,
       pImageId: image.id,
     ))
     return
 
   openImageYamlFile(image.path, saveChanges = true):
-    imageYaml.plugins.keepItIf(it.id != plugin.id)
+    imageYaml.plugins.keepItIf(it.id != pluginId)
 
   discard image.loadImageYaml()
