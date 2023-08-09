@@ -17,6 +17,7 @@ type ErrorKind* = enum
   fileDoesNotExistError,
   pluginAlreadyExistsInImageError,
   pluginDoesNotExistInImageError,
+  pluginDoesNotExistInContainerError,
   pluginDoesNotExistError,
   pluginSpecifiedVersionDoesNotExistError,
   packagesYamlFileDoesNotExistError,
@@ -52,6 +53,10 @@ type Error* = object of CatchableError
     of pluginAlreadyExistsInImageError, pluginDoesNotExistInImageError:
       pluginId*: string
       pImageId*: string
+
+    of pluginDoesNotExistInContainerError:
+      pdPluginId*: string
+      pContainerId*: string
 
     of pluginDoesNotExistError:
       pPluginId*: string

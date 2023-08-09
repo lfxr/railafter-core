@@ -1,7 +1,8 @@
 import
   browsers,
   options,
-  os
+  os,
+  sequtils
 
 import
   github_api,
@@ -118,6 +119,32 @@ proc listPlugins*(container: ref Container): Result[seq[ContainerPlugin]] =
     return
 
   result.res = container.containerYaml.plugins
+
+
+func pluginStatus*(
+    container: ref Container,
+    pluginId: string
+): Result[ContainerPlugin] =
+  ## コンテナに含まれるプラグインの状態を返す
+  result = result.typeof()()
+
+  if not container.doesExist:
+    result.err = option(Error(
+      kind: containerDoesNotExistError,
+      containerId: container.id,
+    ))
+    return
+
+  let matchedPlugins = container.listPlugins.res.filterIt(it.id == pluginId)
+  if matchedPlugins.len == 0:
+    result.err = option(Error(
+      kind: pluginDoesNotExistInContainerError,
+      pdPluginId: pluginId,
+      pContainerId: container.id,
+    ))
+    return
+
+  result.res = matchedPlugins[0]
 
 
 proc downloadPlugin*(
