@@ -8,6 +8,7 @@ import
   times
 
 import
+  plugin,
   types
 
 
@@ -129,4 +130,43 @@ proc download*(asset: Asset, filename: string): Result[void] =
         statusMessage: e.msg
       )
     )
+    return
+
+
+proc downloadPlugin*(
+    api: ref GitHubApi,
+    plugin: ref Plugin,
+    filePath: string
+): Result[void] =
+  ## 指定されたファイルパスにプラグインのZIPファイルをダウンロード
+  result = result.typeof()()
+
+  let pluginVersionDataResult = plugin.versionData
+
+  if pluginVersionDataResult.err.isSome:
+    result.err = pluginVersionDataResult.err
+    return
+
+  if not plugin.canBeDownloadedViaGitHubApi.res:
+    result.err = option(
+      Error(
+        kind: pluginSpecifiedVersionCannotBeDownloadedViaGitHubApiError
+      )
+    )
+    return
+
+  let
+    githubRepository = plugin.packageInfo.githubRepository
+    owner = githubRepository.get.owner
+    repo = githubRepository.get.repo
+    assetId = pluginVersionDataResult.res.githubAssetId.get
+
+  let res =
+    newGitHubApi()
+      .repository((owner: owner, repo: repo))
+      .asset(assetId)
+      .download(filePath)
+
+  if res.err.isSome:
+    result.err = res.err
     return
