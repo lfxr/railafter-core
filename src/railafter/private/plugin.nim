@@ -1,5 +1,6 @@
 import
   options,
+  os,
   sequtils
 
 import
@@ -8,14 +9,28 @@ import
   types
 
 
+const
+  ArchiveZipFileName = "archive.zip"
+  ArchiveExtractedDirName = "extracted"
+
+
+type PluginArchive = tuple
+  paths: tuple[
+    archiveDirPath: string,
+    zipFile: string,
+    extractedDir: string,
+  ]
+
 type Plugin* = object
   packagesYamlFilePath*: string
   id*, version*: string
   packageInfo*: PackagesYamlPlugin
+  archive*: PluginArchive
 
 
 # プロトタイプ宣言
 proc loadPackageInfo(plugin: ref Plugin): Result[void]
+func doesExist*(archive: PluginArchive): bool
 
 
 proc init(plugin: ref Plugin): Result[void] =
@@ -28,17 +43,33 @@ proc init(plugin: ref Plugin): Result[void] =
     result.err = res.err
     return
 
+  # プラグインのアーカイブディレクトリを作成する
+  discard existsOrCreateDir(plugin.archive.paths.archiveDirPath.splitPath.head)
+  discard existsOrCreateDir(plugin.archive.paths.archiveDirPath)
+
 
 proc newPlugin*(
     id: string,
     version: string = "",
     packagesYamlFilePath: string = "",
+    pluginArchivesDirPath: string
 ): Result[ref Plugin] =
   result = result.typeof()()
   result.res = new Plugin
   result.res.id = id
   result.res.version = version
   result.res.packagesYamlFilePath = packagesYamlFilePath
+
+  # TODO: idとversionとpackagesYamlFilePath等をフィルターする
+ 
+  let archiveDirPath = pluginArchivesDirPath / id / version
+  result.res.archive = (
+    paths: (
+      archiveDirPath: archiveDirPath,
+      zipFile: archiveDirPath / ArchiveZipFileName,
+      extractedDir: archiveDirPath / ArchiveExtractedDirName,
+    )
+  )
 
   let res = result.res.init()
   if res.err.isSome:
@@ -114,8 +145,12 @@ proc download*(
     result.err = pluginVersionDataRes.err
     return
 
-  let res = newGitHubApi().downloadPlugin(plugin, "temp.zip")
+  let res = newGitHubApi().downloadPlugin(plugin, plugin.archive.paths.zipFile)
   if res.err.isSome:
     result.err = res.err
     return
 
+
+func doesExist*(archive: PluginArchive): bool =
+  ## プラグインのアーカイブが存在するかどうかを返す
+  fileExists(archive.paths.zipFile)
