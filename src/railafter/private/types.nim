@@ -20,6 +20,7 @@ type ErrorKind* = enum
   pluginDoesNotExistInContainerError,
   pluginDoesNotExistError,
   pluginSpecifiedVersionDoesNotExistError,
+  pluginSpecifiedVersionCannotBeDownloadedViaGitHubApiError,
   packagesYamlFileDoesNotExistError,
 
 
@@ -61,7 +62,8 @@ type Error* = object of CatchableError
     of pluginDoesNotExistError:
       pPluginId*: string
 
-    of pluginSpecifiedVersionDoesNotExistError:
+    of pluginSpecifiedVersionDoesNotExistError,
+        pluginSpecifiedVersionCannotBeDownloadedViaGitHubApiError:
       psPluginId*, pluginVersion*: string
 
     of packagesYamlFileDoesNotExistError:

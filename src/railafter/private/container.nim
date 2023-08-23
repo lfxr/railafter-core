@@ -1,15 +1,11 @@
 import
-  browsers,
   options,
   os,
   sequtils
 
 import
-  github_api,
-  plugin,
   templates,
-  types,
-  utils
+  types
 
 
 const ContainerYamlFileName = "container.yaml"
@@ -145,70 +141,3 @@ func pluginStatus*(
     return
 
   result.res = matchedPlugins[0]
-
-
-proc downloadPlugin*(
-    container: ref Container,
-    plugin: ref Plugin,
-    options: tuple[useBrowser: bool] = (useBrowser: false)
-): Result[void] =
-  ## コンテナにプラグインをダウンロードする
-  result = result.typeof()()
-
-  if not container.doesExist:
-    result.err = option(Error(
-      kind: containerDoesNotExistError,
-      containerId: container.id,
-    ))
-    return
-
-  block:
-    # プラグインのバージョンデータを取得する
-    let pluginVersionData = plugin.versionData
-
-    if pluginVersionData.err.isSome:
-      result.err = pluginVersionData.err
-      return
-    
-    # プラグインのキャッシュが存在する場合は,
-    # プラグインをインターネットからダウンロードせずに, キャッシュを適用する
-    # TODO: キャッシュの処理を書く
-
-    # プラグインのキャッシュが存在しない場合は,
-    # プラグインをインターネットからダウンロードする
-    block:
-      let
-        pluginCanBeDownloadedViaGitHubApi = plugin.canBeDownloadedViaGitHubApi.res
-      if not options.useBrowser and not pluginCanBeDownloadedViaGitHubApi:
-        occurNonfatalError(
-          "このプラグインをGitHub API経由でダウンロードできません。"
-        )
-        occurNonfatalError(
-          "代わりに, プラグインの配布ページをデフォルトブラウザで開きます。"
-        )
-
-      if options.useBrowser or not pluginCanBeDownloadedViaGitHubApi:
-        # プラグインの配布ページをデフォルトブラウザで開く
-        showInfo "プラグインの配布ページをデフォルトブラウザで開いています..."
-        openDefaultBrowser(pluginVersionData.res.url)
-
-        # tempSrcディレクトリをエクスプローラーで開く
-        showInfo "一時ディレクトリをエクスプローラーで開いています..."
-        revealDirInExplorer(container.tempSrcDirPath) 
-
-      else:
-        let
-          githubRepository = plugin.packageInfo.githubRepository
-          owner = githubRepository.get.owner
-          repo = githubRepository.get.repo
-          assetId = pluginVersionData.res.githubAssetId
-
-        let res =
-          newGitHubApi()
-            .repository((owner: owner, repo: repo))
-            .asset(assetId.get)
-            .download(container.tempSrcDirPath / "assets.zip")
-
-        if res.err.isSome:
-          result.err = res.err
-          return

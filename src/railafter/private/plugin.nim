@@ -3,6 +3,7 @@ import
   sequtils
 
 import
+  github_api,
   packages_yaml,
   types
 
@@ -99,3 +100,22 @@ func canBeDownloadedViaGitHubApi*(plugin: ref Plugin): Result[bool] =
     return
 
   result.res = pluginVersionData.res.canBeDownloadedViaGitHubApi
+
+
+proc download*(
+    plugin: ref Plugin
+): Result[void] =
+  ## プラグインをダウンロードする
+  result = result.typeof()()
+
+  # プラグインのバージョンデータを取得する
+  let pluginVersionDataRes = plugin.versionData
+  if pluginVersionDataRes.err.isSome:
+    result.err = pluginVersionDataRes.err
+    return
+
+  let res = newGitHubApi().downloadPlugin(plugin, "temp.zip")
+  if res.err.isSome:
+    result.err = res.err
+    return
+
