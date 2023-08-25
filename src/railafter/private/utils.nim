@@ -3,13 +3,15 @@ import
   os,
   osproc,
   strutils,
-  terminal
+  sugar,
+  tables,
+  terminal,
+  times
 
 import
   nimcrypto
 
 import
-  plugin,
   types
 
 
@@ -46,22 +48,6 @@ func sanitizeFileOrDirName*(s: string): string =
   ]
   for target in replacingTargets:
     result = result.replace(target, "-")
-
-
-func deserializePlugin*(raw: string): Plugin =
-  ## プラグインの文字列をパースし, Pluginオブジェクトに変換する
-  let
-    doesRawContainVersion = raw.contains(":")
-    pluginId =
-      if doesRawContainVersion: raw.split(":")[0]
-      else: raw
-    pluginVersion =
-      if doesRawContainVersion: raw.split(":")[1]
-      else: "latest"
-  Plugin(
-    id: pluginId,
-    version: pluginVersion
-  )
 
 
 proc sha3_512File*(filePath: string): Result[string] =
@@ -118,3 +104,31 @@ proc processTrackedFds*(
     of FdType.Dir:
       moveDir(srcFdPath, destFdPath)
 
+
+proc observeDir*(
+    path: string,
+    extension: string = "",
+    sha3_512Hash: string,
+    cooldownTimeMilliseconds: int = 1000
+): string =
+  ## ディレクトリの変更を監視し,
+  ## 指定されたハッシュ値と一致するファイルがあればそのパスを返す
+  proc walkFiles: seq[string] =
+    collect newSeq: (for file in walkFiles(path / "*." & extension): file)
+
+  var fileAndLastWriteTime = newTable[string, Time]()
+  for file in walkFiles():
+    fileAndLastWriteTime[file] = file.getFileInfo.lastWriteTime
+
+  while true:
+    for file in walkFiles():
+      let lastWriteTime = file.getFileInfo.lastWriteTime
+
+      if fileAndLastWriteTime.hasKey(file) and
+          lastWriteTime != fileAndLastWriteTime[file] or
+          not fileAndLastWriteTime.hasKey(file):
+        fileAndLastWriteTime[file] = lastWriteTime
+
+        if sha3_512File(file).res == sha3_512Hash:
+          return file
+    sleep cooldownTimeMilliseconds

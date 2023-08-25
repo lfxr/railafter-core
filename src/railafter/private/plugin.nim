@@ -1,4 +1,5 @@
 import
+  browsers,
   options,
   os,
   sequtils
@@ -6,12 +7,14 @@ import
 import
   github_api,
   packages_yaml,
-  types
+  types,
+  utils
 
 
 const
   ArchiveZipFileName = "archive.zip"
   ArchiveExtractedDirName = "extracted"
+  ZipFileExtension = "zip"
 
 
 type PluginArchive = tuple
@@ -26,6 +29,7 @@ type Plugin* = object
   id*, version*: string
   packageInfo*: PackagesYamlPlugin
   archive*: PluginArchive
+  defaultBrowserDownloadDirPath: string
 
 
 # プロトタイプ宣言
@@ -52,7 +56,8 @@ proc newPlugin*(
     id: string,
     version: string = "",
     packagesYamlFilePath: string = "",
-    pluginArchivesDirPath: string
+    pluginArchivesDirPath: string,
+    defaultBrowserDownloadDirPath: string
 ): Result[ref Plugin] =
   result = result.typeof()()
   result.res = new Plugin
@@ -70,6 +75,7 @@ proc newPlugin*(
       extractedDir: archiveDirPath / ArchiveExtractedDirName,
     )
   )
+  result.res.defaultBrowserDownloadDirPath = defaultBrowserDownloadDirPath
 
   let res = result.res.init()
   if res.err.isSome:
@@ -134,7 +140,8 @@ func canBeDownloadedViaGitHubApi*(plugin: ref Plugin): Result[bool] =
 
 
 proc download*(
-    plugin: ref Plugin
+    plugin: ref Plugin,
+    options: tuple[viaGitHubApi: bool] = (viaGitHubApi: false)
 ): Result[void] =
   ## プラグインをダウンロードする
   result = result.typeof()()
@@ -145,10 +152,32 @@ proc download*(
     result.err = pluginVersionDataRes.err
     return
 
-  let res = newGitHubApi().downloadPlugin(plugin, plugin.archive.paths.zipFile)
-  if res.err.isSome:
-    result.err = res.err
-    return
+  if options.viaGitHubApi:
+    # GitHub API経由でプラグインをダウンロードする
+    # GitHub API経由でプラグインをダウンロード可能かどうかを確認する
+    if not plugin.canBeDownloadedViaGitHubApi.res:
+      result.err = option(Error(
+        kind: pluginSpecifiedVersionCannotBeDownloadedViaGitHubApiError,
+        psPluginId: plugin.id,
+        pluginVersion: plugin.version,
+      ))
+      return
+
+    let res = newGitHubApi().downloadPlugin(plugin, plugin.archive.paths.zipFile)
+    if res.err.isSome:
+      result.err = res.err
+      return
+
+  else:
+    # デフォルトブラウザでプラグインをダウンロードする
+    openDefaultBrowser(plugin.packageInfo.website)
+
+    let downloadedFilePath = observeDir(
+      plugin.defaultBrowserDownloadDirPath,
+      ZipFileExtension,
+      pluginVersionDataRes.res.sha3_512_hash
+    ) 
+    copyFile(downloadedFilePath, plugin.archive.paths.zipFile)
 
 
 func doesExist*(archive: PluginArchive): bool =
