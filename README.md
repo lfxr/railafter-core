@@ -66,11 +66,15 @@ nimble install -dy
 
 ### 依存外部ライブラリ
 
-| ライブラリ名 | 用途                               | リポジトリ                               |
-| :----------- | :--------------------------------- | :--------------------------------------- |
-| nimcrypto    | SHA3-512ハッシュ値の計算           | <https://github.com/cheatfate/nimcrypto> |
-| NimYAML      | YAMLのシリアライズ・デシリアライズ | <https://github.com/flyx/NimYAML>        |
-| Zippy        | zipファイルの解凍                  | <https://github.com/guzba/zippy>         |
+| ライブラリ名 | 用途                                | リポジトリ                               |
+| :----------- | :---------------------------------- | :--------------------------------------- |
+| cligen       | コマンドライン引数のパース          | <https://github.com/c-blake/cligen>      |
+| libcurl      | (Puppy の依存パッケージ)            | <https://github.com/Araq/libcurl>        |
+| nimcrypto    | SHA3-512 ハッシュ値の計算           | <https://github.com/cheatfate/nimcrypto> |
+| Puppy        | HTTP/HTTPS クライアント             | <https://github.com/treeform/puppy>      |
+| Webby        | (Puppy の依存パッケージ)            | <https://github.com/treeform/webby>      |
+| NimYAML      | YAML のシリアライズ・デシリアライズ | <https://github.com/flyx/NimYAML>        |
+| Zippy        | zip ファイルの解凍                  | <https://github.com/guzba/zippy>         |
 
 ## 依存ライブラリのライセンス
 
@@ -80,4 +84,4 @@ nimble install -dy
 
 Copyright (c) 2023 Lafixier Rafinantoka
 
-[MITライセンス](LICENSE.txt)でライセンスされています。
+[MIT ライセンス](LICENSE.txt)でライセンスされています。

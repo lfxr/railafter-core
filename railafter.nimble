@@ -10,6 +10,11 @@ srcDir        = "src"
 # Dependencies
 
 requires "nim >= 1.6.10"
+requires "cligen >= 1.5.39"
+requires "libcurl >= 1.0.0"
+requires "nimcrypto >= 0.5.4"
+requires "puppy >= 2.0.3"
+requires "webby >= 0.1.9"
 requires "nimcrypto >= 0.5.4"
 requires "yaml >= 1.0.0"
 requires "zippy >= 0.10.10"
