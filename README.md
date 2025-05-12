@@ -2,6 +2,7 @@
 
 > [!CAUTION]
 > このライブラリは未完成のまま開発が終了しました。
+> [開発メモ](https://github.com/lfxr/railafter-core/blob/develop/notes/index.md)
 
 <!--[![GitHub Repo stars](https://img.shields.io/github/stars/lfxr/railafter-core?style=for-the-badge)](https://github.com/lfxr/railafter-core/stargazers)
 [![GitHub](https://img.shields.io/github/license/lfxr/railafter-core?style=for-the-badge)](LICENSE.txt)
