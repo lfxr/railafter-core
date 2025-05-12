@@ -1,3 +1,0 @@
-sanitizeFileOrDirName	procs.html#sanitizeFileOrDirName,string	procs: sanitizeFileOrDirName(s: string): string	
-deserializePlugin	procs.html#deserializePlugin,string	procs: deserializePlugin(raw: string): Plugin	
-sha3_512File	procs.html#sha3_512File,string	procs: sha3_512File(filePath: string): string	

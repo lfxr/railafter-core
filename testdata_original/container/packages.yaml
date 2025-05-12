@@ -1,0 +1,61 @@
+bases:
+  - id: aviutl
+    name: AviUtl
+    description: AviUtlの本体
+    website: http://spring-fragrance.mints.ne.jp/aviutl/
+    versions:
+      - version: 1.10
+        url: http://spring-fragrance.mints.ne.jp/aviutl/aviutl110.zip
+        sha3_512_hash: F5C1E50AC6DCB66530CFF113AF63539793DF573E1C29B3B6574ABB85BE857C19A417D83B179057F09CAAB4C52BF725CFAE0DD68A77A056CCB894D23F715E4B06
+
+  - id: exedit
+    name: 拡張編集
+    description: 拡張編集
+    website: http://spring-fragrance.mints.ne.jp/aviutl/
+    versions:
+      - version: 0.92
+        url: http://spring-fragrance.mints.ne.jp/aviutl/exedit92.zip
+        sha3_512_hash: 3BDC5F69573A24079105CF1B331A2E7A129C4E3E1A91A5AA6AECB42A57185B417DB09CE58C01C41122B36F75F9697C30FE7AB8CA3E2E9F291772B1F997CBBC41
+
+
+plugins:
+  - id: lafixier/release-test
+    name: "[DEBUG] Release Test"
+    plugin_type: input
+    description: "デバッグ用"
+    tags: []
+    author: Lafixier Rafinantoka
+    website: https://github.com/lafixier/release-test
+    github_repository:
+      owner: lafixier
+      repo: release-test
+    niconico_commons_id: ""
+    dependencies:
+      - conforming_versions: [v1.0]
+        body:
+          bases:
+            aviutl_versions: []
+            exedit_versions: []
+          plugins: []
+    tracked_files_and_dirs:
+      - conforming_versions: [v1.0]
+        body:
+          - path: foo.txt
+            fd_type: file
+            move_to: plugins
+            is_protected: false
+            is_mutable: false
+            is_config: false
+    jobs: []
+    versions:
+      - version: v1.0
+        is_latest: true
+        can_be_downloaded_via_github_api: true
+        url: https://github.com/lafixier/release-test/releases/tag/v1.0
+        github_release_tag: v1.0
+        github_asset_id: 110174731
+        sha3_512_hash: 25B4721297A941CCC933537B53387077689446649E949F975422B3D2DDC4382EF27999387E4B39D141C63AC1017795F8FA788D15EE1B8C7F11CBC3BA26FDE3F3
+        released_on: 2023-05-28
+        tracked_file_or_dir_hashes:
+          hoge: 096BAAF9E2A6F09FA842BEAE9CF86960B8F63A232D040A159861FC2C4E8B6E89B6B3298983329A594C2FDE668872518744825B15ACB361025E6D6EF4693EA785
+

@@ -4,6 +4,9 @@
 !pre-commit
 
 *.exe
+*.out
 app/
-bin/
 nimbledeps/
+testresults/
+nimcache/
+testdata/
