@@ -1,41 +1,13 @@
 # Railafter Core - Package Manager for AviUtl <!-- omit in toc -->
 
-<!--[![GitHub Repo stars](https://img.shields.io/github/stars/lafixier/railafter-core?style=for-the-badge)](https://github.com/lafixier/railafter-core/stargazers)
-[![GitHub](https://img.shields.io/github/license/lafixier/railafter-core?style=for-the-badge)](LICENSE.txt)
-![GitHub last commit](https://img.shields.io/github/last-commit/lafixier/railafter-core?style=for-the-badge)
-[![GitHub issues](https://img.shields.io/github/issues/lafixier/railafter-core?style=for-the-badge)](https://github.com/lafixier/railafter-core/issues)
-[![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/lafixier/railafter-core?style=for-the-badge)](https://github.com/lafixier/railafter-core/pulls)-->
+> [!CAUTION]
+> このライブラリは未完成のまま開発が終了しました。
 
-## 目次 <!-- omit in toc -->
-
-- [概要](#概要)
-- [機能 (予定)](#機能-予定)
-- [インストール](#インストール)
-  - [Nimble](#nimble)
-- [使い方](#使い方)
-  - [ライブラリ](#ライブラリ)
-- [開発](#開発)
-  - [要件](#要件)
-  - [環境構築](#環境構築)
-  - [依存外部ライブラリ](#依存外部ライブラリ)
-- [依存ライブラリのライセンス](#依存ライブラリのライセンス)
-- [ライセンス](#ライセンス)
-
-## 概要
-
-## 機能 (予定)
-
-## インストール
-
-### Nimble
-
-```sh
-nimble install railafter
-```
-
-## 使い方
-
-### ライブラリ
+<!--[![GitHub Repo stars](https://img.shields.io/github/stars/lfxr/railafter-core?style=for-the-badge)](https://github.com/lfxr/railafter-core/stargazers)
+[![GitHub](https://img.shields.io/github/license/lfxr/railafter-core?style=for-the-badge)](LICENSE.txt)
+![GitHub last commit](https://img.shields.io/github/last-commit/lfxr/railafter-core?style=for-the-badge)
+[![GitHub issues](https://img.shields.io/github/issues/lfxr/railafter-core?style=for-the-badge)](https://github.com/lfxr/railafter-core/issues)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/lfxr/railafter-core?style=for-the-badge)](https://github.com/lfxr/railafter-core/pulls)-->
 
 ## 開発
 
@@ -50,7 +22,7 @@ nimble install railafter
 
 ```sh
 # リポジトリをクローン
-git clone git@github.com:lafixier/railafter-core.git
+git clone git@github.com:lfxr/railafter-core.git
 
 # リポジトリに移動
 cd railafter-core
