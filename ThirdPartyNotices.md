@@ -2,6 +2,8 @@
 
 ## Nim and Nim's Runtime Library
 
+<https://github.com/nim-lang/nim>
+
 ```text
 =====================================================
 Nim -- a Compiler for Nim. https://nim-lang.org/
@@ -75,6 +77,8 @@ SOFTWARE.
 
 ## nimcrypto
 
+<https://github.com/cheatfate/nimcrypto>
+
 ```text
 MIT License
 
@@ -129,6 +133,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ## NimYAML
 
+<https://github.com/flyx/NimYAML>
+
 ```text
 =====================================================
 NimYAML -- YAML implementation in Nim.
@@ -157,6 +163,8 @@ THE SOFTWARE.
 ```
 
 ## Zippy
+
+<https://github.com/guzba/zippy/>
 
 ```text
 Copyright (c) 2020 Ryan Oldenburg

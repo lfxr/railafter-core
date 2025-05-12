@@ -1,10 +1,10 @@
-# AzanaUtl CLI - AviUtl統合環境管理CLIツール <!-- omit in toc -->
+# Railafter Core - Package Manager for AviUtl <!-- omit in toc -->
 
-[![GitHub Repo stars](https://img.shields.io/github/stars/lafixier/azanautl-cli?style=for-the-badge)](https://github.com/lafixier/azanautl-cli/stargazers)
-[![GitHub](https://img.shields.io/github/license/lafixier/azanautl-cli?style=for-the-badge)](LICENSE.txt)
-![GitHub last commit](https://img.shields.io/github/last-commit/lafixier/azanautl-cli?style=for-the-badge)
-[![GitHub issues](https://img.shields.io/github/issues/lafixier/azanautl-cli?style=for-the-badge)](https://github.com/lafixier/azanautl-cli/issues)
-[![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/lafixier/azanautl-cli?style=for-the-badge)](https://github.com/lafixier/azanautl-cli/pulls)
+<!--[![GitHub Repo stars](https://img.shields.io/github/stars/lafixier/railafter-core?style=for-the-badge)](https://github.com/lafixier/railafter-core/stargazers)
+[![GitHub](https://img.shields.io/github/license/lafixier/railafter-core?style=for-the-badge)](LICENSE.txt)
+![GitHub last commit](https://img.shields.io/github/last-commit/lafixier/railafter-core?style=for-the-badge)
+[![GitHub issues](https://img.shields.io/github/issues/lafixier/railafter-core?style=for-the-badge)](https://github.com/lafixier/railafter-core/issues)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/lafixier/railafter-core?style=for-the-badge)](https://github.com/lafixier/railafter-core/pulls)-->
 
 ## 目次 <!-- omit in toc -->
 
@@ -13,7 +13,6 @@
 - [インストール](#インストール)
   - [Nimble](#nimble)
 - [使い方](#使い方)
-  - [CLIツール](#cliツール)
   - [ライブラリ](#ライブラリ)
 - [開発](#開発)
   - [要件](#要件)
@@ -24,31 +23,19 @@
 
 ## 概要
 
-AzanaUtl CLIは, AviUtlの環境を統合的に管理するCLIツールです。
-
 ## 機能 (予定)
-
-- AviUtl, 拡張編集Pluginのインストール
-- プラグイン, スクリプトのインストール
-- AviUtl自体の環境を複数作成・管理・共有
 
 ## インストール
 
 ### Nimble
 
 ```sh
-nimble install azanautl-cli
+nimble install railafter
 ```
 
 ## 使い方
 
-### CLIツール
-
-[docs/cli/README.md](docs/cli/README.md)を参照してください。
-
 ### ライブラリ
-
-[docs/api](docs/api/theindex.html)を参照してください。
 
 ## 開発
 
@@ -57,15 +44,16 @@ nimble install azanautl-cli
 - Git
 - [Nim](https://nim-lang.org/) (1.6.10 or higher), [Nimble](https://github.com/nim-lang/nimble)
 - [typos](https://github.com/crate-ci/typos)
+- [ls-lint](https://github.com/loeffel-io/ls-lint)
 
 ### 環境構築
 
 ```sh
 # リポジトリをクローン
-git clone git@github.com:lafixier/azanautl-cli.git
+git clone git@github.com:lafixier/railafter-core.git
 
 # リポジトリに移動
-cd azanautl-cli
+cd railafter-core
 
 # Git Hooksをインストール
 chmod +x scripts/git_hooks/pre-commit
@@ -78,15 +66,15 @@ nimble install -dy
 
 ### 依存外部ライブラリ
 
-| ライブラリ名 | 用途                               | リポジトリ                               |
-| :----------- | :--------------------------------- | :--------------------------------------- |
-| cligen       | コマンドライン引数のパース         | <https://github.com/c-blake/cligen>      |
-| libcurl      | (Puppyの依存パッケージ)            | <https://github.com/Araq/libcurl>        |
-| nimcrypto    | SHA3-512ハッシュ値の計算           | <https://github.com/cheatfate/nimcrypto> |
-| Puppy        | HTTP/HTTPSクライアント             | <https://github.com/treeform/puppy>      |
-| Webby        | (Puppyの依存パッケージ)            | <https://github.com/treeform/webby>      |
-| NimYAML      | YAMLのシリアライズ・デシリアライズ | <https://github.com/flyx/NimYAML>        |
-| Zippy        | zipファイルの解凍                  | <https://github.com/guzba/zippy>         |
+| ライブラリ名 | 用途                                | リポジトリ                               |
+| :----------- | :---------------------------------- | :--------------------------------------- |
+| cligen       | コマンドライン引数のパース          | <https://github.com/c-blake/cligen>      |
+| libcurl      | (Puppy の依存パッケージ)            | <https://github.com/Araq/libcurl>        |
+| nimcrypto    | SHA3-512 ハッシュ値の計算           | <https://github.com/cheatfate/nimcrypto> |
+| Puppy        | HTTP/HTTPS クライアント             | <https://github.com/treeform/puppy>      |
+| Webby        | (Puppy の依存パッケージ)            | <https://github.com/treeform/webby>      |
+| NimYAML      | YAML のシリアライズ・デシリアライズ | <https://github.com/flyx/NimYAML>        |
+| Zippy        | zip ファイルの解凍                  | <https://github.com/guzba/zippy>         |
 
 ## 依存ライブラリのライセンス
 
@@ -94,6 +82,6 @@ nimble install -dy
 
 ## ライセンス
 
-Copyright (c) 2023 Lafixier Furude
+Copyright (c) 2023 Lafixier Rafinantoka
 
-[MITライセンス](LICENSE.txt)でライセンスされています。
+[MIT ライセンス](LICENSE.txt)でライセンスされています。
